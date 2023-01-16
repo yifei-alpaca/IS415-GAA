@@ -12,5 +12,19 @@
     "title": "About",
     "section": "",
     "text": "About this site.\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "inclass_ex/inclass_ex02/In-class_Ex02.html",
+    "href": "inclass_ex/inclass_ex02/In-class_Ex02.html",
+    "title": "In-Class Ex02",
+    "section": "",
+    "text": "Download 3 R packages:\n\npacman::p_load(sf, tidyverse, funModeling)"
+  },
+  {
+    "objectID": "inclass_ex/inclass_ex02/In-class_Ex02.html#importing-geospatial",
+    "href": "inclass_ex/inclass_ex02/In-class_Ex02.html#importing-geospatial",
+    "title": "In-Class Ex02",
+    "section": "Importing Geospatial",
+    "text": "Importing Geospatial\n\nThe geoBoundaries dataset\n\ngeoNGA <- st_read(\"data/geospatial/\",\n                  layer = \"geoBoundaries-NGA-ADM2\" ) %>%\n  st_transform(crs=26392)\n\nReading layer `geoBoundaries-NGA-ADM2' from data source \n  `C:\\yifei-alpaca\\IS415-GAA\\inclass_ex\\inclass_ex02\\data\\geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 774 features and 6 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2.668534 ymin: 4.273007 xmax: 14.67882 ymax: 13.89442\nGeodetic CRS:  WGS 84\n\n\n\n\nThe NGA dataset\n\nNGAadm <- st_read(\"data/geospatial/\",\n                  layer = \"nga_admbnda_adm2_osgof_20190417\" ) %>%\n  st_transform(crs=26392)\n\nReading layer `nga_admbnda_adm2_osgof_20190417' from data source \n  `C:\\yifei-alpaca\\IS415-GAA\\inclass_ex\\inclass_ex02\\data\\geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 774 features and 16 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2.668534 ymin: 4.273007 xmax: 14.67882 ymax: 13.89442\nGeodetic CRS:  WGS 84"
   }
 ]
