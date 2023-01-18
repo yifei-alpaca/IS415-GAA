@@ -2,7 +2,7 @@
 title: "In-Class Ex02"
 date: "`r Sys.Date()`"
 author: "Sherry Ng"
-format: html 
+format: html
 execute: 
   message: false
   warning: false
@@ -17,6 +17,8 @@ Download 3 R packages:
 pacman::p_load(sf, tidyverse, funModeling)
 ```
 
+<br>
+
 ## Importing Geospatial
 
 ### The geoBoundaries dataset
@@ -27,7 +29,9 @@ geoNGA <- st_read("data/geospatial/",
   st_transform(crs=26392)
 ```
 
-### The  NGA dataset
+<br>
+
+### The NGA dataset
 
 ```{r}
 NGAadm <- st_read("data/geospatial/",
