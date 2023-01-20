@@ -13,10 +13,10 @@ website:
           - text: "Hand-on Exercise 2 (NEW!)"
             href: "handson_ex/handson_ex02/handson_ex02.qmd"
           - text: "Hand-on Exercise 3"
-            href: Hand-on_Ex03.html
+            href: "handson_ex/handson_ex03/handson_ex03.qmd"
       - text: "In-class Exercise"
         menu:
-          - text: "In-class Exercise 2"
+          - text: "In-class Exercise 2 (UPDATED)"
             href: "inclass_ex/inclass_ex02/In-class_Ex02.qmd"
           - text: "In-class Exercise 3"
             href: In-class_Ex03.html
