@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sherry Ng">
-<meta name="dcterms.date" content="2023-01-18">
+<meta name="dcterms.date" content="2023-01-20">
 
-<title>IS415-GAA - In-Class Ex02</title>
+<title>Sherry’s IS415 Journey - In-Class Ex02</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -128,7 +128,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -136,7 +136,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
     <a class="navbar-brand" href="../../index.html">
-    <span class="navbar-title">IS415-GAA</span>
+    <span class="navbar-title">Sherry’s IS415 Journey</span>
     </a>
   </div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
@@ -150,12 +150,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-hand-on-exercise">    
         <li>
-    <a class="dropdown-item" href="../../Hand-on_ex1.html">
- <span class="dropdown-text">Hand-on Exercise</span></a>
-  </li>  
-        <li>
     <a class="dropdown-item" href="../../handson_ex/handson_ex02/handson_ex02.html">
- <span class="dropdown-text">Hand-on Exercise 2</span></a>
+ <span class="dropdown-text">Hand-on Exercise 2 (NEW!)</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../../Hand-on_Ex03.html">
@@ -168,10 +164,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
  <span class="menu-text">In-class Exercise</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercise">    
-        <li>
-    <a class="dropdown-item" href="../../In-class.html">
- <span class="dropdown-text">In-class Exercise</span></a>
-  </li>  
         <li>
     <a class="dropdown-item" href="../../inclass_ex/inclass_ex02/In-class_Ex02.html">
  <span class="dropdown-text">In-class Exercise 2</span></a>
@@ -188,10 +180,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <a class="nav-link" href="../../index.html">
  <span class="menu-text">Home</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../about.html">
- <span class="menu-text">About</span></a>
-  </li>  
 </ul>
               <div id="quarto-search" class="" title="Search"></div>
           </div> <!-- /navcollapse -->
@@ -202,20 +190,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#getting-started" id="toc-getting-started" class="nav-link active" data-scroll-target="#getting-started">Getting started</a></li>
-  <li><a href="#importing-geospatial" id="toc-importing-geospatial" class="nav-link" data-scroll-target="#importing-geospatial">Importing Geospatial</a>
-  <ul class="collapse">
-  <li><a href="#the-geoboundaries-dataset" id="toc-the-geoboundaries-dataset" class="nav-link" data-scroll-target="#the-geoboundaries-dataset">The geoBoundaries dataset</a></li>
-  <li><a href="#the-nga-dataset" id="toc-the-nga-dataset" class="nav-link" data-scroll-target="#the-nga-dataset">The NGA dataset</a></li>
-  </ul></li>
-  </ul>
-</nav>
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -238,7 +213,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 18, 2023</p>
+      <p class="date">January 20, 2023</p>
     </div>
   </div>
   
@@ -254,6 +229,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, tidyverse, funModeling)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p><br></p>
+<p>Notes to take note of:</p>
+<ul>
+<li><p>st_ refers to spatial and temporal</p></li>
+<li><p>sf, the table with feature attributes and feature geometries, which contains</p></li>
+<li><p>sfc , the list-column with the geometries for each feature (record), which is composed of</p></li>
+<li><p>sfg, the feature geometry of an individual simple feature.</p></li>
+</ul>
 </section>
 <section id="importing-geospatial" class="level2">
 <h2 class="anchored" data-anchor-id="importing-geospatial">Importing Geospatial</h2>
@@ -274,6 +257,7 @@ Bounding box:  xmin: 2.668534 ymin: 4.273007 xmax: 14.67882 ymax: 13.89442
 Geodetic CRS:  WGS 84</code></pre>
 </div>
 </div>
+<p><br></p>
 </section>
 <section id="the-nga-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="the-nga-dataset">The NGA dataset</h3>
@@ -290,6 +274,174 @@ Geometry type: MULTIPOLYGON
 Dimension:     XY
 Bounding box:  xmin: 2.668534 ymin: 4.273007 xmax: 14.67882 ymax: 13.89442
 Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+</section>
+<section id="importing-aspatial-data" class="level3">
+<h3 class="anchored" data-anchor-id="importing-aspatial-data">Importing Aspatial data</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>wp_nga <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/WPdx.csv"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">#clean_country_name</span><span class="st">`</span> <span class="sc">==</span> <span class="st">"Nigeria"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="write-the-extracted-data-into-rds-format" class="level3">
+<h3 class="anchored" data-anchor-id="write-the-extracted-data-into-rds-format">Write the extracted data into rds format</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_nga, <span class="at">file =</span> <span class="st">"data/rsd/wp_nga.RDS"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="converting-aspatial-data-into-geospatial" class="level2">
+<h2 class="anchored" data-anchor-id="converting-aspatial-data-into-geospatial">Converting Aspatial Data into Geospatial</h2>
+<ul>
+<li><p>st_as_sfc, convert foreign geomerty object to a sfc object.</p></li>
+<li><p>st_as_sf, convert foreign object to an sf object. if dataset contains a column call “geometry”, coords will results in overwriting of this column by sfc geometry list column.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>wp_nga<span class="sc">$</span>Geometry <span class="ot">=</span> <span class="fu">st_as_sfc</span>(wp_nga<span class="sc">$</span><span class="st">`</span><span class="at">New Georeferenced Column</span><span class="st">`</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>wp_nga</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 95,008 × 71
+   row_id `#source`      #lat_…¹ #lon_…² #repo…³ #stat…⁴ #wate…⁵ #wate…⁶ #wate…⁷
+    &lt;dbl&gt; &lt;chr&gt;            &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  
+ 1 429068 GRID3             7.98    5.12 08/29/… Unknown &lt;NA&gt;    &lt;NA&gt;    Tapsta…
+ 2 222071 Federal Minis…    6.96    3.60 08/16/… Yes     Boreho… Well    Mechan…
+ 3 160612 WaterAid          6.49    7.93 12/04/… Yes     Boreho… Well    Hand P…
+ 4 160669 WaterAid          6.73    7.65 12/04/… Yes     Boreho… Well    &lt;NA&gt;   
+ 5 160642 WaterAid          6.78    7.66 12/04/… Yes     Boreho… Well    Hand P…
+ 6 160628 WaterAid          6.96    7.78 12/04/… Yes     Boreho… Well    Hand P…
+ 7 160632 WaterAid          7.02    7.84 12/04/… Yes     Boreho… Well    Hand P…
+ 8 642747 Living Water …    7.33    8.98 10/03/… Yes     Boreho… Well    Mechan…
+ 9 642456 Living Water …    7.17    9.11 10/03/… Yes     Boreho… Well    Hand P…
+10 641347 Living Water …    7.20    9.22 03/28/… Yes     Boreho… Well    Hand P…
+# … with 94,998 more rows, 62 more variables: `#water_tech_category` &lt;chr&gt;,
+#   `#facility_type` &lt;chr&gt;, `#clean_country_name` &lt;chr&gt;, `#clean_adm1` &lt;chr&gt;,
+#   `#clean_adm2` &lt;chr&gt;, `#clean_adm3` &lt;chr&gt;, `#clean_adm4` &lt;chr&gt;,
+#   `#install_year` &lt;dbl&gt;, `#installer` &lt;chr&gt;, `#rehab_year` &lt;lgl&gt;,
+#   `#rehabilitator` &lt;lgl&gt;, `#management_clean` &lt;chr&gt;, `#status_clean` &lt;chr&gt;,
+#   `#pay` &lt;chr&gt;, `#fecal_coliform_presence` &lt;chr&gt;,
+#   `#fecal_coliform_value` &lt;dbl&gt;, `#subjective_quality` &lt;chr&gt;, …</code></pre>
+</div>
+</div>
+<ul>
+<li>st_sf, is to create sf object, which extends df-like objects with a simple feature list column.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>wp_sf <span class="ot">&lt;-</span> <span class="fu">st_sf</span>(wp_nga, <span class="at">crs=</span><span class="dv">4326</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>wp_sf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 95008 features and 70 fields
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: 2.707441 ymin: 4.301812 xmax: 14.21828 ymax: 13.86568
+Geodetic CRS:  WGS 84
+# A tibble: 95,008 × 71
+   row_id `#source`      #lat_…¹ #lon_…² #repo…³ #stat…⁴ #wate…⁵ #wate…⁶ #wate…⁷
+ *  &lt;dbl&gt; &lt;chr&gt;            &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  
+ 1 429068 GRID3             7.98    5.12 08/29/… Unknown &lt;NA&gt;    &lt;NA&gt;    Tapsta…
+ 2 222071 Federal Minis…    6.96    3.60 08/16/… Yes     Boreho… Well    Mechan…
+ 3 160612 WaterAid          6.49    7.93 12/04/… Yes     Boreho… Well    Hand P…
+ 4 160669 WaterAid          6.73    7.65 12/04/… Yes     Boreho… Well    &lt;NA&gt;   
+ 5 160642 WaterAid          6.78    7.66 12/04/… Yes     Boreho… Well    Hand P…
+ 6 160628 WaterAid          6.96    7.78 12/04/… Yes     Boreho… Well    Hand P…
+ 7 160632 WaterAid          7.02    7.84 12/04/… Yes     Boreho… Well    Hand P…
+ 8 642747 Living Water …    7.33    8.98 10/03/… Yes     Boreho… Well    Mechan…
+ 9 642456 Living Water …    7.17    9.11 10/03/… Yes     Boreho… Well    Hand P…
+10 641347 Living Water …    7.20    9.22 03/28/… Yes     Boreho… Well    Hand P…
+# … with 94,998 more rows, 62 more variables: `#water_tech_category` &lt;chr&gt;,
+#   `#facility_type` &lt;chr&gt;, `#clean_country_name` &lt;chr&gt;, `#clean_adm1` &lt;chr&gt;,
+#   `#clean_adm2` &lt;chr&gt;, `#clean_adm3` &lt;chr&gt;, `#clean_adm4` &lt;chr&gt;,
+#   `#install_year` &lt;dbl&gt;, `#installer` &lt;chr&gt;, `#rehab_year` &lt;lgl&gt;,
+#   `#rehabilitator` &lt;lgl&gt;, `#management_clean` &lt;chr&gt;, `#status_clean` &lt;chr&gt;,
+#   `#pay` &lt;chr&gt;, `#fecal_coliform_presence` &lt;chr&gt;,
+#   `#fecal_coliform_value` &lt;dbl&gt;, `#subjective_quality` &lt;chr&gt;, …</code></pre>
+</div>
+</div>
+<section id="project-transformation" class="level3">
+<h3 class="anchored" data-anchor-id="project-transformation">Project transformation</h3>
+<p>check projection</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(wp_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: EPSG:4326 
+  wkt:
+GEOGCRS["WGS 84",
+    ENSEMBLE["World Geodetic System 1984 ensemble",
+        MEMBER["World Geodetic System 1984 (Transit)"],
+        MEMBER["World Geodetic System 1984 (G730)"],
+        MEMBER["World Geodetic System 1984 (G873)"],
+        MEMBER["World Geodetic System 1984 (G1150)"],
+        MEMBER["World Geodetic System 1984 (G1674)"],
+        MEMBER["World Geodetic System 1984 (G1762)"],
+        MEMBER["World Geodetic System 1984 (G2139)"],
+        ELLIPSOID["WGS 84",6378137,298.257223563,
+            LENGTHUNIT["metre",1]],
+        ENSEMBLEACCURACY[2.0]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433]],
+    CS[ellipsoidal,2],
+        AXIS["geodetic latitude (Lat)",north,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["geodetic longitude (Lon)",east,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433]],
+    USAGE[
+        SCOPE["Horizontal component of 3D system."],
+        AREA["World."],
+        BBOX[-90,-180,90,180]],
+    ID["EPSG",4326]]</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wp_sf <span class="ot">&lt;-</span> wp_sf <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">26392</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(wp_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: EPSG:26392 
+  wkt:
+PROJCRS["Minna / Nigeria Mid Belt",
+    BASEGEOGCRS["Minna",
+        DATUM["Minna",
+            ELLIPSOID["Clarke 1880 (RGS)",6378249.145,293.465,
+                LENGTHUNIT["metre",1]]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        ID["EPSG",4263]],
+    CONVERSION["Nigeria Mid Belt",
+        METHOD["Transverse Mercator",
+            ID["EPSG",9807]],
+        PARAMETER["Latitude of natural origin",4,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8801]],
+        PARAMETER["Longitude of natural origin",8.5,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["Scale factor at natural origin",0.99975,
+            SCALEUNIT["unity",1],
+            ID["EPSG",8805]],
+        PARAMETER["False easting",670553.98,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]]],
+    CS[Cartesian,2],
+        AXIS["(E)",east,
+            ORDER[1],
+            LENGTHUNIT["metre",1]],
+        AXIS["(N)",north,
+            ORDER[2],
+            LENGTHUNIT["metre",1]],
+    USAGE[
+        SCOPE["Engineering survey, topographic mapping."],
+        AREA["Nigeria between 6°30'E and 10°30'E, onshore and offshore shelf."],
+        BBOX[3.57,6.5,13.53,10.51]],
+    ID["EPSG",26392]]</code></pre>
 </div>
 </div>
 
