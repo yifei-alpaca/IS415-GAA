@@ -12,7 +12,7 @@ website:
         menu:
           - text: "Hand-on Exercise 2 (NEW!)"
             href: "handson_ex/handson_ex02/handson_ex02.qmd"
-          - text: "Hand-on Exercise 3"
+          - text: "Hand-on Exercise 3 (NEW!)"
             href: "handson_ex/handson_ex03/handson_ex03.qmd"
       - text: "In-class Exercise"
         menu:
