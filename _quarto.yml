@@ -19,7 +19,7 @@ website:
           - text: "In-class Exercise 2 (UPDATED)"
             href: inclass_ex/inclass_ex02/In-class_Ex02.qmd
           - text: "In-class Exercise 3 (NEW!)"
-            href: inclass_ex\In-class_Ex03\inclass_ex03.qmd
+            href: inclass_ex/In-class_Ex03/inclass_ex03.qmd
         
 format:
   html:
