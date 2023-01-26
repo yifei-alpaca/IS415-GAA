@@ -4,9 +4,6 @@ project:
 website:
   title: "Sherry's IS415 Journey"
   navbar:
-    right: 
-      - text: "Home"
-        href: index.qmd
     left:
       - text: "Hand-on Exercise"
         menu:

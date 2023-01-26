@@ -97,14 +97,14 @@ wp_sf <- wp_sf %>%
 st_crs(wp_sf)
 ```
 
-### Excluded redundant fields 
+### Excluded redundant fields
 
 ```{r}
 NGA <- NGAadm %>%
   select(c(3:4, 8:9))
 ```
 
-### Check for duplicate names 
+### Check for duplicate names
 
 ```{r}
 NGA$ADM2_EN[duplicated(NGA$ADM2_EN)==TRUE]
@@ -178,13 +178,13 @@ NGA_wp <- NGA %>%
     st_intersects(NGA, wp_unknown)))
 ```
 
-### Saving the analytical data in rds format 
+### Saving the analytical data in rds format
 
 ```{r}
 #saveRDS(NGA_wp,"data/rsd/NGA_wp.rds")
 ```
 
-### Visualising attributes by using statistical graphs 
+### Visualising attributes by using statistical graphs
 
 ```{r}
 ggplot(data = NGA_wp,
