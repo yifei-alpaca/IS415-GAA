@@ -7,13 +7,13 @@ website:
     left:
       - text: "Hand-on Exercise"
         menu:
-          - text: "Hand-on Exercise 2 (NEW!)"
+          - text: "Hand-on Exercise 2"
             href: handson_ex/handson_ex02/handson_ex02.qmd
           - text: "Hand-on Exercise 3 (NEW!)"
             href: handson_ex/handson_ex03/handson_ex03.qmd
       - text: "In-class Exercise"
         menu:
-          - text: "In-class Exercise 2 (UPDATED)"
+          - text: "In-class Exercise 2"
             href: inclass_ex/inclass_ex02/In-class_Ex02.qmd
           - text: "In-class Exercise 3 (NEW!)"
             href: inclass_ex/inclass_ex03/inclass_ex03.qmd
