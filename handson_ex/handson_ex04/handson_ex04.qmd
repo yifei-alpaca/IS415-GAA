@@ -75,3 +75,46 @@ Check
 ```{r}
 st_crs(sg_sf3414)
 ```
+
+### Mapping the geospatial data set
+
+```{r}
+tmap_mode('view')
+tm_shape(childcare_sf)+
+  tm_dots()
+```
+
+## Geospatial Data Wrangling 
+
+```{r}
+childcare <- as_Spatial(childcare_sf)
+mpsz <- as_Spatial(mpsz_sf3414)
+sg <- as_Spatial(sg_sf3414)
+```
+
+```{r}
+childcare
+```
+
+```{r}
+mpsz
+```
+
+```{r}
+sg
+```
+
+## Converting the Spatial\* class into generic sp format 
+
+```{r}
+childcare_sp <- as(childcare, "SpatialPoints")
+sg_sp <- as(sg, "SpatialPolygons")
+```
+
+```{r}
+childcare_sp
+```
+
+```{r}
+sg_sp
+```
