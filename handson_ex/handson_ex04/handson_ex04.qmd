@@ -9,3 +9,69 @@ execute:
   warning: false
 editor: visual
 ---
+
+## Installing and Loading R package 
+
+```{r}
+pacman::p_load(maptools, sf, raster, spatstat, tmap)
+```
+
+### Importing the spatial data 
+
+```{r}
+childcare_sf <- st_read("data/child-care-services-geojson.geojson") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+sg_sf <- st_read(dsn = "data", layer="CostalOutline")
+```
+
+```{r}
+mpsz_sf <- st_read(dsn = "data", 
+                layer = "MP14_SUBZONE_WEB_PL")
+```
+
+### Retrieve Information
+
+```{r}
+st_geometry(mpsz_sf)
+```
+
+Childcare is in 3414 format.
+
+```{r}
+st_crs(childcare_sf)
+```
+
+mpsz_sf is in EPSG 9001 format. need to transform
+
+```{r}
+st_crs(mpsz_sf)
+```
+
+Transform:
+
+```{r}
+mpsz_sf3414 <- st_transform(mpsz_sf, 
+                              crs = 3414)
+```
+
+Check:
+
+```{r}
+st_crs(mpsz_sf3414)
+```
+
+Convert sg_sf to 3414 format.
+
+```{r}
+sg_sf3414 <- st_transform(sg_sf, 
+                              crs = 3414)
+```
+
+Check
+
+```{r}
+st_crs(sg_sf3414)
+```
