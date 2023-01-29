@@ -128,7 +128,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -144,33 +144,60 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">
+ <span class="menu-text">Home</span></a>
+  </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hand-on-exercise" role="button" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Hand-on Exercise</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">In-Class Exercises</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-hand-on-exercise">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercises">    
         <li>
-    <a class="dropdown-item" href="../../handson_ex/handson_ex02/handson_ex02.html">
- <span class="dropdown-text">Hand-on Exercise 2 (NEW!)</span></a>
+    <a class="dropdown-item" href="../../inclass_ex/inclass_ex02/In-class_Ex02.html">
+ <span class="dropdown-text">In-Class Exercise 2</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../handson_ex/handson_ex03/handson_ex03.html">
- <span class="dropdown-text">Hand-on Exercise 3 (NEW!)</span></a>
+    <a class="dropdown-item" href="../../inclass_ex/inclass_ex03/inclass_ex03.html">
+ <span class="dropdown-text">In-Class Exercise 3</span></a>
   </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercise" role="button" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">In-class Exercise</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hands-on-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Hands-On Exercises</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercise">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercises">    
         <li>
-    <a class="dropdown-item" href="../../inclass_ex/inclass_ex02/In-class_Ex02.html">
- <span class="dropdown-text">In-class Exercise 2 (UPDATED)</span></a>
+    <a class="dropdown-item" href="../../handson_ex/handson_ex02/handson_ex02.html">
+ <span class="dropdown-text">Hands-On Exercise 2</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../inclass_ex/inclass_ex03/inclass_ex03.html">
- <span class="dropdown-text">In-class Exercise 3 (NEW!)</span></a>
+    <a class="dropdown-item" href="../../handson_ex/handson_ex03/handson_ex03.html">
+ <span class="dropdown-text">Hands-On Exercise 3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../handson_ex/handson_ex04/handson_ex04.html">
+ <span class="dropdown-text">Hands-On Exercise 4 (NEW!)</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-take-home-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Take-Home Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-take-home-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex01/Take-home_Ex01.qmd">
+ <span class="dropdown-text">Take-Home Exercise 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex02/Take-home_Ex02.qmd">
+ <span class="dropdown-text">Take-Home Exercise 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex03/Take-home_Ex03.qmd">
+ <span class="dropdown-text">Take-Home Exercise 3</span></a>
   </li>  
     </ul>
   </li>
@@ -184,7 +211,31 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#getting-started" id="toc-getting-started" class="nav-link active" data-scroll-target="#getting-started">Getting started</a></li>
+  <li><a href="#importing-geospatial" id="toc-importing-geospatial" class="nav-link" data-scroll-target="#importing-geospatial">Importing Geospatial</a>
+  <ul class="collapse">
+  <li><a href="#the-geoboundaries-dataset" id="toc-the-geoboundaries-dataset" class="nav-link" data-scroll-target="#the-geoboundaries-dataset">The geoBoundaries dataset</a></li>
+  <li><a href="#the-nga-dataset" id="toc-the-nga-dataset" class="nav-link" data-scroll-target="#the-nga-dataset">The NGA dataset</a></li>
+  <li><a href="#importing-aspatial-data" id="toc-importing-aspatial-data" class="nav-link" data-scroll-target="#importing-aspatial-data">Importing Aspatial data</a></li>
+  <li><a href="#write-the-extracted-data-into-rds-format" id="toc-write-the-extracted-data-into-rds-format" class="nav-link" data-scroll-target="#write-the-extracted-data-into-rds-format">Write the extracted data into rds format</a></li>
+  </ul></li>
+  <li><a href="#converting-aspatial-data-into-geospatial" id="toc-converting-aspatial-data-into-geospatial" class="nav-link" data-scroll-target="#converting-aspatial-data-into-geospatial">Converting Aspatial Data into Geospatial</a>
+  <ul class="collapse">
+  <li><a href="#project-transformation" id="toc-project-transformation" class="nav-link" data-scroll-target="#project-transformation">Project transformation</a></li>
+  <li><a href="#excluded-redundant-fields" id="toc-excluded-redundant-fields" class="nav-link" data-scroll-target="#excluded-redundant-fields">Excluded redundant fields</a></li>
+  <li><a href="#check-for-duplicate-names" id="toc-check-for-duplicate-names" class="nav-link" data-scroll-target="#check-for-duplicate-names">Check for duplicate names</a></li>
+  <li><a href="#extracting-water-point-data" id="toc-extracting-water-point-data" class="nav-link" data-scroll-target="#extracting-water-point-data">Extracting Water Point Data</a></li>
+  <li><a href="#saving-the-analytical-data-in-rds-format" id="toc-saving-the-analytical-data-in-rds-format" class="nav-link" data-scroll-target="#saving-the-analytical-data-in-rds-format">Saving the analytical data in rds format</a></li>
+  <li><a href="#visualising-attributes-by-using-statistical-graphs" id="toc-visualising-attributes-by-using-statistical-graphs" class="nav-link" data-scroll-target="#visualising-attributes-by-using-statistical-graphs">Visualising attributes by using statistical graphs</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 

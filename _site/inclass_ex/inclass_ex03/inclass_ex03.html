@@ -128,7 +128,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -144,33 +144,64 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hand-on-exercise" role="button" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Hand-on Exercise</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">In-Class Exercises</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-hand-on-exercise">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercises">    
         <li>
-    <a class="dropdown-item" href="../../handson_ex/handson_ex02/handson_ex02.html">
- <span class="dropdown-text">Hand-on Exercise 2</span></a>
+    <a class="dropdown-item" href="../../inclass_ex/inclass_ex02/In-class_Ex02.html">
+ <span class="dropdown-text">In-Class Exercise 2</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../handson_ex/handson_ex03/handson_ex03.html">
- <span class="dropdown-text">Hand-on Exercise 3 (NEW!)</span></a>
+    <a class="dropdown-item" href="../../inclass_ex/inclass_ex03/inclass_ex03.html">
+ <span class="dropdown-text">In-Class Exercise 3</span></a>
   </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercise" role="button" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">In-class Exercise</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hands-on-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Hands-On Exercises</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercise">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercises">    
         <li>
-    <a class="dropdown-item" href="../../inclass_ex/inclass_ex02/In-class_Ex02.html">
- <span class="dropdown-text">In-class Exercise 2</span></a>
+    <a class="dropdown-item" href="../../handson_ex/handson_ex02/handson_ex02.html">
+ <span class="dropdown-text">Hands-On Exercise 2</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../inclass_ex/inclass_ex03/inclass_ex03.html">
- <span class="dropdown-text">In-class Exercise 3 (NEW!)</span></a>
+    <a class="dropdown-item" href="../../handson_ex/handson_ex03/handson_ex03.html">
+ <span class="dropdown-text">Hands-On Exercise 3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../handson_ex/handson_ex03/handson_ex04.qmd">
+ <span class="dropdown-text">Hands-On Exercise 4</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-take-home-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Take-Home Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-take-home-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex01/Take-home_Ex01.qmd">
+ <span class="dropdown-text">Take-Home Exercise 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex02/Take-home_Ex02.qmd">
+ <span class="dropdown-text">Take-Home Exercise 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex03/Take-home_Ex03.qmd">
+ <span class="dropdown-text">Take-Home Exercise 3</span></a>
   </li>  
     </ul>
   </li>
@@ -184,7 +215,23 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#getting-started" id="toc-getting-started" class="nav-link active" data-scroll-target="#getting-started">Getting Started</a>
+  <ul class="collapse">
+  <li><a href="#import-data" id="toc-import-data" class="nav-link" data-scroll-target="#import-data">Import data</a></li>
+  <li><a href="#visualising-distribution-of-non-functional-water-point" id="toc-visualising-distribution-of-non-functional-water-point" class="nav-link" data-scroll-target="#visualising-distribution-of-non-functional-water-point">Visualising distribution of non-functional water point</a></li>
+  </ul></li>
+  <li><a href="#extreme-value-map" id="toc-extreme-value-map" class="nav-link" data-scroll-target="#extreme-value-map">Extreme Value Map</a>
+  <ul class="collapse">
+  <li><a href="#box-map" id="toc-box-map" class="nav-link" data-scroll-target="#box-map">Box Map</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -214,7 +261,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">January 25, 2023</p>
+      <p class="date-modified">January 29, 2023</p>
     </div>
   </div>
     
