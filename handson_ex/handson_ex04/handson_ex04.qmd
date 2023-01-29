@@ -104,7 +104,7 @@ mpsz
 sg
 ```
 
-## Converting the Spatial\* class into generic sp format 
+## Converting the Spatial\* class into generic SP format
 
 ```{r}
 childcare_sp <- as(childcare, "SpatialPoints")
