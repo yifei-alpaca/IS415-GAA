@@ -128,7 +128,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -161,6 +161,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <a class="dropdown-item" href="../../inclass_ex/inclass_ex03/inclass_ex03.html">
  <span class="dropdown-text">In-Class Exercise 3</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../inclass_ex/inclass_ex04/inclass_ex04.qmd">
+ <span class="dropdown-text">In-Class Exercise 4</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -177,7 +181,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
  <span class="dropdown-text">Hands-On Exercise 3</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../handson_ex/handson_ex03/handson_ex04.qmd">
+    <a class="dropdown-item" href="../../handson_ex/handson_ex04/handson_ex04.html">
  <span class="dropdown-text">Hands-On Exercise 4 (NEW!)</span></a>
   </li>  
     </ul>
@@ -211,37 +215,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#getting-started" id="toc-getting-started" class="nav-link active" data-scroll-target="#getting-started">Getting started</a>
-  <ul class="collapse">
-  <li><a href="#importing-geospatial-data-into-r" id="toc-importing-geospatial-data-into-r" class="nav-link" data-scroll-target="#importing-geospatial-data-into-r">Importing Geospatial Data into R</a></li>
-  <li><a href="#import-attribute-data-into-r" id="toc-import-attribute-data-into-r" class="nav-link" data-scroll-target="#import-attribute-data-into-r">Import attribute data into R</a></li>
-  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">Data preparation</a></li>
-  <li><a href="#joining-attribute-data-and-geospatial-data" id="toc-joining-attribute-data-and-geospatial-data" class="nav-link" data-scroll-target="#joining-attribute-data-and-geospatial-data">Joining attribute data and geospatial data</a></li>
-  <li><a href="#export-the-df-to-rds-format" id="toc-export-the-df-to-rds-format" class="nav-link" data-scroll-target="#export-the-df-to-rds-format">Export the df to rds format</a></li>
-  <li><a href="#choropleth-mapping-geospatial-data-using-tmap" id="toc-choropleth-mapping-geospatial-data-using-tmap" class="nav-link" data-scroll-target="#choropleth-mapping-geospatial-data-using-tmap">Choropleth Mapping Geospatial data using tmap</a></li>
-  <li><a href="#creating-a-choropleth-map-by-using-tmaps-elements" id="toc-creating-a-choropleth-map-by-using-tmaps-elements" class="nav-link" data-scroll-target="#creating-a-choropleth-map-by-using-tmaps-elements">creating a choropleth map by using tmap’s elements</a></li>
-  <li><a href="#drawing-a-base-map" id="toc-drawing-a-base-map" class="nav-link" data-scroll-target="#drawing-a-base-map">Drawing a base map</a></li>
-  <li><a href="#drawing-a-choropleth-map-using-tm_polygons" id="toc-drawing-a-choropleth-map-using-tm_polygons" class="nav-link" data-scroll-target="#drawing-a-choropleth-map-using-tm_polygons">Drawing a choropleth map using tm_polygons()</a></li>
-  <li><a href="#drawing-a-choropleth-map-using-tm_fill-and-tm_border" id="toc-drawing-a-choropleth-map-using-tm_fill-and-tm_border" class="nav-link" data-scroll-target="#drawing-a-choropleth-map-using-tm_fill-and-tm_border">Drawing a choropleth map using tm_fill() and tm_border()</a></li>
-  <li><a href="#plotting-choropleth-maps-with-built-in-classification-methods" id="toc-plotting-choropleth-maps-with-built-in-classification-methods" class="nav-link" data-scroll-target="#plotting-choropleth-maps-with-built-in-classification-methods">Plotting choropleth maps with built-in classification methods</a></li>
-  <li><a href="#plotting-choropleth-map-with-customer-break" id="toc-plotting-choropleth-map-with-customer-break" class="nav-link" data-scroll-target="#plotting-choropleth-map-with-customer-break">Plotting choropleth map with customer break</a></li>
-  <li><a href="#map-layouts" id="toc-map-layouts" class="nav-link" data-scroll-target="#map-layouts">Map layouts</a></li>
-  <li><a href="#cartographic-furniture" id="toc-cartographic-furniture" class="nav-link" data-scroll-target="#cartographic-furniture">Cartographic Furniture</a></li>
-  <li><a href="#reset-style-to-default" id="toc-reset-style-to-default" class="nav-link" data-scroll-target="#reset-style-to-default">Reset style to default</a></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
-  <li><a href="#defining-a-group-by-variable-in-tm_facets" id="toc-defining-a-group-by-variable-in-tm_facets" class="nav-link" data-scroll-target="#defining-a-group-by-variable-in-tm_facets">Defining a group-by variable in tm_facets()</a></li>
-  <li><a href="#creating-multiple-stand-alone-maps-with-tmap_arrange" id="toc-creating-multiple-stand-alone-maps-with-tmap_arrange" class="nav-link" data-scroll-target="#creating-multiple-stand-alone-maps-with-tmap_arrange">Creating multiple stand-alone maps with tmap_arrange()</a></li>
-  <li><a href="#mapping-spatial-object-meeting-a-selection-criterion" id="toc-mapping-spatial-object-meeting-a-selection-criterion" class="nav-link" data-scroll-target="#mapping-spatial-object-meeting-a-selection-criterion">Mapping Spatial object meeting a selection criterion</a></li>
-  <li><a href="#section-1" id="toc-section-1" class="nav-link" data-scroll-target="#section-1"></a></li>
-  </ul></li>
-  </ul>
-</nav>
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 

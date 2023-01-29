@@ -13,7 +13,8 @@ website:
           href: inclass_ex/inclass_ex02/In-class_Ex02.qmd
         - text: "In-Class Exercise 3"
           href: inclass_ex/inclass_ex03/inclass_ex03.qmd
-          
+        - text: "In-Class Exercise 4"
+          href: inclass_ex/inclass_ex04/inclass_ex04.qmd
       - text: "Hands-On Exercises"
         menu:
         - text: "Hands-On Exercise 2"

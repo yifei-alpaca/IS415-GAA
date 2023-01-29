@@ -10,13 +10,13 @@ execute:
 editor: visual
 ---
 
-## Installing and Loading R package 
+## Installing and Loading R package
 
 ```{r}
 pacman::p_load(maptools, sf, raster, spatstat, tmap)
 ```
 
-### Importing the spatial data 
+### Importing the spatial data
 
 ```{r}
 childcare_sf <- st_read("data/child-care-services-geojson.geojson") %>%
