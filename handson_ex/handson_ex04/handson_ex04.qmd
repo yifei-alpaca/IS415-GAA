@@ -90,6 +90,10 @@ tmap_mode('plot')
 
 ## Geospatial Data Wrangling
 
+as_Spatial() convert geospatial data from simple feature data frame to sp spatial class.
+
+Class = SpatialPointsDataFrame
+
 ```{r}
 childcare <- as_Spatial(childcare_sf)
 mpsz <- as_Spatial(mpsz_sf3414)
@@ -110,10 +114,16 @@ sg
 
 ## Converting the Spatial\* class into generic SP format
 
+In order to convert data in ppp object format, we need to convert the spatial class into spatial object first.
+
+***ppp refers to two-dimensional point pattern***.
+
 ```{r}
 childcare_sp <- as(childcare, "SpatialPoints")
 sg_sp <- as(sg, "SpatialPolygons")
 ```
+
+Class = SpatialPoints
 
 ```{r}
 childcare_sp
@@ -123,12 +133,196 @@ childcare_sp
 sg_sp
 ```
 
-## Geospatial Data wrangling 
+### ppp Point Pattern Object
 
-### Converting sf data frames to sp's Spatial\* class 
+convert spatial data into spatstat's pp object format.
+
+A ppp object has the coordinates of the points and the analysis "window". To assign the points locations we need to extract the coordinates from sptialpoint object which has been done above.
 
 ```{r}
-childcare <- as_Spatial(childcare_sf)
-mpsz <- as_Spatial(mpsz_sf3414)
-sg <- as_Spatial(sg_sf3414)
+childcare_ppp <- as(childcare_sp, "ppp")
+childcare_ppp
+```
+
+```{r}
+plot(childcare_ppp)
+```
+
+```{r}
+summary(childcare_ppp)
+```
+
+### Handling duplicated points 
+
+to check if there is duplicates
+
+```{r}
+any(duplicated(childcare_ppp))
+```
+
+Count the number of duplicates
+
+```{r}
+multiplicity(childcare_ppp)
+```
+
+to know how many locations have more than one point event
+
+```{r}
+sum(multiplicity(childcare_ppp) > 1)
+```
+
+To view the location of the duplicates
+
+```{r}
+tmap_mode('view')
+tm_shape(childcare) +
+  tm_dots(alpha=0.4, 
+          size=0.05)
+```
+
+### 3 ways to overcome the problem of duplicates 
+
+1.  delete duplicates (some useful points might be lost)
+
+2.  use jittering (do not occupy the same exact space)
+
+3.  make each point unique and attach the duplicates, and mark it.
+
+Below code is using the 2nd method.
+
+```{r}
+childcare_ppp_jit <- rjitter(childcare_ppp, 
+                             retry=TRUE, 
+                             nsim=1, 
+                             drop=TRUE)
+```
+
+```{r}
+any(duplicated(childcare_ppp_jit))
+```
+
+## Creating owin object 
+
+Owin = define the observation window of a point pattern. It is specially designed to represent this polygonal region.
+
+```{r}
+sg_owin <- as(sg_sp, "owin")
+```
+
+```{r}
+plot(sg_owin)
+```
+
+```{r}
+summary(sg_owin)
+```
+
+### Combining point events object and owin object 
+
+```{r}
+childcareSG_ppp = childcare_ppp[sg_owin]
+```
+
+\*\*\* Combine both the point and polygon feature in one ppp object class as shown below.
+
+```{r}
+summary(childcareSG_ppp)
+```
+
+```{r}
+plot(childcareSG_ppp)
+```
+
+## First-order Spatial Point Pattern Analysis
+
+-   Kernel density estimation (KDE)
+
+-   Confirmatory Spatial Point Patterns Analysis by using Nearest Neighbour
+
+## Kernel Density Estimation 
+
+### Type bandwidth algorithm
+
+```{r}
+kde_childcareSG_bw_diggle <- density(childcareSG_ppp,
+                              sigma=bw.diggle,
+                              edge=TRUE,
+                            kernel="gaussian") 
+```
+
+```{r}
+kde_childcareSG_bw_scott <- density(childcareSG_ppp,
+                              sigma=bw.scott,
+                              edge=TRUE,
+                            kernel="gaussian")
+```
+
+```{r}
+kde_childcareSG_bw_CvL <- density(childcareSG_ppp,
+                              sigma=bw.CvL,
+                              edge=TRUE,
+                            kernel="gaussian")
+```
+
+```{r}
+kde_childcareSG_bw_ppl <- density(childcareSG_ppp,sigma=bw.ppl,
+                              edge=TRUE,
+                            kernel="gaussian")
+```
+
+ppl algorithm gives us the narrower and smaller bandwidth. we can see how other algo works too as shown below.
+
+```{r}
+plot(kde_childcareSG_bw_diggle)
+plot(kde_childcareSG_bw_ppl)
+plot(kde_childcareSG_bw_CvL)
+plot(kde_childcareSG_bw_scott)
+
+```
+
+```{r}
+bw <- bw.diggle(childcareSG_ppp)
+bw
+```
+
+### Recalling KDE values
+
+rescale() is used to convert the unit of measurement from meter to kilometer.
+
+```{r}
+childcareSG_ppp.km <- rescale(childcareSG_ppp, 1000, "km")
+```
+
+re-run density()
+
+```{r}
+kde_childcareSG.bw <- density(childcareSG_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+plot(kde_childcareSG.bw)
+```
+
+### Working with different kernel method 
+
+```{r}
+par(mfrow=c(2,2))
+plot(density(childcareSG_ppp.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian"), 
+     main="Gaussian")
+plot(density(childcareSG_ppp.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="epanechnikov"), 
+     main="Epanechnikov")
+plot(density(childcareSG_ppp.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="quartic"), 
+     main="Quartic")
+plot(density(childcareSG_ppp.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="disc"), 
+     main="Disc")
 ```
