@@ -84,7 +84,11 @@ tm_shape(childcare_sf)+
   tm_dots()
 ```
 
-## Geospatial Data Wrangling 
+```{r}
+tmap_mode('plot')
+```
+
+## Geospatial Data Wrangling
 
 ```{r}
 childcare <- as_Spatial(childcare_sf)
@@ -117,4 +121,14 @@ childcare_sp
 
 ```{r}
 sg_sp
+```
+
+## Geospatial Data wrangling 
+
+### Converting sf data frames to sp's Spatial\* class 
+
+```{r}
+childcare <- as_Spatial(childcare_sf)
+mpsz <- as_Spatial(mpsz_sf3414)
+sg <- as_Spatial(sg_sf3414)
 ```
