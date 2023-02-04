@@ -1,0 +1,99 @@
+---
+title: "Hands-On Ex05 - 2nd Order SPA Methods"
+date: "1 Feburary 2023"
+date-modified: "`r Sys.Date()`"
+author: "Sherry Ng"
+format: html
+execute: 
+  message: false
+  warning: false
+editor: visual
+---
+
+```{r}
+pacman::p_load(maptools, sf, raster, spatstat, tmap)
+```
+
+## Import the spatial data
+
+```{r}
+childcare_sf <- st_read("data/child-care-services-geojson.geojson") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+sg_sf <- st_read(dsn = "data", layer="CostalOutline")
+```
+
+```{r}
+st_crs(sg_sf)
+```
+
+```{r}
+sg_sf <-st_set_crs(sg_sf, 3414)
+```
+
+```{r}
+st_crs(sg_sf)
+```
+
+```{r}
+mpsz_sf <- st_read(dsn = "data", 
+                layer = "MP14_SUBZONE_WEB_PL")
+```
+
+```{r}
+mpsz_sf <- st_set_crs(mpsz_sf, 3414)
+st_crs(mpsz_sf)
+```
+
+```{r}
+tmap_mode('view')
+```
+
+```{r}
+tm_shape(childcare_sf)+
+  tm_dots()
+```
+
+```{r}
+tmap_mode('plot')
+```
+
+### Convert sf data frames to sp's Spatial\* class
+
+```{r}
+childcare <- as_Spatial(childcare_sf)
+mpsz <- as_Spatial(mpsz_sf)
+sg <- as_Spatial(sg_sf)
+```
+
+### Converting the Spatial\* class into generic sp format 
+
+```{r}
+childcare_sp <- as(childcare, "SpatialPoints")
+sg_sp <- as(sg, "SpatialPolygons")
+```
+
+```{r}
+childcare_sp
+```
+
+```{r}
+sg_sp
+```
+
+### Converting the generic sp format into spatstat's ppp format 
+
+```{r}
+childcare_ppp <- as(childcare_sp, "ppp")
+childcare_ppp
+```
+
+```{r}
+plot(childcare_ppp)
+```
+
+```{r}
+summary(childcare_ppp)
+```

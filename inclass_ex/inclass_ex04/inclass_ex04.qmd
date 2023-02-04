@@ -1,0 +1,66 @@
+---
+title: "In-Class Ex04"
+date: "30 January 2023"
+date-modified: "`r Sys.Date()`"
+format: html
+execute: 
+  echo: true
+  eval: true
+  message: false
+  warning: false
+editor: visual
+---
+
+## Installing and Loading R package
+
+-   spatstat is mainly for spatial point analytics
+
+```{r}
+pacman::p_load(maptools, sf, raster, spatstat, tmap)
+```
+
+### Importing the spatial data
+
+-   data are in meters and are in ***object format***
+
+Childcare is a single file
+
+```{r}
+childcare_sf <- st_read("data/child-care-services-geojson.geojson") %>%
+  st_transform(crs = 3414)
+```
+
+Read in list of data files in the folder
+
+```{r}
+sg_sf <- st_read(dsn = "data", layer="CostalOutline")
+```
+
+```{r}
+mpsz_sf <- st_read(dsn = "data", 
+                layer = "MP14_SUBZONE_WEB_PL")
+```
+
+# 3 steps to take note
+
+1.  The data table is in object format.
+
+```{r}
+childcare <- as_Spatial(childcare_sf)
+mpsz <- as_Spatial(mpsz_sf)
+sg <- as_Spatial(sg_sf)
+```
+
+2.  It drops the object and display it as a polygon format.
+
+```{r}
+childcare_sp <- as(childcare, "SpatialPoints")
+sg_sp <- as(sg, "SpatialPolygons")
+```
+
+3.  this will show a list of the data points.
+
+```{r}
+childcare_ppp <- as(childcare_sp, "ppp")
+childcare_ppp
+```

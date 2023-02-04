@@ -21,8 +21,10 @@ website:
           href: handson_ex/handson_ex02/handson_ex02.qmd
         - text: "Hands-On Exercise 3"
           href: handson_ex/handson_ex03/handson_ex03.qmd
-        - text: "Hands-On Exercise 4 (NEW!)"
-          href: handson_ex/handson_ex04/handson_ex04.qmd
+        - text: "Hands-On Exercise 4a (NEW!)"
+          href: handson_ex/handson_ex04a/handson_ex04a.qmd
+        - text: "Hands-On Exercise 4b (NEW!)"
+          href: handson_ex/handson_ex04b/handson_ex04b.qmd
           
       - text: "Take-Home Exercises"
         menu:
