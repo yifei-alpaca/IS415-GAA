@@ -1,5 +1,5 @@
 ---
-title: "Hands-On Ex05 - 2nd Order SPA Methods"
+title: "Hands-On Ex04b - 2nd Order SPA Methods"
 date: "1 Feburary 2023"
 date-modified: "`r Sys.Date()`"
 author: "Sherry Ng"
@@ -68,7 +68,7 @@ mpsz <- as_Spatial(mpsz_sf)
 sg <- as_Spatial(sg_sf)
 ```
 
-### Converting the Spatial\* class into generic sp format 
+### Converting the Spatial\* class into generic sp format
 
 ```{r}
 childcare_sp <- as(childcare, "SpatialPoints")
@@ -83,7 +83,7 @@ childcare_sp
 sg_sp
 ```
 
-### Converting the generic sp format into spatstat's ppp format 
+### Converting the generic sp format into spatstat's ppp format
 
 ```{r}
 childcare_ppp <- as(childcare_sp, "ppp")
