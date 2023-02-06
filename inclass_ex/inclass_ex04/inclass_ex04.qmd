@@ -22,6 +22,8 @@ pacman::p_load(maptools, sf, raster, spatstat, tmap)
 ### Importing the spatial data
 
 -   data are in meters and are in ***object format***
+-   st_read() extension of r read(), this df will create new columns called "geometry". it stores all the geometry features inside which is a geospatial data.
+-   tidyverse join to sf will retain spatial data.
 
 Childcare is a single file
 
@@ -79,4 +81,47 @@ sg_sp <- as(sg, "SpatialPolygons")
 ```{r}
 childcare_ppp <- as(childcare_sp, "ppp")
 childcare_ppp
+```
+
+```{r}
+plot(childcare_ppp)
+```
+
+### Handling Duplicated point events
+
+-   Singapore uses geocoding to retrieve the points
+
+-   uses postal code to plot xy coordinates = duplicates
+
+-   jitter pushes the points slightly to prevent any duplicates.
+
+```{r}
+childcare_ppp_jit <- rjitter(childcare_ppp, 
+                             retry=TRUE, 
+                             nsim=1, 
+                             drop=TRUE)
+```
+
+```{r}
+any(duplicated(childcare_ppp_jit))
+```
+
+### Creating Owin object
+
+-   owin helps to confine within the study layer instead of using the extend the study area.
+
+```{r}
+sg_owin <- as(sg_sp, "owin")
+```
+
+```{r}
+plot(sg_owin)
+```
+
+```{r}
+childcareSG_ppp = childcare_ppp[sg_owin]
+```
+
+```{r}
+plot(childcareSG_ppp)
 ```
