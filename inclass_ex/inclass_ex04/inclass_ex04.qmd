@@ -41,6 +41,22 @@ mpsz_sf <- st_read(dsn = "data",
                 layer = "MP14_SUBZONE_WEB_PL")
 ```
 
+```{r}
+tmap_mode('view')
+tm_shape(childcare_sf)+
+  tm_dots(alph=0.5,
+          size= 0.01) + 
+  tm_view(set.zoom.limits = c(11,14))
+```
+
+-   tmap_mode('view') will always connect to the server. it is best not to include more than 5.
+
+-   tm_bubbles create proportional symbol maps.
+
+-   tm_view(set.zoom.limits = c(11,14)):
+
+    -   (a,b) a is the zoom out value, b is the zoom in
+
 # 3 steps to take note
 
 1.  The data table is in object format.

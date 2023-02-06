@@ -87,7 +87,7 @@ plot(childcare_ppp)
 summary(childcare_ppp)
 ```
 
-### Handling Duplicates 
+### Handling Duplicates
 
 ```{r}
 any(duplicated(childcare_ppp))
@@ -136,7 +136,7 @@ plot(sg_owin)
 summary(sg_owin)
 ```
 
-### Combining point events object and owin object 
+### Combining point events object and owin object
 
 ```{r}
 childcareSG_ppp = childcare_ppp[sg_owin]
@@ -174,7 +174,7 @@ plot(ck, main = "Choa Chu Kang")
 plot(jw, main = "Jurong West")
 ```
 
-### Convert the spatial point data frame into generic sp format 
+### Convert the spatial point data frame into generic sp format
 
 ```{r}
 pg_sp = as(pg, "SpatialPolygons")
@@ -192,7 +192,7 @@ ck_owin = as(ck_sp, "owin")
 jw_owin = as(jw_sp, "owin")
 ```
 
-### Combining childcare points and the study area 
+### Combining childcare points and the study area
 
 ```{r}
 childcare_pg_ppp = childcare_ppp_jit[pg_owin]
@@ -278,14 +278,14 @@ plot(G_tm.csr)
 
 Estimates the empty space function F(r) or its hazard rate h(r) from a point pattern in a window of arbitrary shape.
 
-### Chua Chu Kang Planning Area 
+### Chua Chu Kang Planning Area
 
 ```{r}
 F_CK = Fest(childcare_ck_ppp)
 plot(F_CK)
 ```
 
-### Performing Complete Spatial Randomness Test 
+### Performing Complete Spatial Randomness Test
 
 ```{r}
 F_CK.csr <- envelope(childcare_ck_ppp, Fest, nsim = 999)
@@ -295,7 +295,7 @@ F_CK.csr <- envelope(childcare_ck_ppp, Fest, nsim = 999)
 plot(F_CK.csr)
 ```
 
-### Tampines Planning Area 
+### Tampines Planning Area
 
 ```{r}
 F_tm = Fest(childcare_tm_ppp, correction = "best")
@@ -311,6 +311,7 @@ plot(F_tm.csr)
 ```
 
 ## 
+
 Analysing Spatial Point Process Using K-Function
 
 K-function measures the number of events found up to a given distance of any particular event.
@@ -330,7 +331,7 @@ K_ck.csr <- envelope(childcare_ck_ppp, Kest, nsim = 99, rank = 1, glocal=TRUE)
 plot(K_ck.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ```
 
-### Tampines Planning Area 
+### Tampines Planning Area
 
 ```{r}
 K_tm = Kest(childcare_tm_ppp, correction = "Ripley")
@@ -351,6 +352,7 @@ plot(K_tm.csr, . - r ~ r,
 ## Analysing Spatial Point Process Using L-Function
 
 ### 
+
 Chua Chu Kang Planning Area
 
 ```{r}
@@ -367,7 +369,7 @@ L_ck.csr <- envelope(childcare_ck_ppp, Lest, nsim = 99, rank = 1, glocal=TRUE)
 plot(L_ck.csr, . - r ~ r, xlab="d", ylab="L(d)-r")
 ```
 
-### Tampines Planning Area 
+### Tampines Planning Area
 
 ```{r}
 L_tm = Lest(childcare_tm_ppp, correction = "Ripley")

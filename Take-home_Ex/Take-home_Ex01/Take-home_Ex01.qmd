@@ -8,3 +8,65 @@ execute:
   warning: false
 editor: visual
 ---
+
+## Getting started - Load R packages
+
+```{r}
+pacman::p_load(sf, tidyverse, funModeling, tmap, maptools, raster, spatstat )
+```
+
+## Importing Geospatial dataset
+
+```{r}
+NGA <- st_read("data/geospatial/",
+               layer = "nga_admbnda_adm2") %>%
+  st_transform(crs = 26392)
+```
+
+Instead of loading just Osun state, it is good to keep a raw data above incase we need to roll back or to cross check with other columns.
+
+```{r}
+NGA_osun <- st_read("data/geospatial/",
+               layer = "nga_admbnda_adm2") %>%
+  st_transform(crs = 26392) %>% filter(`ADM1_EN` == "Osun")
+```
+
+## Importing Aspatial dataset
+
+```{r}
+wp_nga <- read_csv("data/aspatial/WPdx.csv")
+```
+
+### Filter the raw dataset to only in Osun State, Nigeria.
+
+Instead of loading just Osun state, it is good to keep a raw data above incase we need to roll back or to cross check with other columns. We will be using wp_osun_nga dataframe.
+
+```{r}
+ wp_osun_nga <- read_csv("data/aspatial/WPdx.csv") %>%
+  filter(`#clean_country_name` == "Nigeria" & `#clean_adm1` == "Osun")
+```
+
+### Converting aspatial data into sf point features
+
+We need to convert into sfc field by using **st_as_sfc** data type.
+
+```{r}
+wp_osun_nga$Geometry = st_as_sfc(wp_osun_nga$`New Georeferenced Column`)
+wp_osun_nga
+```
+
+Next, we will convert the dataframe into an sf object by using **st_sf()**. It is important to transform the referencing system of the data into the sf format.
+
+```{r}
+wp_sf_osun <- st_sf(wp_osun_nga, crs=4326)
+wp_sf_osun
+```
+
+Next we have to transform Nigeria projected coordinate system.
+
+```{r}
+wp_sf_osun <- wp_sf_osun %>%
+  st_transform(crs = 26392)
+```
+
+## Data cleaning
