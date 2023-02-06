@@ -99,6 +99,10 @@ tm_shape(LCLQ_stores) +
   tm_dots(col = "X7.Eleven",           
           size = 0.1,           
           border.col = "black",           
-          border.lwd = 0.5) +   
+          border.lwd = 0.5) + 
+  tm_dots(col = "X7.Eleven",           
+        size = 0.1,           
+        border.col = "black",           
+        border.lwd = 0.5) +
 tm_view(set.zoom.limits = c(12,16))
 ```
