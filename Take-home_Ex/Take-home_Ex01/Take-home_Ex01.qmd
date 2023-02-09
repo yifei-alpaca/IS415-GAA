@@ -2,7 +2,11 @@
 title: "Take-home_Ex01"
 date: "30 January 2023"
 date-modified: "`r Sys.Date()`"
-format: html
+format:
+ html:
+  toc: true
+  toc-location: right
+  number-depth: 3
 execute: 
   message: false
   warning: false
@@ -12,10 +16,10 @@ editor: visual
 ## Getting started - Load R packages
 
 ```{r}
-pacman::p_load(sf, tidyverse, funModeling, tmap, maptools, raster, spatstat )
+pacman::p_load(sf, tidyverse, funModeling, tmap, maptools, raster, spatstat, dplyr,ggplot2, tmap)
 ```
 
-## Importing Geospatial dataset
+## Importing GeoSpatial Dataset
 
 ```{r}
 NGA <- st_read("data/geospatial/",
@@ -23,7 +27,7 @@ NGA <- st_read("data/geospatial/",
   st_transform(crs = 26392)
 ```
 
-Instead of loading just Osun state, it is good to keep a raw data above incase we need to roll back or to cross check with other columns.
+Instead of loading just Osun state, it is good to keep a raw data above in case we need to roll back or for checking purposes.
 
 ```{r}
 NGA_osun <- st_read("data/geospatial/",
@@ -39,14 +43,20 @@ wp_nga <- read_csv("data/aspatial/WPdx.csv")
 
 ### Filter the raw dataset to only in Osun State, Nigeria.
 
-Instead of loading just Osun state, it is good to keep a raw data above incase we need to roll back or to cross check with other columns. We will be using wp_osun_nga dataframe.
+Instead of loading just Osun state, it is good to keep a raw data above incase we need to roll back or for checking purposes. We will be using wp_osun_nga dataframe.
 
 ```{r}
  wp_osun_nga <- read_csv("data/aspatial/WPdx.csv") %>%
   filter(`#clean_country_name` == "Nigeria" & `#clean_adm1` == "Osun")
 ```
 
-### Converting aspatial data into sf point features
+### Checking the content of a simple feature data frame
+
+```{r}
+st_geometry(NGA_osun)
+```
+
+### Converting (aspatial data) into sf point features
 
 We need to convert into sfc field by using **st_as_sfc** data type.
 
@@ -55,18 +65,440 @@ wp_osun_nga$Geometry = st_as_sfc(wp_osun_nga$`New Georeferenced Column`)
 wp_osun_nga
 ```
 
-Next, we will convert the dataframe into an sf object by using **st_sf()**. It is important to transform the referencing system of the data into the sf format.
+Next, we will convert the dataframe into an sf object by using **st_sf()**. It is important to transform the referencing system of the data into the sf format. Next we have to transform Nigeria projected coordinate system.
 
 ```{r}
-wp_sf_osun <- st_sf(wp_osun_nga, crs=4326)
+wp_sf_osun <- st_sf(wp_osun_nga, crs=4326) %>%
+  st_transform(crs = 26392)
 wp_sf_osun
 ```
 
-Next we have to transform Nigeria projected coordinate system.
+we can check the transformed projected system
 
 ```{r}
-wp_sf_osun <- wp_sf_osun %>%
-  st_transform(crs = 26392)
+st_crs(wp_sf_osun)
 ```
 
 ## Data cleaning
+
+1.  Remove unwanted columns
+    -   As the data set contains many redundant fields, we will be selecting the columns that we want.
+    -   I have included SD_EN for further analysis purposes.
+
+```{r}
+keeps <- c(3:4, 8:9, 15:16)
+NGA_osun = NGA_osun[keeps]
+```
+
+```{r}
+keeps2 <- c(1,2,7:9,11:14,17,21,22,26)
+wp_sf_osun = wp_sf_osun[keeps2]
+```
+
+Check for duplicates for NGA_osun
+
+```{r}
+NGA_osun$ADM2_EN[duplicated(NGA_osun$ADM2_EN)==TRUE]
+```
+
+In this case, there is no duplicate names, we do not need to transform any names. We can move on to the next phase which is the EDA.
+
+## Exploratory data analysis and further cleaning
+
+In our in class exe02, we uses ggplot() of ggplot package to reveal the distribution of water point status visually.
+
+*\*Note: currently my freq() for funModeling package is not working properly, hence, I'm using alternative method to plot the horizontal barchart.*
+
+```{r}
+ggplot(wp_sf_osun) + geom_bar(aes(y = fct_infreq(`#status_clean`), fill=`#status_clean`, stat="identity"))+  theme(legend.position = "right")
+```
+
+As we can see from the images, there are category which can be group together such as "Abandoned" can combine with "Abandoned/Decommissioned". As we can see that there are quite a number of missing values. Hence, we should rename to "Unknown".
+
+```{r}
+wp_sf_osun <- wp_sf_osun %>% 
+  rename(status_clean = '#status_clean') %>%
+  mutate(status_clean = replace_na(
+    status_clean, "Unknown"))
+```
+
+```{r}
+wp_sf_osun$status_clean[wp_sf_osun$status_clean=="Abandoned"]  <- "Abandoned/Decommissioned" 
+```
+
+We can plot the freq distribution diagram again.
+
+```{r}
+#freq(data = wp_sf_osun,
+     #input = 'status_clean')
+
+ggplot(wp_sf_osun) + geom_bar(aes(y = fct_infreq(`status_clean`), fill=`status_clean`, stat="identity"))+  theme(legend.position = "right")
+```
+
+Based on the image above, about to 42% of the water point are Functional, followed by 4.5% needs repair and about 1.2% are not in use. Whereas for Non-Functional, it is about 36.2% and 2.8% are non functional due to the dry season. The unknown status is at about 13.5% which is quite a large %. If let say, most of the unknown falls under non-functional, we can say that in Osun state close to 50% of the water points are not very clean and further work improvement needs to perform in the future. One of the reason for being "unknown" could be the area have not been accessed yet.
+
+<br>
+
+In order to have a better view, we can plot a chart based on the the (adm2) which is the Secondary Administrative Division.
+
+```{r}
+ggplot(wp_sf_osun, aes(x = `#clean_adm2`, fill = status_clean)) + 
+  geom_bar() + 
+  coord_flip() + 
+  theme_minimal() + 
+  xlab("Secondary Admin Division") + 
+  ylab("Number of status") + 
+  scale_fill_brewer(type = "qual", palette = 3, name = "Status")
+```
+
+As we can see from the image above, Aiyedade has the highest number of status record ( 455 est.) as compared to others. 2nd in line would be Ejigbo (440 est.). The lowest status recorded would be Ife East with a record of 20 est.
+
+<br>
+
+By plotting based on the Secondary Admin Division, it is hard to interpret the area of interest e.g located in the north, south, east or west area. Notice that for **NGA_osun** dataframe, I have included SD_EN which shows the results of East, West and Central. Whereas for wp_sf_osun, there is no SD_EN which shows East, West or Central.
+
+<br>
+
+In this section, I would combine both dataset and try to find some useful insights. As mentioned by Prof Kam during in-class 05, we use cbind when the dataset has no unique identifier and it also must have the same number of row. But, in this case, I am able to use relational join even though there is no exact unique identifier but we can join on the Secondary Admin Division as it exists in both data frame. But before joining, we need to make sure that the column name is the same. We can change it to ADM2_EN for water point.
+
+```{r}
+names(wp_sf_osun)[9] <- "ADM2_EN"
+```
+
+Next, we can proceed to joining the data. But before that, lets deactivate the geometry in this new data frame for the purpose of this EDA analysis. When I first left join, some rows shows NA values, I went to cross check and notice the upper and lower case difference. With that, let's change all names to lower case instead.
+
+```{r}
+wp_sf_osun<- wp_sf_osun %>% 
+ mutate(ADM2_EN = tolower(ADM2_EN)) 
+```
+
+```{r}
+NGA_osun<- NGA_osun %>% 
+ mutate(ADM2_EN = tolower(ADM2_EN)) 
+```
+
+```{r}
+NGA_WP <- left_join(wp_sf_osun %>% as.data.frame(), NGA_osun %>% as.data.frame(), by = "ADM2_EN")
+```
+
+After joining, I still have NA rows. I went to cross check and realized the difference. The spelling and "-".
+
+-   NGA_osun: aiyedire, ola-oluwa
+
+-   wp_sf_osun: ayedire , ola oluwa
+
+In the situation above, I will replace ayedire to aiyedire and ola oluwa to ola-oluwa.
+
+```{r}
+wp_sf_osun$ADM2_EN <- str_replace(wp_sf_osun$ADM2_EN,"ayedire", "aiyedire")
+```
+
+```{r}
+wp_sf_osun$ADM2_EN <- str_replace(wp_sf_osun$ADM2_EN,"ola oluwa", "ola-oluwa")
+```
+
+Next, re join the 2 data frame again.
+
+```{r}
+NGA_WP <- left_join(wp_sf_osun %>% as.data.frame(), NGA_osun %>% as.data.frame(), by = "ADM2_EN")
+```
+
+Lets do a quick check if there is any NA in the column in NGA_WP data frame.
+
+```{r}
+sum(is.na(NGA_WP$SD_EN))
+```
+
+yay! there is no NA values in that column. Now we can plot a graph based on SD_EN column to have a clearer view of the region.
+
+```{r}
+ggplot(NGA_WP, aes(x = SD_EN, fill = status_clean)) + 
+  geom_bar() + 
+  coord_flip() + 
+  theme_minimal() + 
+  xlab("SD_EN") + 
+  ylab("Number of status") + 
+  scale_fill_brewer(type = "qual", palette = 2, name = "Status")
+```
+
+As we can see from the chart above, Osun west has the most number of status being recorded. It also can the most functional water point as compared to the other 2 region. As for Non functional, Osun East has the most number being recorded.
+
+### Extracting water point data
+
+Functional
+
+```{r}
+wp_functional <- wp_sf_osun %>%
+  filter(status_clean %in%
+           c("Functional",
+             "Functional but not in use",
+             "Functional but needs repair"))
+```
+
+Non Functional
+
+```{r}
+wp_nonfunctional <- wp_sf_osun %>%
+  filter(status_clean %in%
+           c("Abandoned/Decommissioned",
+             "Non-Functional due to dry season",
+             "Non-Functional"))
+```
+
+Unknown
+
+```{r}
+wp_unknown <- wp_sf_osun %>%
+  filter(status_clean == "Unknown")
+```
+
+<br>
+
+### Performing Point in Polygon count
+
+Next, we want to find out the number of total, functional, nonfunctional and unknown water points in each **Secondary Division**.
+
+```{r}
+NGA_wp_SubDiv <- NGA_osun %>% 
+  mutate(`total_wp` = lengths(
+    st_intersects(NGA_osun, wp_sf_osun))) %>%
+  mutate(`wp_functional` = lengths(
+    st_intersects(NGA_osun, wp_functional))) %>%
+  mutate(`wp_nonfunctional` = lengths(
+    st_intersects(NGA_osun, wp_nonfunctional))) %>%
+  mutate(`wp_unknown` = lengths(
+    st_intersects(NGA_osun, wp_unknown)))
+```
+
+## 
+
+Choropleth Mapping
+
+```{r}
+functional_choroplot <- tm_shape(NGA_wp_SubDiv) +
+  tm_fill("wp_functional",
+          n = 5,
+          style = "equal",
+          palette = "Reds") +
+  tm_borders(lwd = 0.1,
+             alpha = 1) +
+  tm_text("ADM2_EN", size = .7) +
+  tm_layout(main.title = "Distribution of functional water point by Sub Division", 
+            legend.outside = TRUE)
+```
+
+```{r}
+nonfunctional_choroplot <- tm_shape(NGA_wp_SubDiv) +
+  tm_fill("wp_nonfunctional",
+          n = 5,
+          style = "equal",
+          palette = "Reds") +
+  tm_borders(lwd = 0.1,
+             alpha = 1) +
+  tm_text("ADM2_EN", size = .7) +
+  tm_layout(main.title = "Distribution of non-functional water point by Sub Division",
+            legend.outside = TRUE)
+```
+
+```{r}
+functional_choroplot
+```
+
+```{r}
+nonfunctional_choroplot
+```
+
+### Choropleth map group by Secondary Division
+
+### Functional
+
+```{r}
+tm_shape(NGA_wp_SubDiv) +
+  tm_fill("wp_functional",
+          style = "equal",
+          palette = "Reds",
+          thres.poly = 0) + 
+   tm_text("ADM2_EN", size = .7) +
+  tm_facets(by="SD_EN", 
+            free.coords=TRUE, 
+            drop.shapes=TRUE) +
+  tm_layout(legend.show = FALSE,
+            title.position = c("center", "center"), 
+            title.size = 20) +
+  tm_borders(alpha = 0.5)
+
+```
+
+### Non-Functional
+
+```{r}
+tm_shape(NGA_wp_SubDiv) +
+  tm_fill("wp_nonfunctional",
+          style = "equal",
+          palette = "Reds",
+          thres.poly = 0) + 
+   tm_text("ADM2_EN", size = .7) +
+  tm_facets(by="SD_EN", 
+            free.coords=TRUE, 
+            drop.shapes=TRUE) +
+  tm_layout(legend.show = FALSE,
+            title.position = c("center", "center"), 
+            title.size = 20) +
+  tm_borders(alpha = 0.5)
+
+```
+
+Based on image above, we can see that for ejigbo has the highest distribution in functional water point. Whereas for non functional, ejigbo and aiyedade has the highest distribution in non functional water point.
+
+However, We know that water points are not equally distributed in space. I will tabulate the proportion of functional water points and the proportion of non-functional water points in secondary division.
+
+```{r}
+NGA_wp_SubDiv <- NGA_wp_SubDiv %>%
+  mutate(pct_functional = wp_functional/total_wp) %>%
+  mutate(pct_nonfunctional = wp_nonfunctional/total_wp)
+```
+
+Plotting the map of the rate
+
+```{r}
+functional_choroplot <- tm_shape(NGA_wp_SubDiv) +
+  tm_fill("pct_functional",
+          n = 5,
+          style = "equal",
+          palette = "Purples") +
+  tm_borders(lwd = 0.1,
+             alpha = 1) +
+  tm_layout(main.title = "Rate map of functional water point by Sub Division", 
+            legend.outside = TRUE)
+```
+
+```{r}
+nonfunctional_choroplot <- tm_shape(NGA_wp_SubDiv) +
+  tm_fill("pct_nonfunctional",
+          n = 5,
+          style = "equal",
+          palette = "Purples") +
+  tm_borders(lwd = 0.1,
+             alpha = 1) +
+  tm_layout(main.title = "Rate map of non-functional water point by Sub Division",
+            legend.outside = TRUE)
+```
+
+```{r}
+tmap_arrange(functional_choroplot, nonfunctional_choroplot, nrow = 2)
+```
+
+[Reasoning for EDA, right now, we have a clear background of osun after eda, next we will proceed with.]{.underline}
+
+## Exploratory Spatial Data Analysis (ESDA)
+
+Previously, we have converted into SF format which is wp_sf_osun. However, the data frame is for **Aspatial** data. As for **Geospatial** data, we have not yet converting it. We have to convert sf data frames to sp's Spatial class. We will be using NGA_osun.
+
+```{r}
+NGA_osun_s <- as_Spatial(NGA_osun)
+```
+
+Check the description summary of the new sp class data.
+
+```{r}
+NGA_osun_s
+```
+
+```{r}
+NGA_osun_sp <- as(NGA_osun_s, "SpatialPolygons")
+```
+
+```{r}
+NGA_osun_sp
+```
+
+Next, we will be converting water point data frame into ppp format. But first, we have to convert it from sf to sp. Do note that, we have transformed the coordinate system previously hence, we do not need to transform again.
+
+```{r}
+wp_osun <- as_Spatial(wp_sf_osun)
+```
+
+```{r}
+wp_osun
+```
+
+Next, convert sf to generic sp format of the water point.
+
+```{r}
+wp_sp_osun <- as(wp_osun, "SpatialPoints")
+```
+
+```{r}
+wp_sp_osun
+```
+
+Next, we will use *as.ppp()* function of **spatstat** to convert the spatial data into **spatstat**'s ***ppp*** object format.
+
+```{r}
+wp_ppp_osun <- as(wp_sp_osun, "ppp")
+wp_ppp_osun
+```
+
+```{r}
+summary(wp_ppp_osun)
+```
+
+Check for duplicates.
+
+```{r}
+any(duplicated(wp_ppp_osun))
+```
+
+yay! there is no duplicates.
+
+We can plot the water point data by using the code below.
+
+```{r}
+tmap_mode("view")
+tm_shape(wp_osun) +
+  tm_dots(alph = 0.7, 
+          size=0.01,
+          palette = "Dark2",
+          col="status_clean") +
+  tm_view(set.zoom.limits = c(8,11))
+```
+
+```{r}
+tmap_mode('plot')
+```
+
+## Create owin object
+
+***owin*** is specially designed to represent this polygonal region.
+
+```{r}
+NGA_osun_owin <- as(NGA_osun_sp, "owin")
+```
+
+```{r}
+plot(NGA_osun_owin)
+```
+
+### 
+
+Combining point events object and owin
+
+```{r}
+wpNGA_owin = wp_ppp_osun[NGA_osun_owin]
+```
+
+```{r}
+plot(wpNGA_owin)
+```
+
+-   for further EDA, we can include the column of **quality**
+
+-   need check the CRS for the map (resoning for the dots that lies outside of the region, we uses owin to determine.)
+
+    Polygon data may contain geometrical inconsistencies such as self-intersections and overlaps. These inconsistencies must be removed to prevent problems in other spatstat functions. By default, polygon data will be repaired automatically using polygon-clipping code. The repair process may change the number of vertices in a polygon and the number of polygon components.
+
+-   unique state
+
+```{r}
+unique(wp_osun_nga$`#clean_adm2`)
+```

@@ -3,6 +3,7 @@ project:
 
 website:
   title: "IS415 Journey"
+  search: true
   navbar:
     left:
       - href: index.qmd
@@ -39,7 +40,6 @@ website:
         
 format:
   html:
-    theme: lux
-    css: styles.css
+    theme: [Zephyr, theme.scss]
 
 editor: visual
