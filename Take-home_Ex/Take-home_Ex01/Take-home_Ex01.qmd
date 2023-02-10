@@ -412,6 +412,8 @@ NGA_osun_sp
 
 Next, we will be converting water point data frame into ppp format. But first, we have to convert it from sf to sp. Do note that, we have transformed the coordinate system previously hence, we do not need to transform again.
 
+# \<\<\<\<\<\< SEPERATE FUNC AND NON-FUNC T.T
+
 ```{r}
 wp_osun <- as_Spatial(wp_sf_osun)
 ```
@@ -553,18 +555,16 @@ kde_wpNGA_owin_bw_raster <- raster(gridded_kde_wpNGA_owin_bw)
 kde_wpNGA_owin_bw_raster
 ```
 
-Notice that the crs property is NA. We have to assign to appropriate projection system.
+Notice that the crs property is NA. We have to assign to appropriate projection system with the correct unit of measurement.
 
 ```{r}
-projection(kde_wpNGA_owin_bw_raster) <- CRS("+init=EPSG:26392")
+projection(kde_wpNGA_owin_bw_raster) <- CRS("+init=EPSG:26392 +units=km" )
 kde_wpNGA_owin_bw_raster
 ```
 
 Now we can see the crs property completed.
 
 ### Visualising the output on OpenStreetMap 
-
-###  
 
 ```{r}
 density_map <- function(rasterObj, map_title) {
@@ -584,3 +584,138 @@ tm_shape(rasterObj) +
 ```{r}
 density_map(kde_wpNGA_owin_bw_raster, map_title = "Osun,Nigeria Density Map")
 ```
+
+## Comparing Spatial Point Pattern using KDE 
+
+Previously, we have included the region in the data set, in this section, we will be comparing KDE water point at Central, East and West region.
+
+### Extract the study area
+
+```{r}
+oe = NGA_osun_s[NGA_osun_s$SD_EN == 'Osun East',]
+ow = NGA_osun_s[NGA_osun_s$SD_EN == 'Osun West',]
+oc = NGA_osun_s[NGA_osun_s$SD_EN == 'Osun Central',]
+```
+
+```{r}
+par(mfrow=c(1,3))
+plot(oe, main="Osun East")
+plot(ow, main="Osun West")
+plot(oc, main="Osun Central")
+```
+
+```{r}
+oe_sp = as(oe, "SpatialPolygons")
+ow_sp = as(ow, "SpatialPolygons")
+oc_sp = as(oc, "SpatialPolygons")
+```
+
+```{r}
+oe_owin = as(oe_sp, "owin")
+ow_owin = as(ow_sp, "owin")
+oc_owin = as(oc_sp, "owin")
+```
+
+### Combining Water points and the study area
+
+```{r}
+wp_oe_ppp = wp_ppp_osun[oe_owin]
+wp_ow_ppp = wp_ppp_osun[ow_owin]
+wp_oc_ppp = wp_ppp_osun[oc_owin]
+```
+
+Next, rescale() function is used to transform the unit of measurement from m to km
+
+```{r}
+wp_oe_ppp.km = rescale(wp_oe_ppp, 1000, "km")
+wp_ow_ppp.km = rescale(wp_ow_ppp, 1000, "km")
+wp_oc_ppp.km = rescale(wp_oc_ppp, 1000, "km")
+```
+
+plot the 3 study area and the location of the water point
+
+```{r}
+par(mfrow=c(1,3))
+plot(wp_oe_ppp.km, main="Osun East")
+plot(wp_ow_ppp.km, main="Osun West")
+plot(wp_oc_ppp.km, main="Osun Central")
+```
+
+### Computing KDA by Region
+
+Over here, we will continue to use bw.diggle too so as to make a non bias analysis.
+
+```{r}
+par(mfrow=c(1,3))
+plot(density(wp_oe_ppp.km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Osun East")
+plot(density(wp_ow_ppp.km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Osun West")
+plot(density(wp_oc_ppp.km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Osun Central")
+```
+
+Based on the 3 graph above, we can see that central area seems more concentrated. Lets compare point map and kernel density map fro Osun Central area.
+
+```{r}
+kde_oc.bw <- density(wp_oc_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+plot(kde_oc.bw)
+```
+
+```{r}
+gridded_kde_oc.bw <- as.SpatialGridDataFrame.im(kde_oc.bw)
+spplot(gridded_kde_oc.bw)
+```
+
+```{r}
+kde_oc_bw_raster <- raster(gridded_kde_oc.bw)
+```
+
+```{r}
+projection(kde_oc_bw_raster) <- CRS("+init=EPSG:26392 +units=km")
+kde_oc_bw_raster
+```
+
+### Clipping Polygon and Point to form Point Map
+
+```{r}
+NGA_Osun_Central = NGA_osun[NGA_osun$SD_EN == "Osun Central",]
+```
+
+Clipping polygon and point together, using st_intersects()
+
+```{r}
+oc_wp <- st_intersects(NGA_Osun_Central, wp_sf_osun)
+oc_wp <- wp_sf_osun[unlist(oc_wp),]
+```
+
+### Point Map
+
+```{r}
+ggplot() + 
+  geom_sf(data = NGA_Osun_Central) + 
+  geom_sf(data = oc_wp) + 
+  theme(legend.position = "none",
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_blank()) 
+```
+
+### Density Map
+
+```{r}
+density_map(kde_oc_bw_raster, map_title = "Osun Central,Nigeria Density Map")
+```
+
+### Monte Carlo method
