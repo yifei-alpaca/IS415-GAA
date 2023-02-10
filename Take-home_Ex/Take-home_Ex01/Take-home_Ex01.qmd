@@ -270,9 +270,7 @@ NGA_wp_SubDiv <- NGA_osun %>%
     st_intersects(NGA_osun, wp_unknown)))
 ```
 
-## 
-
-Choropleth Mapping
+## Choropleth Mapping
 
 ```{r}
 functional_choroplot <- tm_shape(NGA_wp_SubDiv) +
@@ -463,6 +461,8 @@ tm_shape(wp_osun) +
   tm_view(set.zoom.limits = c(8,11))
 ```
 
+Notice that there are some point that is outside of Osun, Nigeria area. This is because polygon data may contain geometrical inconsistencies such as self-intersections and overlaps. These inconsistencies must be removed to prevent problems in other spatstat functions. By default, polygon data will be repaired automatically using polygon-clipping code. The repair process may change the number of vertices in a polygon and the number of polygon components. With that, we will be using owin object in the next section to help us with that.
+
 ```{r}
 tmap_mode('plot')
 ```
@@ -479,9 +479,7 @@ NGA_osun_owin <- as(NGA_osun_sp, "owin")
 plot(NGA_osun_owin)
 ```
 
-### 
-
-Combining point events object and owin
+### Combining point events object and owin
 
 ```{r}
 wpNGA_owin = wp_ppp_osun[NGA_osun_owin]
@@ -491,14 +489,98 @@ wpNGA_owin = wp_ppp_osun[NGA_osun_owin]
 plot(wpNGA_owin)
 ```
 
--   for further EDA, we can include the column of **quality**
+Based on the image above, there is a little cluttered in many different areas. However, it seems that there are more records at the top area of Osun, Nigeria.
 
--   need check the CRS for the map (resoning for the dots that lies outside of the region, we uses owin to determine.)
+## First-order Spatial Point Pattern Analysis
 
-    Polygon data may contain geometrical inconsistencies such as self-intersections and overlaps. These inconsistencies must be removed to prevent problems in other spatstat functions. By default, polygon data will be repaired automatically using polygon-clipping code. The repair process may change the number of vertices in a polygon and the number of polygon components.
+### **Kernel density estimation (KDE)**
 
--   unique state
+Kernel density estimation maps are considered best for location, size, shape and orientation of the hotspot.
+
+In the hands-on excises, there are a few recommendation in using methods such as, bw.CvL(), bw.scott(), bw.ppl() or bw.diggle(). But before applying the methods, we learnt from our hands-on exe that we should rescale, so as to convert the meters to kilometers.
 
 ```{r}
-unique(wp_osun_nga$`#clean_adm2`)
+kde_wpNGA_owin_bw.km <- rescale(wpNGA_owin, 1000, "km")
+```
+
+In spatstat the functions bw.diggle(), bw.ppl(), and bw.scott() can be used to estimate the bandwidth according to difference methods. These functions run algorithms that aim to select an appropriate bandwith.
+
+```{r}
+bw.diggle(kde_wpNGA_owin_bw.km)
+```
+
+```{r}
+bw.ppl(kde_wpNGA_owin_bw.km)
+```
+
+```{r}
+bw.scott(kde_wpNGA_owin_bw.km)
+```
+
+As we can see the Diggle algorithm gives us a narrower bandwith.
+
+Hence, in this take home, I decided to use diggle() for my analysis.
+
+```{r}
+kde_wpNGA_owin_bw <- density(kde_wpNGA_owin_bw.km,
+                              sigma=bw.diggle,
+                              edge=TRUE,
+                            kernel="gaussian") 
+```
+
+```{r}
+plot(kde_wpNGA_owin_bw)
+```
+
+## Converting KDE output into grid object 
+
+Now, we have to convert our KDE outputs into RasterLayer objects. Since we can\'t do that directly, we\'ll need to convert them into a SpatialGridDataFrame first, then convert the SpatialGridDataFrame into RasterLayer objects:
+
+```{r}
+gridded_kde_wpNGA_owin_bw <- as.SpatialGridDataFrame.im(kde_wpNGA_owin_bw)
+spplot(gridded_kde_wpNGA_owin_bw)
+```
+
+### Converting gridded output into raster
+
+Next, we will convert the gridded kernal density objects into RasterLayer object by using *raster()* of **raster** package.
+
+```{r}
+kde_wpNGA_owin_bw_raster <- raster(gridded_kde_wpNGA_owin_bw)
+```
+
+```{r}
+kde_wpNGA_owin_bw_raster
+```
+
+Notice that the crs property is NA. We have to assign to appropriate projection system.
+
+```{r}
+projection(kde_wpNGA_owin_bw_raster) <- CRS("+init=EPSG:26392")
+kde_wpNGA_owin_bw_raster
+```
+
+Now we can see the crs property completed.
+
+### Visualising the output on OpenStreetMap 
+
+###  
+
+```{r}
+density_map <- function(rasterObj, map_title) {
+  tm_basemap("OpenStreetMap") +
+tm_shape(rasterObj) +
+  tm_raster("v", alpha=0.65) + 
+  tm_layout(legend.position = c("right", "bottom"), 
+            legend.height = 0.5, 
+            legend.width = 0.4,
+            main.title = map_title,
+            main.title.position = 'center',
+            main.title.size = 1,
+            frame = FALSE)
+  }
+```
+
+```{r}
+density_map(kde_wpNGA_owin_bw_raster, map_title = "Osun,Nigeria Density Map")
 ```
