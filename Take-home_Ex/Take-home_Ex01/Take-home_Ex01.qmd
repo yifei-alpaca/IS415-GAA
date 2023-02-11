@@ -566,7 +566,7 @@ any(duplicated(wp_ppp_osun_nf))
 
 yay! there is no duplicates.
 
-We can plot the water point data by using the code below.
+##### We can plot the water point data by using the code below. {#correlation}
 
 ```{r}
 tmap_mode("view")
@@ -1068,6 +1068,8 @@ tm_shape(kde_iwo_nf_raster) +
             main.title = "iwo Non Functional",
             main.title.position = "center",
             main.title.size = 0.8)
+
+tmap_mode("plot")
 ```
 
 -   Highlight the advantage of kernel density map over point map
@@ -1187,3 +1189,153 @@ plot(G_iwo_nf.csr)
 ```
 
 **Conclusion**: The observed G(r) is far above the G(theo) as well as the envelope. This shows that non functional water point in iwo are clustered. Hence, we will reject the null hypothesis that the functional water points at iwo are randomly distributed at 95% confident interval.
+
+## 
+Spatial Correlation Analysis
+
+Previously, we have visualize geospatial data on the different status [here](#correlation). Having to further dive in, we can look into the subjective quality in both functional and non functional.
+
+Let's take a look at quality column.
+
+```{r}
+unique(wp_functional$`#subjective_quality`)
+```
+
+```{r}
+unique(wp_nonfunctional$`#subjective_quality`)
+```
+
+Based on the result, both functional and non functional has 4 unique values.
+
+Let's plot them to have a better idea.
+
+```{r}
+tmap_mode("view")
+tm_basemap("OpenStreetMap") +
+tm_shape(wp_functional) +
+  tm_dots(col = '#subjective_quality', size = 0.02, title="Quality Type" ,alpha=0.6,
+          palette = c("#e76f51", "#e9c46a","#2a9d8f"))
+
+```
+
+```{r}
+tm_basemap("OpenStreetMap") +
+tm_shape(wp_nonfunctional) +
+  tm_dots(col = '#subjective_quality', size = 0.02, title="Quality Type" ,alpha=0.6,
+          palette = c("#e76f51", "#e9c46a","#2a9d8f"))
+```
+
+```{r}
+tmap_mode("plot")
+
+```
+
+As we are working with marked data, and we know that the values are categorical (different room types), we need to ensure that the marked field is of factor data type. However, as seen from the output, our `room_type` field is of chr data type, not factor! Let\'s rectify that with the *as.factor()* function:
+
+```{r}
+wp_osun_f@data$`#subjective_quality` <-as.factor(wp_osun_f@data$`X.subjective_quality`)
+
+```
+
+```{r}
+wp_osun_nf@data$`X.subjective_quality` <-as.factor(wp_osun_nf@data$`X.subjective_quality`)
+```
+
+```{r}
+wp_functional_ppp_factor <- as(wp_osun_f, "ppp") 
+wp_nonfunctional_ppp_factor <- as(wp_osun_nf, "ppp") 
+```
+
+### Correlation
+
+In this section, I will be using ife east and iwo owin object. We will be looking at:
+
+-   ife east quality of water in functional
+
+-   ife east quality of water in non functional
+
+-   iwo quality of water in functional
+
+-   iwo quality of water in non functional
+
+```{r}
+ife_east_marked_ppp <- wp_functional_ppp_factor[ife_east_owin]
+iwo_marked_ppp <- wp_functional_ppp_factor[iwo_owin]
+```
+
+```{r}
+ife_east_marked_ppp_nf <- wp_nonfunctional_ppp_factor[ife_east_owin]
+iwo_marked_ppp_nf <- wp_nonfunctional_ppp_factor[iwo_owin]
+```
+
+```{r}
+par(mfrow=c(1,2))
+plot(ife_east_marked_ppp, main = "ife east F", which.marks = "#subjective_quality")
+plot(ife_east_marked_ppp_nf, main = "ife east NF", which.marks = "X.subjective_quality")
+
+```
+
+```{r}
+par(mfrow=c(1,2))
+plot(iwo_marked_ppp, main = "iwo F", which.marks = "#subjective_quality")
+plot(iwo_marked_ppp_nf, main = "iwo NF", which.marks = "X.subjective_quality")
+```
+
+In this section, hypothesis testing will be conducted utilising second-order statistics (L function), to assess if the spatial distribution of functional and non-functional water points are independent from each other.
+
+<br>
+
+### 2nd order multi-type point pattern analysis - Cross L function 
+
+```{r}
+par(mar = c(2, 2, 2, 2))
+plot((density(split(rescale(ife_east_marked_ppp, 1000)))))
+```
+
+```{r}
+plot((density(split(rescale(ife_east_marked_ppp_nf, 1000)))))
+```
+
+Based on the graphs above, acceptable quality and cause of taste seems to have a stronger complementary relationship with each other in ife east area for both functional and non functional area. However, Acceptable quality being the most strong ones due to the scale.
+
+```{r}
+plot((density(split(rescale(iwo_marked_ppp, 1000)))))
+```
+
+```{r}
+plot((density(split(rescale(iwo_marked_ppp_nf, 1000)))))
+```
+
+Based on the graphs above, for functional in iwo area, most of the charts has a stronger complementary relationship with each other except for odour. However, Acceptable quality being the most strong ones due to the scale. As for non functional, most of the charts has a strong complementary relationship too except for color chart, there is a slight difference on the area. However, Acceptable quality also being the most strong ones due to the scale.
+
+### 
+2nd order multi type Point pattern Analysis: Cross L-function
+
+<br>
+
+We will be using cross L-function to look into the relationship.
+
+-   H0: The distribution of the acceptance quality and cause of taste in ife east are spatially independent.
+
+-   H1: The distribution of the accrptance quality and cause of taste in ife east are spatially not independent.
+
+-   Confidence level: 95%
+
+-   Significance level: 0.05
+
+In the below section, I will be comparing
+
+1.  ife east functional and non functional (Acceptance quality and Cause of taste)
+
+2.  iwo functional and non functional (Acceptance quality and Cause of taste)
+
+### ife east functional
+
+```{r}
+ife_east_Lcross.csr <- envelope(ife_east_marked_ppp, 
+                                 Lcross, 
+                                 i="Acceptable quality", 
+                                 j="No because of Taste", 
+                                 correction="border", 
+                                 nsim=39)
+```
