@@ -306,6 +306,10 @@ functional_choroplot
 nonfunctional_choroplot
 ```
 
+```{r}
+tmap_mode('plot')
+```
+
 ### Choropleth map group by Secondary Division
 
 ### Functional
@@ -388,13 +392,13 @@ tmap_arrange(functional_choroplot, nonfunctional_choroplot, nrow = 2)
 
 [Reasoning for EDA, right now, we have a clear background of osun after eda, next we will proceed with.]{.underline}
 
-## Population Analysis
+## Population Analysis (additional findings)
 
 In this section, I have found Nigeria's Subnation population statistic in this website [NGA_Subnation Population](https://data.humdata.org/dataset/cod-ps-nga) statistic. We can download **nga_admpop_adm2_2020.csv.**
 
 In this data set, it is categorized by demographics such as age and sex on a Nigeria administrative level 0-2 . The purpose of this is to help me to identify which area with the most population are affected by water shortages and poor water quality.
 
-### Import aspatial data 
+### Import aspatial data
 
 ```{r}
 nga_osun_pop <- read_csv("data/aspatial/nga_admpop_adm2_2020.csv") %>%
@@ -413,7 +417,9 @@ nga_osun_pop<- nga_osun_pop %>%
  mutate(ADM2_NAME = tolower(ADM2_NAME)) 
 ```
 
-Next we can do some basic EDA to understand the data.
+Next we can do some basic EDA to understand the data. Because there is some limit in the colors, we have to extend the colors by using colorRampPalette() function.
+
+### Population Bar chat {#popbar}
 
 ```{r}
 colourCount = length(unique(nga_osun_pop$ADM2_NAME))
@@ -428,7 +434,7 @@ ggplot(nga_osun_pop, aes(x=ADM2_NAME, y=T_TL, fill=ADM2_NAME )) +
    scale_fill_manual(values = getPalette(colourCount))
 ```
 
-As we can see from the chart above ***ife north*** and ***iwo*** has the most population with 312,801 and 302,585 respectively.
+As we can see from the chart above ***ife east*** and ***iwo*** has the most population with 312,801 and 302,585 respectively.
 
 Next, we can plot population choropleth mapping, but before that, we should do a join with NGA_wp_SubDiv as we previously joined NGA and wp together to plot chorpleth charts. In this case, we have a unique subdivision name ADM2_NAME in nga_osun_pop and can join together with ADM2_EN in NGA_wp_SubDiv.
 
@@ -439,40 +445,30 @@ names(nga_osun_pop)[5] <- "ADM2_EN"
 ```
 
 ```{r}
-NGA_wp_SubDiv_pop <- left_join(NGA_wp_SubDiv %>% as.data.frame(), nga_osun_pop %>% as.data.frame(), by = "ADM2_EN")
+NGA_wp_SubDiv_pop <- left_join(NGA_osun, nga_osun_pop,
+                              by = c("ADM2_EN"))
 ```
 
-```{r}
-st_crs(NGA_wp_SubDiv_pop)
-```
+### Distribution of population by Sub Division {#populationSub}
 
 As shown above, there is no Coordinate system. We have to re assign them.
 
 ```{r}
-NGA_wp_SubDiv_pop <- st_sf(NGA_wp_SubDiv_pop, crs=4326) %>%
-  st_transform(crs = 26392)
-NGA_wp_SubDiv_pop
+tmap_mode("plot")
+tm_shape(NGA_wp_SubDiv_pop)+
+  tm_fill("T_TL", 
+          style = "quantile", 
+          palette = "Oranges",
+          legend.show = FALSE,
+         ) +
+  tm_text("ADM2_EN", size = .6) +
+  tm_layout(main.title = "Distribution of Population by Sub Division",
+            main.title.position = "center",
+            main.title.size = 0.8) +tm_borders(alpha = 0.5)
+ 
 ```
 
-```{r}
-st_crs(NGA_wp_SubDiv_pop)
-```
-
-```{r}
-population_choroplot <- tm_shape(NGA_wp_SubDiv_pop) +
-  tm_fill("T_TL",
-          n = 5,
-          style = "equal",
-          palette = "Reds") +
-  tm_borders(lwd = 0.1,
-             alpha = 1) +
-  tm_text("ADM2_EN", size = .7) +
-  tm_layout(main.title = "Distribution of Population in Osun", 
-            legend.outside = TRUE)
-```
-
-```{r}
-```
+As we can see from the chart, **ejigbo**, **iwo**, **irewole**, **ife** **central**, **ife** **east** and **oriade** is much more dense as compared to the rest. This shows that the dense area has the most population. We will be continue with this data below.
 
 ## Exploratory Spatial Data Analysis (ESDA)
 
@@ -630,7 +626,7 @@ plot(wpNGA_owin_nf)
 
 Based on the image above, there is a little cluttered in many different areas. However, it seems that there are more records at the centre & top area of Osun, Nigeria.
 
-## First-order Spatial Point Pattern Analysis
+## 1st order Spatial Point Pattern Analysis
 
 ### **Kernel density estimation (KDE)**
 
@@ -643,7 +639,7 @@ kde_wpNGA_owin_f_bw.km <- rescale(wpNGA_owin_f, 1000, "km")
 kde_wpNGA_owin_nf_bw.km <- rescale(wpNGA_owin_nf, 1000, "km")
 ```
 
-In spatstat the functions bw.diggle(), bw.ppl(), and bw.scott() can be used to estimate the bandwidth according to difference methods. These functions run algorithms that aim to select an appropriate bandwith.
+In spatstat, the functions bw.diggle(), bw.ppl(), and bw.scott() can be used to estimate the bandwidth according to difference methods. These functions run algorithms that aim to select an appropriate bandwith.
 
 ### Functional
 
@@ -673,9 +669,11 @@ bw.ppl(kde_wpNGA_owin_nf_bw.km)
 bw.scott(kde_wpNGA_owin_nf_bw.km)
 ```
 
-As we can see the Diggle algorithm gives us a narrower bandwidth for both functional and non-functional water point.
+As we can see the Diggle algorithm gives us a narrower bandwidth for both functional and non-functional water point. However, Baddeley et (2016) suggest the use of the bw.ppl() algorithm because in their experience it tends to produce the more appropriate values when the pattern consists predominantly of tight clusters.
 
-Hence, in this take home, I decided to use diggle() for my analysis.
+Hence, in this take home, I decided to use ppl() for my analysis.
+
+<br>
 
 ```{r}
 kde_wpNGA_owin_bw_f <- density(kde_wpNGA_owin_f_bw.km,
@@ -686,17 +684,19 @@ kde_wpNGA_owin_bw_f <- density(kde_wpNGA_owin_f_bw.km,
 
 ```{r}
 kde_wpNGA_owin_bw_nf <- density(kde_wpNGA_owin_nf_bw.km,
-                              sigma=bw.scott,
+                              sigma=bw.ppl,
                               edge=TRUE,
                             kernel="gaussian") 
 ```
 
 ```{r}
+par(mfrow=c(1,2))
 plot(kde_wpNGA_owin_bw_f)
+plot(kde_wpNGA_owin_bw_nf)
 ```
 
 ```{r}
-plot(kde_wpNGA_owin_bw_nf)
+
 ```
 
 ## Converting KDE output into grid object
@@ -766,6 +766,7 @@ tm_shape(rasterObj) +
 
 ```{r}
 density_map(kde_wpNGA_owin_bw_raster_f, map_title = "Osun Functional Water Point Density Map")
+
 ```
 
 ```{r}
@@ -786,9 +787,10 @@ oc = NGA_osun_s[NGA_osun_s$SD_EN == 'Osun Central',]
 
 ```{r}
 par(mfrow=c(1,3))
+plot(oc, main="Osun Central")
 plot(oe, main="Osun East")
 plot(ow, main="Osun West")
-plot(oc, main="Osun Central")
+
 ```
 
 ```{r}
@@ -835,116 +837,353 @@ plot the 3 study area and the location of the water point
 
 ```{r}
 par(mfrow=c(1,3))
-plot(wp_oe_ppp_f.km, main="Osun East")
-plot(wp_ow_ppp_f.km, main="Osun West")
-plot(wp_oc_ppp_f.km, main="Osun Central")
+plot(wp_oc_ppp_f.km, main="Osun Central Functional")
+plot(wp_oe_ppp_f.km, main="Osun East Functional")
+plot(wp_ow_ppp_f.km, main="Osun West Functional")
+
 ```
 
 ```{r}
 par(mfrow=c(1,3))
-plot(wp_oe_ppp_nf.km, main="Osun East")
-plot(wp_ow_ppp_nf.km, main="Osun West")
-plot(wp_oc_ppp_nf.km, main="Osun Central")
+plot(wp_oc_ppp_nf.km, main="Osun Central Non Functional")
+plot(wp_oe_ppp_nf.km, main="Osun East Non Functional")
+plot(wp_ow_ppp_nf.km, main="Osun West Non Functional")
+
 ```
 
-### Computing KDA by Region
+### Computing KDE by Region
 
-Over here, we will continue to use bw.diggle too so as to make a non bias analysis.
+Over here, we will continue to use bw.ppl too so as to make a non bias analysis.
 
 ```{r}
 par(mfrow=c(1,3))
-plot(density(wp_oe_ppp_f.km, 
-             sigma=bw.diggle, 
-             edge=TRUE, 
-             kernel="gaussian"),
-     main="Osun East")
-plot(density(wp_ow_ppp_f.km, 
-             sigma=bw.diggle, 
-             edge=TRUE, 
-             kernel="gaussian"),
-     main="Osun West")
 plot(density(wp_oc_ppp_f.km, 
-             sigma=bw.diggle, 
+             sigma=bw.ppl, 
              edge=TRUE, 
              kernel="gaussian"),
-     main="Osun Central")
+     main="Osun Central Functional")
+plot(density(wp_oe_ppp_f.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Osun East Functional")
+plot(density(wp_ow_ppp_f.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Osun West Functional")
+
 ```
 
 ```{r}
 par(mfrow=c(1,3))
-plot(density(wp_oe_ppp_nf.km, 
-             sigma=bw.diggle, 
-             edge=TRUE, 
-             kernel="gaussian"),
-     main="Osun East")
-plot(density(wp_ow_ppp_nf.km, 
-             sigma=bw.diggle, 
-             edge=TRUE, 
-             kernel="gaussian"),
-     main="Osun West")
 plot(density(wp_oc_ppp_nf.km, 
-             sigma=bw.diggle, 
+             sigma=bw.ppl, 
              edge=TRUE, 
              kernel="gaussian"),
-     main="Osun Central")
+     main="Osun Central Non Functional")
+plot(density(wp_oe_ppp_nf.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Osun East Non Functional")
+plot(density(wp_ow_ppp_nf.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Osun West Non Functional")
+
 ```
 
-Based on the 3 graph above, we can see that central area seems more concentrated. Although, it is a little hard to narrow down into the division. I will be extracting Osun's population to decide which area should be critically analyse.
-
-## Importing Aspatial Dataset for Population.
-
-Lets compare point map and kernel density map for Osun Central area.
+Based on the 3 graph above, we can see that central area seems more concentrated. Although, it is a little hard to narrow down into the division. I will be extracting Osun's population based on region to determine which area we should be analyse on.
 
 ```{r}
-#kde_oc.bw <- density(wp_oc_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
-#plot(kde_oc.bw)
+tm_shape(NGA_wp_SubDiv_pop) +
+  tm_fill("T_TL",
+          style = "equal",
+          palette = "Oranges",
+          thres.poly = 0) + 
+   tm_text("ADM2_EN", size = .7) +
+  tm_facets(by="SD_EN", 
+            free.coords=TRUE, 
+            drop.shapes=TRUE) +
+  tm_layout(legend.show = FALSE,
+            title.position = c("center", "center"), 
+            title.size = 20) +
+  tm_borders(alpha = 0.5)
+```
+
+As mentioned above [here](#populationSub), **ejigbo, iwon, irewole, oriade, ife central** and **ife east** is most dense and from the bar chart above [here](#popbar) ***ife east*** and ***iwo*** has the most population with 312,801 and 302,585 respectively.
+
+With the findings, I will be narrowing to the 2 most populated division for further analysis:
+
+1.  ife east
+2.  iwo
+
+### Extract the study area for ife east & iwo 
+
+```{r}
+ife_east = NGA_osun_s[NGA_osun_s$ADM2_EN == 'ife east',]
+iwo = NGA_osun_s[NGA_osun_s$ADM2_EN == 'iwo',]
 ```
 
 ```{r}
-#gridded_kde_oc.bw <- as.SpatialGridDataFrame.im(kde_oc.bw)
-#spplot(gridded_kde_oc.bw)
+ife_east_sp = as(ife_east, "SpatialPolygons")
+iwo_sp = as(iwo, "SpatialPolygons")
 ```
 
 ```{r}
-#kde_oc_bw_raster <- raster(gridded_kde_oc.bw)
+ife_east_owin = as(ife_east_sp, "owin")
+iwo_owin = as(iwo_sp, "owin")
 ```
 
 ```{r}
-#projection(kde_oc_bw_raster) <- CRS("+init=EPSG:26392 +units=km")
-#kde_oc_bw_raster
-```
+wp_ife_east_ppp_f = wp_ppp_osun_f[ife_east_owin]
+wp_iwo_ppp_f = wp_ppp_osun_f[iwo_owin]
 
-### Clipping Polygon and Point to form Point Map
+wp_ife_east_ppp_nf = wp_ppp_osun_nf[ife_east_owin]
+wp_iwo_ppp_nf = wp_ppp_osun_nf[iwo_owin]
+
+wp_ife_east_ppp_f.km = rescale(wp_ife_east_ppp_f, 1000, "km")
+wp_iwo_ppp_f.km = rescale(wp_iwo_ppp_f, 1000, "km")
+
+wp_ife_east_ppp_nf.km = rescale(wp_ife_east_ppp_nf, 1000, "km")
+wp_iwo_ppp_nf.km = rescale(wp_iwo_ppp_nf, 1000, "km")
+```
 
 ```{r}
-#NGA_Osun_Central = NGA_osun[NGA_osun$SD_EN == "Osun Central",]
-```
 
-Clipping polygon and point together, using st_intersects()
+kde_ife_east_f <- density(wp_ife_east_ppp_f.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian")
+kde_iwo_f <- density(wp_iwo_ppp_f.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian")
+
+    
+```
 
 ```{r}
-#oc_wp <- st_intersects(NGA_Osun_Central, wp_sf_osun)
-#oc_wp <- wp_sf_osun[unlist(oc_wp),]
+par(mfrow=c(1,2))
+plot( kde_ife_east_f,
+   main="ife_east Functional")
+plot( kde_iwo_f,
+   main="iwo Functional")
 ```
-
-### Point Map
 
 ```{r}
-#ggplot() + 
-#  geom_sf(data = NGA_Osun_Central) + 
-#  geom_sf(data = oc_wp) + 
-#  theme(legend.position = "none",
-#        panel.grid = element_blank(),
-#        axis.title = element_blank(),
-#        axis.text = element_blank(),
-#        axis.ticks = element_blank(),
-#        panel.background = element_blank()) 
-```
 
-### Density Map
+kde_ife_east_nf <- density(wp_ife_east_ppp_nf.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian")
+
+kde_iwo_nf <- density(wp_iwo_ppp_nf.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian")
+
+```
 
 ```{r}
-#density_map(kde_oc_bw_raster, map_title = "Osun Central,Nigeria Density Map")
+par(mfrow=c(1,2))
+plot( kde_ife_east_nf,
+   main="ife_east Non Functional")
+plot( kde_iwo_nf,
+   main="iwo Non Functional")
 ```
 
-### Monte Carlo method
+## 
+Converting KDE output into grid object
+
+```{r}
+gridded_kde_ife_east_f<- as.SpatialGridDataFrame.im(kde_ife_east_f)
+gridded_kde_iwo_f <- as.SpatialGridDataFrame.im(kde_iwo_f)
+
+gridded_kde_ife_east_nf <- as.SpatialGridDataFrame.im(kde_ife_east_nf)
+gridded_kde_iwo_nf <- as.SpatialGridDataFrame.im(kde_iwo_nf)
+
+```
+
+```{r}
+par(mfrow=c(1,2))
+
+spplot(gridded_kde_ife_east_f)
+spplot(gridded_kde_iwo_f)
+```
+
+```{r}
+par(mfrow=c(1,2))
+
+spplot(gridded_kde_ife_east_nf)
+spplot(gridded_kde_iwo_nf)
+```
+
+### Converting gridded output into raster 
+
+```{r}
+kde_ife_east_f_raster <- raster(gridded_kde_ife_east_f)
+kde_iwo_f_raster <- raster(gridded_kde_iwo_f)
+kde_ife_east_nf_raster <- raster(gridded_kde_ife_east_nf)
+kde_iwo_nf_raster <- raster(gridded_kde_iwo_nf)
+```
+
+```{r}
+projection(kde_ife_east_f_raster) <- CRS("+init=EPSG:26392 +units=km")
+projection(kde_iwo_f_raster) <- CRS("+init=EPSG:26392 +units=km")
+projection(kde_ife_east_nf_raster) <- CRS("+init=EPSG:26392 +units=km")
+projection(kde_iwo_nf_raster) <- CRS("+init=EPSG:26392 +units=km")
+```
+
+```{r}
+par(mfrow=c(2,4))
+tm_shape(kde_ife_east_f_raster) + 
+  tm_raster("v") +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE,
+            main.title = "ife east Funtional",
+            main.title.position = "center",
+            main.title.size = 0.8)
+
+tm_shape(kde_iwo_f_raster) + 
+  tm_raster("v") +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, 
+            main.title = "iwo Functional",
+            main.title.position = "center",
+            main.title.size = 0.8)
+
+
+tm_shape(kde_ife_east_nf_raster) + 
+  tm_raster("v") +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE,
+            main.title = "ife east Non Functional",
+            main.title.position = "center",
+            main.title.size = 0.8)
+
+
+tm_shape(kde_iwo_nf_raster) + 
+  tm_raster("v") +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, 
+            main.title = "iwo Non Functional",
+            main.title.position = "center",
+            main.title.size = 0.8)
+```
+
+-   Highlight the advantage of kernel density map over point map
+
+    The advantage of kernel density map over point map lies in the ability of the former to provide a smoother representation of the data distribution. Unlike point map which simply plots individual data points, the kernel density map uses a mathematical technique to estimate the underlying probability density function of the data and provides a smooth estimate of the data density over the entire region. This smoothed representation of the data gives a clearer picture of the underlying distribution pattern, making it easier to identify trends and anomalies. Additionally, the use of color gradients in kernel density maps allows for a clearer representation of the distribution range, making it easier to interpret the results.
+
+## 2nd Order Spatial Point Pattern Analysis
+
+Now that we have analysed the spatial point patterns, we have to confirm our observation statistically. I have narrowed down on my observation to ife east and iwo area which is the most populated area. The nearest-neighbour distance is the measure of distance from each point to its nearest neighbour. G-function measures the distribution of distances from an arbitrary event to its nearest neighbour.
+
+### Ife East Functional - G Function Gest()
+
+-   H0: The distribution of the Functional water points at ife east are randomly distributed
+
+-   H1: The distribution of the Functional water points at ife east are not randomly distributed
+
+-   Confidence level at 95%
+
+-   Significance level: 0.05
+
+-   The null hypothesis will be rejected if p-value is smaller than alpha value of 0.05
+
+```{r}
+G_ife_east_f = Gest(wp_ife_east_ppp_f, correction = "border")
+plot(G_ife_east_f, xlim=c(0,500))
+
+```
+
+```{r}
+G_ife_east_f.csr <- envelope(wp_ife_east_ppp_f, Gest, nsim = 95)
+```
+
+```{r}
+plot(G_ife_east_f.csr)
+```
+
+**Conclusion**: The observed G(r) is above the G(theo) as well as the envelope. This shows that functional water point in ife east are clustered. Hence, we will reject the null hypothesis that the functional water points at ife east are randomly distributed.
+
+### Iwo Functional - G Function
+
+-   H0: The distribution of the Functional water points at iwo are randomly distributed
+
+-   H1: The distribution of the Functional water points at iwo are not randomly distributed
+
+-   Confidence level at 95%
+
+-   Significance level: 0.05
+
+-   The null hypothesis will be rejected if p-value is smaller than alpha value of 0.05
+
+```{r}
+G_iwo_f = Gest(wp_iwo_ppp_f, correction = "border")
+plot(G_iwo_f, xlim=c(0,500))
+```
+
+```{r}
+G_iwo_f.csr <- envelope(wp_iwo_ppp_f, Gest, nsim = 39)
+```
+
+```{r}
+plot(G_iwo_f.csr)
+```
+
+**Conclusion**: The observed G(r) is far above the G(theo) as well as the envelope. This shows that functional water point in iwo are clustered. Hence, we will reject the null hypothesis that the functional water points at iwo are randomly distributed at 95% confident interval.
+
+### Ife East Non Functional - G Function
+
+-   H0: The distribution of the Non functional water points at ife east are randomly distributed
+
+-   H1: The distribution of the Non Functional water points at ife east are not randomly distributed
+
+-   Confidence level at 95%
+
+-   Significance level: 0.05
+
+-   The null hypothesis will be rejected if p-value is smaller than alpha value of 0.05
+
+```{r}
+G_ife_east_nf = Gest(wp_ife_east_ppp_nf, correction = "border")
+plot(G_ife_east_nf, xlim=c(0,500))
+
+```
+
+```{r}
+G_ife_east_nf.csr <- envelope(wp_ife_east_ppp_nf, Gest, nsim = 39)
+```
+
+```{r}
+plot(G_ife_east_nf.csr)
+```
+
+**Conclusion**: The observed G(r) is above the G(theo) as well as the envelope. This shows that non functional water point in ife east are clustered. Hence, we will reject the null hypothesis that the non functional water points at ife east are randomly distributed.
+
+### Iwo Non Functional - G Function
+
+-   H0: The distribution of the Non functional water points at iwo are randomly distributed
+
+-   H1: The distribution of the Non Functional water points at iwo are not randomly distributed
+
+-   Confidence level at 95%
+
+-   Significance level: 0.05
+
+-   The null hypothesis will be rejected if p-value is smaller than alpha value of 0.05
+
+```{r}
+G_iwo_nf = Gest(wp_iwo_ppp_nf, correction = "border")
+plot(G_iwo_nf, xlim=c(0,500))
+```
+
+```{r}
+G_iwo_nf.csr <- envelope(wp_iwo_ppp_nf, Gest, nsim = 39)
+```
+
+```{r}
+plot(G_iwo_nf.csr)
+```
+
+**Conclusion**: The observed G(r) is far above the G(theo) as well as the envelope. This shows that non functional water point in iwo are clustered. Hence, we will reject the null hypothesis that the functional water points at iwo are randomly distributed at 95% confident interval.
