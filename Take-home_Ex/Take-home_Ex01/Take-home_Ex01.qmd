@@ -425,9 +425,9 @@ nga_osun_pop<- nga_osun_pop %>%
  mutate(ADM2_NAME = tolower(ADM2_NAME)) 
 ```
 
-Next we can do some basic EDA to understand the data. Because there is some limit in the colors, we have to extend the colors by using **colorRampPalette()** function.
-
 ### Population Bar chat {#popbar}
+
+Next we can do some basic EDA to understand the data. Because there is some limit in the colors, we have to extend the colors by using **colorRampPalette()** function.
 
 ```{r}
 colourCount = length(unique(nga_osun_pop$ADM2_NAME))
@@ -458,8 +458,6 @@ NGA_wp_SubDiv_pop <- left_join(NGA_osun, nga_osun_pop,
 ```
 
 ### Distribution of population by Sub Division {#populationSub}
-
-As shown above, there is no Coordinate system. We have to re assign them.
 
 ```{r}
 tmap_mode("plot")
@@ -1265,11 +1263,7 @@ We will be using cross L-function to look into the relationship.
 
 -   Significance level: 0.05
 
-In the below section, I will be comparing
-
-1.  ife east functional and non functional (Acceptance quality and Cause of taste)
-
-2.  iwo functional and non functional (Acceptance quality and Cause of taste)
+In the below section, I will be comparing ife east functional and non functional (Acceptance quality and Cause of taste)
 
 ### ife east functional
 
