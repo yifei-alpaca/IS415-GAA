@@ -13,10 +13,14 @@ execute:
 editor: visual
 ---
 
-## Getting started - Load R packages
+# Objective
+
+Geospatial analytics hold tremendous potential to address complex problems facing society. In this study, you are tasked to apply appropriate spatial point patterns analysis methods to discover the geographical distribution of functional and non-function water points and their co-locations if any in Osun State, Nigeria.
+
+# Getting started - Load R packages
 
 ```{r}
-pacman::p_load(sf, tidyverse, funModeling, tmap, maptools, raster, spatstat, dplyr,ggplot2, tmap, RColorBrewer)
+pacman::p_load(sf, tidyverse, funModeling, tmap, maptools, raster, spatstat, dplyr,ggplot2, tmap, RColorBrewer, spatialEco)
 ```
 
 ## Importing GeoSpatial Dataset
@@ -27,7 +31,7 @@ NGA <- st_read("data/geospatial/",
   st_transform(crs = 26392)
 ```
 
-Instead of loading just Osun state, it is good to keep a raw data above in case we need to roll back or for checking purposes.
+Instead of loading just Osun state, it is good to keep a raw data above in case we need to roll back or for checking purposes. After we look at the data, we can filter for column ADM1_EN and extract out only Osun, Nigeria. Let's run the following chunk of code:
 
 ```{r}
 NGA_osun <- st_read("data/geospatial/",
@@ -37,20 +41,16 @@ NGA_osun <- st_read("data/geospatial/",
 
 ## Importing Aspatial dataset
 
-```{r}
-wp_nga <- read_csv("data/aspatial/WPdx.csv")
-```
-
 ### Filter the raw dataset to only in Osun State, Nigeria.
 
-Instead of loading just Osun state, it is good to keep a raw data above incase we need to roll back or for checking purposes. We will be using wp_osun_nga dataframe.
+For aspatial data, we can open up csv file to check which are the columns to be filtered. In this case column **#clean_country_name** & **#clean_adm1** will be filtered.
 
 ```{r}
  wp_osun_nga <- read_csv("data/aspatial/WPdx.csv") %>%
   filter(`#clean_country_name` == "Nigeria" & `#clean_adm1` == "Osun")
 ```
 
-### Checking the content of a simple feature data frame
+Lets do a check on the content of a simple feature data frame.
 
 ```{r}
 st_geometry(NGA_osun)
@@ -73,7 +73,7 @@ wp_sf_osun <- st_sf(wp_osun_nga, crs=4326) %>%
 wp_sf_osun
 ```
 
-we can check the transformed projected system
+we can check the transformed projected system.
 
 ```{r}
 st_crs(wp_sf_osun)
@@ -103,7 +103,7 @@ NGA_osun$ADM2_EN[duplicated(NGA_osun$ADM2_EN)==TRUE]
 
 In this case, there is no duplicate names, we do not need to transform any names. We can move on to the next phase which is the EDA.
 
-## Exploratory data analysis and further cleaning
+# EDA and further cleaning
 
 In our in class exe02, we uses ggplot() of ggplot package to reveal the distribution of water point status visually.
 
@@ -113,7 +113,11 @@ In our in class exe02, we uses ggplot() of ggplot package to reveal the distribu
 ggplot(wp_sf_osun) + geom_bar(aes(y = fct_infreq(`#status_clean`), fill=`#status_clean`, stat="identity"))+  theme(legend.position = "right")
 ```
 
-As we can see from the images, there are category which can be group together such as "Abandoned" can combine with "Abandoned/Decommissioned". As we can see that there are quite a number of missing values. Hence, we should rename to "Unknown".
+As we can see from the image above, there are category which can be group together such as "Abandoned" can combine with "Abandoned/Decommissioned". As we can see that there are quite a number of missing values. Hence, we should rename to "Unknown". The reason for combining:
+
+-   combining rows can increase the overall sample size, which can lead to greater statistical power and more reliable results.
+
+-   it may also improve the quality of the data by identifying and removing errors, outliers, and other anomalies.
 
 ```{r}
 wp_sf_osun <- wp_sf_osun %>% 
@@ -135,7 +139,7 @@ We can plot the freq distribution diagram again.
 ggplot(wp_sf_osun) + geom_bar(aes(y = fct_infreq(`status_clean`), fill=`status_clean`, stat="identity"))+  theme(legend.position = "right")
 ```
 
-Based on the image above, about to 42% of the water point are Functional, followed by 4.5% needs repair and about 1.2% are not in use. Whereas for Non-Functional, it is about 36.2% and 2.8% are non functional due to the dry season. The unknown status is at about 13.5% which is quite a large %. If let say, most of the unknown falls under non-functional, we can say that in Osun state close to 50% of the water points are not very clean and further work improvement needs to perform in the future. One of the reason for being "unknown" could be the area have not been accessed yet.
+Based on the image above,more than 2000 of the water point are Functional, followed by about 250 needs repair and about 50 are not in use. Whereas for Non-Functional, it is more than 1500 and about 100 are non functional due to the dry season. The unknown status is at about 700 which is quite a large number. If let say, most of the unknown falls under non-functional, we can say that in Osun state close to 50% of the water points are not very clean and further work improvement needs to perform in the future. One of the reason for being "unknown" could be the area have not been accessed yet.
 
 <br>
 
@@ -151,15 +155,15 @@ ggplot(wp_sf_osun, aes(x = `#clean_adm2`, fill = status_clean)) +
   scale_fill_brewer(type = "qual", palette = 3, name = "Status")
 ```
 
-As we can see from the image above, Aiyedade has the highest number of status record ( 455 est.) as compared to others. 2nd in line would be Ejigbo (440 est.). The lowest status recorded would be Ife East with a record of 20 est.
+As we can see from the image above, Aiyedade has the highest number of status record ( 455 est.) as compared to others. 2nd in line would be Ejigbo (440 est.). The lowest status recorded would be Ife East with a record of 20 est. As for functional water points, Ejigbo seems to have the largest bar as compared to the rest and for non functional water point, ife north seems to have the largest.
 
 <br>
 
-By plotting based on the Secondary Admin Division, it is hard to interpret the area of interest e.g located in the north, south, east or west area. Notice that for **NGA_osun** dataframe, I have included SD_EN which shows the results of East, West and Central. Whereas for wp_sf_osun, there is no SD_EN which shows East, West or Central.
+By plotting based on the Secondary Admin Division, it is hard to interpret the area of interest e.g located in the north, south, east or west area. Notice that for **NGA_osun** dataframe, I have included SD_EN which shows the results of East, West and Central. Whereas for **wp_sf_osun**, there is no SD_EN which shows East, West or Central.
 
 <br>
 
-In this section, I would combine both dataset and try to find some useful insights. As mentioned by Prof Kam during in-class 05, we use cbind when the dataset has no unique identifier and it also must have the same number of row. But, in this case, I am able to use relational join even though there is no exact unique identifier but we can join on the Secondary Admin Division as it exists in both data frame. But before joining, we need to make sure that the column name is the same. We can change it to ADM2_EN for water point.
+In this section, I would combine both dataset and try to find some useful insights. As mentioned by Prof Kam during in-class 05, we use cbind when the dataset has no unique identifier and it also must have the same number of row. But, in this case, I am able to use relational join even though there is no exact unique identifier but we can join on the Secondary Admin Division as it exists in both data frame. But before joining, we need to make sure that the column name is the same for consistency purposes. We can change it to ADM2_EN for water point.
 
 ```{r}
 names(wp_sf_osun)[9] <- "ADM2_EN"
@@ -209,7 +213,9 @@ Lets do a quick check if there is any NA in the column in NGA_WP data frame.
 sum(is.na(NGA_WP$SD_EN))
 ```
 
-yay! there is no NA values in that column. Now we can plot a graph based on SD_EN column to have a clearer view of the region.
+yay! there is no NA values in that column.
+
+Now we can plot a graph based on SD_EN column to have a clearer view of the region.
 
 ```{r}
 ggplot(NGA_WP, aes(x = SD_EN, fill = status_clean)) + 
@@ -221,7 +227,7 @@ ggplot(NGA_WP, aes(x = SD_EN, fill = status_clean)) +
   scale_fill_brewer(type = "qual", palette = 2, name = "Status")
 ```
 
-As we can see from the chart above, Osun west has the most number of status being recorded. It also can the most functional water point as compared to the other 2 region. As for Non functional, Osun East has the most number being recorded.
+As we can see from the chart above, Osun west has the most number of status being recorded. It also shows the most functional water point as compared to the other 2 region. As for non functional, Osun East has the most number being recorded.
 
 ### Extracting water point data
 
@@ -302,15 +308,19 @@ nonfunctional_choroplot <- tm_shape(NGA_wp_SubDiv) +
 functional_choroplot
 ```
 
+As shown in the chart above, it has a better view where by ejigbo is more dense than the rest as compared to the bar chart shown above.
+
 ```{r}
 nonfunctional_choroplot
 ```
+
+Based on images above, we can see that for ejigbo has the highest distribution in functional water point. Whereas for non functional, ejigbo and aiyedade has the highest distribution in non functional water point. This could mean that ejigbo has slightly more functional water point than non functional water point due to its scale.
 
 ```{r}
 tmap_mode('plot')
 ```
 
-### Choropleth map group by Secondary Division
+## Choropleth map group by Secondary Division
 
 ### Functional
 
@@ -350,8 +360,6 @@ tm_shape(NGA_wp_SubDiv) +
 
 ```
 
-Based on image above, we can see that for ejigbo has the highest distribution in functional water point. Whereas for non functional, ejigbo and aiyedade has the highest distribution in non functional water point.
-
 However, We know that water points are not equally distributed in space. I will tabulate the proportion of functional water points and the proportion of non-functional water points in secondary division.
 
 ```{r}
@@ -390,9 +398,9 @@ nonfunctional_choroplot <- tm_shape(NGA_wp_SubDiv) +
 tmap_arrange(functional_choroplot, nonfunctional_choroplot, nrow = 2)
 ```
 
-[Reasoning for EDA, right now, we have a clear background of osun after eda, next we will proceed with.]{.underline}
+<br>
 
-## Population Analysis (additional findings)
+# Population Analysis (\*additional findings)
 
 In this section, I have found Nigeria's Subnation population statistic in this website [NGA_Subnation Population](https://data.humdata.org/dataset/cod-ps-nga) statistic. We can download **nga_admpop_adm2_2020.csv.**
 
@@ -417,7 +425,7 @@ nga_osun_pop<- nga_osun_pop %>%
  mutate(ADM2_NAME = tolower(ADM2_NAME)) 
 ```
 
-Next we can do some basic EDA to understand the data. Because there is some limit in the colors, we have to extend the colors by using colorRampPalette() function.
+Next we can do some basic EDA to understand the data. Because there is some limit in the colors, we have to extend the colors by using **colorRampPalette()** function.
 
 ### Population Bar chat {#popbar}
 
@@ -436,7 +444,7 @@ ggplot(nga_osun_pop, aes(x=ADM2_NAME, y=T_TL, fill=ADM2_NAME )) +
 
 As we can see from the chart above ***ife east*** and ***iwo*** has the most population with 312,801 and 302,585 respectively.
 
-Next, we can plot population choropleth mapping, but before that, we should do a join with NGA_wp_SubDiv as we previously joined NGA and wp together to plot chorpleth charts. In this case, we have a unique subdivision name ADM2_NAME in nga_osun_pop and can join together with ADM2_EN in NGA_wp_SubDiv.
+Next, we can plot population choropleth mapping, but before that, we should do a join with NGA_wp_SubDiv as we previously joined NGA and wp together to plot choropleth charts. In this case, we have a unique subdivision name ADM2_NAME in nga_osun_pop and can join together with ADM2_EN in NGA_wp_SubDiv.
 
 Change column name:
 
@@ -468,9 +476,9 @@ tm_shape(NGA_wp_SubDiv_pop)+
  
 ```
 
-As we can see from the chart, **ejigbo**, **iwo**, **irewole**, **ife** **central**, **ife** **east** and **oriade** is much more dense as compared to the rest. This shows that the dense area has the most population. We will be continue with this data below.
+As we can see from the chart, **ejigbo**, **iwo**, **irewole**, **ife** **central**, **ife** **east** and **oriade** is much more highly distributed as compared to the rest. This shows that the dense area has more population. We will be continue with this data below.
 
-## Exploratory Spatial Data Analysis (ESDA)
+# Exploratory Spatial Data Analysis (ESDA)
 
 Previously, we have converted into SF format which is wp_sf_osun. However, the data frame is for **Aspatial** data. As for **Geospatial** data, we have not yet converting it. We have to convert sf data frames to sp's Spatial class. We will be using NGA_osun.
 
@@ -494,7 +502,7 @@ NGA_osun_sp
 
 Next, we will be converting water point data frame into ppp format. But first, we have to convert it from sf to sp. Do note that, we have transformed the coordinate system previously hence, we do not need to transform again.
 
-# Functional and Non-Functional
+## Functional and Non-Functional
 
 -   any variable with \_f means it is Functional
 
@@ -520,9 +528,6 @@ Next, convert sf to generic sp format of the water point.
 
 ```{r}
 wp_sp_osun_f <- as(wp_osun_f, "SpatialPoints")
-```
-
-```{r}
 wp_sp_osun_nf <- as(wp_osun_nf, "SpatialPoints")
 ```
 
@@ -566,7 +571,7 @@ any(duplicated(wp_ppp_osun_nf))
 
 yay! there is no duplicates.
 
-##### We can plot the water point data by using the code below. {#correlation}
+### Plot water point data by Status {#correlation}
 
 ```{r}
 tmap_mode("view")
@@ -626,9 +631,9 @@ plot(wpNGA_owin_nf)
 
 Based on the image above, there is a little cluttered in many different areas. However, it seems that there are more records at the centre & top area of Osun, Nigeria.
 
-## 1st order Spatial Point Pattern Analysis
+# 1st order Spatial Point Pattern Analysis
 
-### **Kernel density estimation (KDE)**
+## **Kernel density estimation (KDE)**
 
 Kernel density estimation maps are considered best for location, size, shape and orientation of the hotspot.
 
@@ -693,10 +698,6 @@ kde_wpNGA_owin_bw_nf <- density(kde_wpNGA_owin_nf_bw.km,
 par(mfrow=c(1,2))
 plot(kde_wpNGA_owin_bw_f)
 plot(kde_wpNGA_owin_bw_nf)
-```
-
-```{r}
-
 ```
 
 ## Converting KDE output into grid object
@@ -920,7 +921,7 @@ With the findings, I will be narrowing to the 2 most populated division for furt
 1.  ife east
 2.  iwo
 
-### Extract the study area for ife east & iwo 
+### Extract the study area for ife east & iwo
 
 ```{r}
 ife_east = NGA_osun_s[NGA_osun_s$ADM2_EN == 'ife east',]
@@ -995,8 +996,7 @@ plot( kde_iwo_nf,
    main="iwo Non Functional")
 ```
 
-## 
-Converting KDE output into grid object
+### Converting KDE output into grid object
 
 ```{r}
 gridded_kde_ife_east_f<- as.SpatialGridDataFrame.im(kde_ife_east_f)
@@ -1021,7 +1021,7 @@ spplot(gridded_kde_ife_east_nf)
 spplot(gridded_kde_iwo_nf)
 ```
 
-### Converting gridded output into raster 
+### Converting gridded output into raster
 
 ```{r}
 kde_ife_east_f_raster <- raster(gridded_kde_ife_east_f)
@@ -1072,13 +1072,15 @@ tm_shape(kde_iwo_nf_raster) +
 tmap_mode("plot")
 ```
 
+For ife east, there are more non functional than functional water point area as the scale shows are higher range. As for iwo state, functional water point is more than non functional water point. Due to the rural area, improvements of the water points can be challenging as a whole of Osun, Nigeria. Instead, I will be narrowing down to only a state for deeper analysis. The purpose of this analysis could inform policy and decision-making related to water manageand invest in the state, as well as guide efforts to improve the overall water supply system in ife east state because the non functional water point is higher in a highly populated state.
+
 -   Highlight the advantage of kernel density map over point map
 
     The advantage of kernel density map over point map lies in the ability of the former to provide a smoother representation of the data distribution. Unlike point map which simply plots individual data points, the kernel density map uses a mathematical technique to estimate the underlying probability density function of the data and provides a smooth estimate of the data density over the entire region. This smoothed representation of the data gives a clearer picture of the underlying distribution pattern, making it easier to identify trends and anomalies. Additionally, the use of color gradients in kernel density maps allows for a clearer representation of the distribution range, making it easier to interpret the results.
 
-## 2nd Order Spatial Point Pattern Analysis
+# 2nd Order Spatial Point Pattern Analysis
 
-Now that we have analysed the spatial point patterns, we have to confirm our observation statistically. I have narrowed down on my observation to ife east and iwo area which is the most populated area. The nearest-neighbour distance is the measure of distance from each point to its nearest neighbour. G-function measures the distribution of distances from an arbitrary event to its nearest neighbour.
+Now that we have analysed the spatial point patterns, we have to confirm our observation statistically. I have **narrowed down on my observation to ife east area** which is the **most populated area** and has a higher **non functional water point than iwo**. The nearest-neighbour distance is the measure of distance from each point to its nearest neighbour. G-function measures the distribution of distances from an arbitrary event to its nearest neighbour.
 
 ### Ife East Functional - G Function Gest()
 
@@ -1099,7 +1101,7 @@ plot(G_ife_east_f, xlim=c(0,500))
 ```
 
 ```{r}
-G_ife_east_f.csr <- envelope(wp_ife_east_ppp_f, Gest, nsim = 95)
+G_ife_east_f.csr <- envelope(wp_ife_east_ppp_f, Gest, nsim = 39)
 ```
 
 ```{r}
@@ -1107,33 +1109,6 @@ plot(G_ife_east_f.csr)
 ```
 
 **Conclusion**: The observed G(r) is above the G(theo) as well as the envelope. This shows that functional water point in ife east are clustered. Hence, we will reject the null hypothesis that the functional water points at ife east are randomly distributed.
-
-### Iwo Functional - G Function
-
--   H0: The distribution of the Functional water points at iwo are randomly distributed
-
--   H1: The distribution of the Functional water points at iwo are not randomly distributed
-
--   Confidence level at 95%
-
--   Significance level: 0.05
-
--   The null hypothesis will be rejected if p-value is smaller than alpha value of 0.05
-
-```{r}
-G_iwo_f = Gest(wp_iwo_ppp_f, correction = "border")
-plot(G_iwo_f, xlim=c(0,500))
-```
-
-```{r}
-G_iwo_f.csr <- envelope(wp_iwo_ppp_f, Gest, nsim = 39)
-```
-
-```{r}
-plot(G_iwo_f.csr)
-```
-
-**Conclusion**: The observed G(r) is far above the G(theo) as well as the envelope. This shows that functional water point in iwo are clustered. Hence, we will reject the null hypothesis that the functional water points at iwo are randomly distributed at 95% confident interval.
 
 ### Ife East Non Functional - G Function
 
@@ -1163,35 +1138,7 @@ plot(G_ife_east_nf.csr)
 
 **Conclusion**: The observed G(r) is above the G(theo) as well as the envelope. This shows that non functional water point in ife east are clustered. Hence, we will reject the null hypothesis that the non functional water points at ife east are randomly distributed.
 
-### Iwo Non Functional - G Function
-
--   H0: The distribution of the Non functional water points at iwo are randomly distributed
-
--   H1: The distribution of the Non Functional water points at iwo are not randomly distributed
-
--   Confidence level at 95%
-
--   Significance level: 0.05
-
--   The null hypothesis will be rejected if p-value is smaller than alpha value of 0.05
-
-```{r}
-G_iwo_nf = Gest(wp_iwo_ppp_nf, correction = "border")
-plot(G_iwo_nf, xlim=c(0,500))
-```
-
-```{r}
-G_iwo_nf.csr <- envelope(wp_iwo_ppp_nf, Gest, nsim = 39)
-```
-
-```{r}
-plot(G_iwo_nf.csr)
-```
-
-**Conclusion**: The observed G(r) is far above the G(theo) as well as the envelope. This shows that non functional water point in iwo are clustered. Hence, we will reject the null hypothesis that the functional water points at iwo are randomly distributed at 95% confident interval.
-
-## 
-Spatial Correlation Analysis
+# Spatial Correlation Analysis
 
 Previously, we have visualize geospatial data on the different status [here](#correlation). Having to further dive in, we can look into the subjective quality in both functional and non functional.
 
@@ -1230,65 +1177,71 @@ tmap_mode("plot")
 
 ```
 
-As we are working with marked data, and we know that the values are categorical (different room types), we need to ensure that the marked field is of factor data type. However, as seen from the output, our `room_type` field is of chr data type, not factor! Let\'s rectify that with the *as.factor()* function:
+## **1st order Spatial Point Patterns Analysis**
+
+As we are working with marked data, and we know that the values are categorical (different quality), we need to ensure that the marked field is of factor data type. However, as seen from the output, our subjective_quality field is of chr data type, not factor.
+
+But before that, we need to extract #subjective_quality only in a spatialpoint dataframe format. to do that we can:
 
 ```{r}
-wp_osun_f@data$`#subjective_quality` <-as.factor(wp_osun_f@data$`X.subjective_quality`)
-
+#keeps <- c("#subjective_quality")
+#wp_ifeeast = wp_functional[keeps]
+#wp_ifeeast_nf = wp_nonfunctional[keeps]
+wp_ifeeast<-subset(wp_functional, select = c("#subjective_quality"))
+wp_ifeeast_nf<-subset(wp_nonfunctional, select = c("#subjective_quality"))
 ```
 
 ```{r}
-wp_osun_nf@data$`X.subjective_quality` <-as.factor(wp_osun_nf@data$`X.subjective_quality`)
+#wp_ifeeast <- select(wp_functional, )
+#wp_ifeeast_nf <- select(wp_nonfunctional, "#subjective_quality")
 ```
 
 ```{r}
-wp_functional_ppp_factor <- as(wp_osun_f, "ppp") 
-wp_nonfunctional_ppp_factor <- as(wp_osun_nf, "ppp") 
+wp_ifeeast_f <- as_Spatial(wp_ifeeast)
+wp_ifeeast_nfs <- as_Spatial(wp_ifeeast_nf)
 ```
 
-### Correlation
+```{r}
+str(wp_ifeeast_f)
+```
 
-In this section, I will be using ife east and iwo owin object. We will be looking at:
+```{r}
+wp_ifeeast_f@data$X.subjective_quality <- as.factor(wp_ifeeast_f@data$X.subjective_quality)
+wp_ifeeast_nfs@data$X.subjective_quality <- as.factor(wp_ifeeast_nfs@data$X.subjective_quality)
+```
+
+```{r}
+str(wp_ifeeast_f)
+```
+
+```{r}
+wp_ifeeast_ppp_f <- as.ppp(wp_ifeeast_f)
+wp_ifeeast_ppp_nf <- as.ppp(wp_ifeeast_nfs)
+```
+
+### Plot ppp chart with marked
+
+In this section, I will be using ife east owin object. We will be looking at:
 
 -   ife east quality of water in functional
 
 -   ife east quality of water in non functional
 
--   iwo quality of water in functional
-
--   iwo quality of water in non functional
-
 ```{r}
-ife_east_marked_ppp <- wp_functional_ppp_factor[ife_east_owin]
-iwo_marked_ppp <- wp_functional_ppp_factor[iwo_owin]
-```
-
-```{r}
-ife_east_marked_ppp_nf <- wp_nonfunctional_ppp_factor[ife_east_owin]
-iwo_marked_ppp_nf <- wp_nonfunctional_ppp_factor[iwo_owin]
+ife_east_marked_ppp <- wp_ifeeast_ppp_f[ife_east_owin]
+ife_east_marked_ppp_nf <- wp_ifeeast_ppp_nf[ife_east_owin]
 ```
 
 ```{r}
 par(mfrow=c(1,2))
-plot(ife_east_marked_ppp, main = "ife east F", which.marks = "#subjective_quality")
+plot(ife_east_marked_ppp, main = "ife east F", which.marks = "X.subjective_quality")
 plot(ife_east_marked_ppp_nf, main = "ife east NF", which.marks = "X.subjective_quality")
 
 ```
 
-```{r}
-par(mfrow=c(1,2))
-plot(iwo_marked_ppp, main = "iwo F", which.marks = "#subjective_quality")
-plot(iwo_marked_ppp_nf, main = "iwo NF", which.marks = "X.subjective_quality")
-```
-
-In this section, hypothesis testing will be conducted utilising second-order statistics (L function), to assess if the spatial distribution of functional and non-functional water points are independent from each other.
-
 <br>
 
-### 2nd order multi-type point pattern analysis - Cross L function 
-
 ```{r}
-par(mar = c(2, 2, 2, 2))
 plot((density(split(rescale(ife_east_marked_ppp, 1000)))))
 ```
 
@@ -1298,26 +1251,15 @@ plot((density(split(rescale(ife_east_marked_ppp_nf, 1000)))))
 
 Based on the graphs above, acceptable quality and cause of taste seems to have a stronger complementary relationship with each other in ife east area for both functional and non functional area. However, Acceptable quality being the most strong ones due to the scale.
 
-```{r}
-plot((density(split(rescale(iwo_marked_ppp, 1000)))))
-```
+## 2nd order multi type Point pattern Analysis: Cross L-function
 
-```{r}
-plot((density(split(rescale(iwo_marked_ppp_nf, 1000)))))
-```
-
-Based on the graphs above, for functional in iwo area, most of the charts has a stronger complementary relationship with each other except for odour. However, Acceptable quality being the most strong ones due to the scale. As for non functional, most of the charts has a strong complementary relationship too except for color chart, there is a slight difference on the area. However, Acceptable quality also being the most strong ones due to the scale.
-
-### 
-2nd order multi type Point pattern Analysis: Cross L-function
-
-<br>
+In this section, hypothesis testing will be conducted utilising second-order statistics (L function), to assess if the spatial distribution of functional and non-functional water points are independent from each other.
 
 We will be using cross L-function to look into the relationship.
 
--   H0: The distribution of the acceptance quality and cause of taste in ife east are spatially independent.
+-   H0: The distribution of the acceptable quality and cause of taste in ife east are spatially independent.
 
--   H1: The distribution of the accrptance quality and cause of taste in ife east are spatially not independent.
+-   H1: The distribution of the acceptable quality and cause of taste in ife east are spatially not independent.
 
 -   Confidence level: 95%
 
@@ -1332,10 +1274,53 @@ In the below section, I will be comparing
 ### ife east functional
 
 ```{r}
-ife_east_Lcross.csr <- envelope(ife_east_marked_ppp, 
-                                 Lcross, 
-                                 i="Acceptable quality", 
-                                 j="No because of Taste", 
-                                 correction="border", 
-                                 nsim=39)
+plot(Lcross(ife_east_marked_ppp, "Acceptable quality", "No because of Taste"))
 ```
+
+The plot above reveals that there is a sign that the marked spatial point events are not independent spatially.
+
+We will conduct a randomisation test of the Random Labelling Property.
+
+```{r}
+shuffle<- expression(rlabel(ife_east_marked_ppp))
+montef_Lcross_ifeeast <- envelope(ife_east_marked_ppp, Lcross, nsim=39, simulate=shuffle, i="Acceptable quality", j="No because of Taste", correction="border")
+```
+
+```{r}
+plot(montef_Lcross_ifeeast, xlab="distance(m)")
+```
+
+The plot above reveals that the are signs that the distribution of **functional** water point for acceptable quality and cause of taste are not independent spatially. Unfortunately, we failed to reject the null hypothesis because the L-cross line is within the envelop of the 95% confident interval.
+
+### ife east non functional
+
+```{r}
+plot(Lcross(ife_east_marked_ppp_nf, "Acceptable quality", "No because of Taste"))
+```
+
+```{r}
+shuffle<- expression(rlabel(ife_east_marked_ppp_nf))
+montenf_Lcross_ifeeast <- envelope(ife_east_marked_ppp_nf, Lcross, nsim=39, simulate=shuffle, i="Acceptable quality", j="No because of Taste", correction="border")
+```
+
+```{r}
+plot(montenf_Lcross_ifeeast, xlab="distance(m)")
+```
+
+The plot above reveals that the are signs that the distribution of **non functional** water point for acceptable quality and cause of taste are not independent spatially. Unfortunately, we failed to reject the null hypothesis because the L-cross line is within the envelop of the 95% confident interval.
+
+# Conclusion
+
+In Nigeria, access to safe and reliable water is a challenge, particularly in rural areas. As we can see from the analysis, despite the country's abundant water resources, many communities lack access to clean drinking water due to the poor water facilities, leading to a range of health and economic problems.
+
+Providing safe and reliable access to water is crucial for the health and well-being of communities in Nigeria. A few suggestion for improving water access especially in a more populated state.
+
+1.  Increase access to finance: Many communities lack the resources to develop and maintain water sources. Increasing access to finance can help to overcome this challenge and support water access initiatives.
+
+2.  Collaborate with NGOs and international organizations: Working with NGOs and international organizations can help to leverage resources and expertise to support water access initiatives in ife east.
+
+3.  Promote rainwater harvesting: This can be an effective way of capturing and storing water during the rainy season, which can then be used during the dry season.
+
+<br>
+
+With that, thank you prof Kam for this Take home exe which makes me learn more out of the class! :)
