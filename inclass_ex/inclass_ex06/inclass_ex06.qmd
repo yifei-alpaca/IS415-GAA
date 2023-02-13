@@ -11,13 +11,13 @@ execute:
 editor: visual
 ---
 
-## Getting started 
+## Getting started
 
 ```{r}
 pacman::p_load(tidyverse, sf, tmap, spdep, sfdep)
 ```
 
-## Import geospatial data 
+## Import geospatial data
 
 ```{r}
 hunan <- st_read(dsn = "data/geospatial", 
