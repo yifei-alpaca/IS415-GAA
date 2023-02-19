@@ -2,7 +2,6 @@
 title: "Hands-On Ex07a - Global Measures of Spatial Autocorrelation"
 date: "19 Feburary 2023"
 date-modified: "`r Sys.Date()`"
-author: "Sherry Ng"
 format: html
 execute: 
   message: false
