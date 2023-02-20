@@ -15,7 +15,7 @@ editor: visual
 pacman::p_load(sf, spdep, tmap, tidyverse)
 ```
 
-## Import shapefile into R 
+## Import shapefile into R
 
 ```{r}
 hunan <- st_read(dsn = "data/geospatial", 
@@ -28,7 +28,7 @@ hunan <- st_read(dsn = "data/geospatial",
 hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
 ```
 
-## Perform relational join 
+## Perform relational join
 
 ```{r}
 hunan <- left_join(hunan,hunan2012) %>%
@@ -75,7 +75,7 @@ rswm_q <- nb2listw(wm_q,
 rswm_q
 ```
 
-### Global Spatial Autocorrelation: Moran\'s I
+### Global Spatial Autocorrelation: Moran's I
 
 ```{r}
 moran.test(hunan$GDPPC, 
@@ -113,7 +113,7 @@ abline(v=0,
        col="red") 
 ```
 
-### Global Spatial Autocorrelation: Geary\'s
+### Global Spatial Autocorrelation: Geary's
 
 ```{r}
 geary.test(hunan$GDPPC, listw=rswm_q)
@@ -144,7 +144,7 @@ abline(v=1, col="red")
 
 ## Spatial Correlogram
 
-### Compute Moran\'s I correlogram
+### Compute Moran's I correlogram
 
 ```{r}
 MI_corr <- sp.correlogram(wm_q, 
@@ -155,7 +155,7 @@ MI_corr <- sp.correlogram(wm_q,
 plot(MI_corr)
 ```
 
-### Compute Geary\'s C correlogram and plot
+### Compute Geary's C correlogram and plot
 
 ```{r}
 GC_corr <- sp.correlogram(wm_q, 
@@ -172,10 +172,9 @@ LISA are statistics that evaluate the existence of clusters in the spatial arran
 
 For instance if we are studying cancer rates among census tracts in a given **city local clusters** in the **rates mean that there are areas that have higher or lower rates than is to be expected by chance alone**; that is, the values occurring are above or below those of a random distribution in space.
 
-
 NOTE!
 
-Will learn how to apply appropriate Local Indicators for Spatial Association (LISA), especially local Moran\'I to detect cluster and/or outlier from GDP per capita 2012 of Hunan Province, PRC.
+Will learn how to apply appropriate Local Indicators for Spatial Association (LISA), especially local Moran'I to detect cluster and/or outlier from GDP per capita 2012 of Hunan Province, PRC.
 
 ## Computing Local Moran's I
 
@@ -187,7 +186,7 @@ head(localMI)
 
 *localmoran()* function returns a matrix of values whose columns are:
 
--   Ii: the local Moran\'s I statistics
+-   Ii: the local Moran's I statistics
 
 -   E.Ii: the expectation of local moran statistic under the randomisation hypothesis
 
@@ -206,14 +205,14 @@ printCoefmat(data.frame(
 
 ## Mapping the local Moran's I
 
-append the local Moran\'s I dataframe (i.e. localMI) onto hunan SpatialPolygonDataFrame
+append the local Moran's I dataframe (i.e. localMI) onto hunan SpatialPolygonDataFrame
 
 ```{r}
 hunan.localMI <- cbind(hunan,localMI) %>%
   rename(Pr.Ii = Pr.z....E.Ii..)
 ```
 
-#### Mapping local Moran\'s I values
+#### Mapping local Moran's I values
 
 ```{r}
 tm_shape(hunan.localMI) +
@@ -224,7 +223,7 @@ tm_shape(hunan.localMI) +
   tm_borders(alpha = 0.5)
 ```
 
-## Mapping local Moran's I p-value 
+## Mapping local Moran's I p-value
 
 The choropleth shows the evidence for both positive and negative values in li.
 
@@ -237,7 +236,7 @@ tm_shape(hunan.localMI) +
   tm_borders(alpha = 0.5)
 ```
 
-For effective interpretation, it is better to plot both the local Moran\'s I values map and its corresponding p-values map next to each other.
+For effective interpretation, it is better to plot both the local Moran's I values map and its corresponding p-values map next to each other.
 
 ```{r}
 localMI.map <- tm_shape(hunan.localMI) +
@@ -257,11 +256,13 @@ tmap_arrange(localMI.map, pvalue.map, asp=1, ncol=2)
 ```
 
 ## 
+
 Creating LISA cluster map
 
 The LISA Cluster Map shows the significant locations color coded by type of spatial autocorrelation
 
 ### 
+
 Plotting Moran's scatter plot ( this is v cool!)
 
 ```{r}
@@ -275,7 +276,7 @@ Notice that the plot is split in 4 quadrants. The top right corner belongs to ar
 
 ## 
 
-Moran Scatter plot with standardised variable 
+Moran Scatter plot with standardised variable
 
 ```{r}
 hunan$Z.GDPPC <- scale(hunan$GDPPC) %>% 
@@ -289,7 +290,7 @@ nci2 <- moran.plot(hunan$Z.GDPPC, rswm_q,
                    ylab="Spatially Lag z-GDPPC 2012")
 ```
 
-## Preparing LISA map classes 
+## Preparing LISA map classes
 
 ```{r}
 quadrant <- vector(mode="numeric",length=nrow(localMI))
@@ -323,7 +324,7 @@ place non-significant Moran in the category 0
 quadrant[localMI[,5]>signif] <- 0
 ```
 
-## Plotting LISA map 
+## Plotting LISA map
 
 ```{r}
 hunan.localMI$quadrant <- quadrant
@@ -385,11 +386,11 @@ The Hot Spot Analysis tool calculates the Getis-Ord Gi\* statistic (pronounced G
 
 Beside detecting cluster and outliers, localised spatial statistics can be also used to detect hot spot and/or cold spot areas.
 
-The term \'hot spot\' has been used generically across disciplines to describe a region or value that is higher relative to its surroundings.
+The term 'hot spot' has been used generically across disciplines to describe a region or value that is higher relative to its surroundings.
 
 A feature with a high value is interesting but may not be a statistically significant hot spot. To be a statistically significant hot spot, a feature will have a high value and be surrounded by other features with high values as well. The local sum for a feature and its neighbors is compared proportionally to the sum of all features; when the local sum is very different from the expected local sum, and when that difference is too large to be the result of random chance, a statistically significant z-score results.
 
-### Getis and Ord\'s G-Statistics
+### Getis and Ord's G-Statistics
 
 It looks at neighbours within a defined proximity to identify where either high or low values clutser spatially.
 
@@ -418,6 +419,7 @@ coords <- cbind(longitude, latitude)
 ```
 
 ### 
+
 Determine the cut-off distance
 
 Firstly, we need to determine the upper limit for distance band
@@ -461,7 +463,8 @@ summary(knn_lw)
 ```
 
 ## Computing Gi statistics
-Gi statistic using Fixed distance 
+
+Gi statistic using Fixed distance
 
 ```{r}
 fips <- order(hunan$County)

@@ -15,20 +15,20 @@ editor: visual
 pacman::p_load(sf, spdep, tmap, tidyverse)
 ```
 
-## Import shapefile into r envionment 
+## Import shapefile into r envionment
 
 ```{r}
 hunan <- st_read(dsn = "data/geospatial", 
                  layer = "Hunan")
 ```
 
-## Import csv file into r environment 
+## Import csv file into r environment
 
 ```{r}
 hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
 ```
 
-## Performing relation join 
+## Performing relation join
 
 In the below code, we will be using left_join()
 
@@ -60,7 +60,7 @@ tmap_arrange(equal,
              ncol=2)
 ```
 
-## Global Spatial Auto Correlation 
+## Global Spatial Auto Correlation
 
 Before we can compute the global spatial autocorrelation statistics, we need to construct a spatial weights of the study area.
 
@@ -68,9 +68,7 @@ Before we can compute the global spatial autocorrelation statistics, we need to 
 
 In the code chunk below, [*poly2nb()*](https://r-spatial.github.io/spdep/reference/poly2nb.html) of **spdep** package is used to compute contiguity weight matrices for the study area. This function builds a neighbours list based on regions with contiguous boundaries.
 
-
-NOTE!
-you can pass a \"queen\" argument that takes TRUE or FALSE as options. If you do not specify this argument the default is set to TRUE, that is, if you don\'t specify queen = FALSE this function will return a list of first order neighbours using the Queen criteria.
+NOTE! you can pass a "queen" argument that takes TRUE or FALSE as options. If you do not specify this argument the default is set to TRUE, that is, if you don't specify queen = FALSE this function will return a list of first order neighbours using the Queen criteria.
 
 ```{r}
 wm_q <- poly2nb(hunan, 
@@ -82,7 +80,7 @@ The most connected area unit has 11 neighbours. There are two area units with on
 
 ## Row-standardised weights matrix
 
-In our case, each neighboring polygon will be assigned equal weight (style=\"W\") for simplicity\'s sake but note that other more robust options are available, notably style=\"B\".
+In our case, each neighboring polygon will be assigned equal weight (style="W") for simplicity's sake but note that other more robust options are available, notably style="B".
 
 ```{r}
 rswm_q <- nb2listw(wm_q, 
@@ -93,7 +91,7 @@ rswm_q
 
 ## Global Spatial Autocorrelation: Moran's I
 
-### Maron's I test 
+### Maron's I test
 
 ```{r}
 moran.test(hunan$GDPPC, 
@@ -114,7 +112,7 @@ bperm= moran.mc(hunan$GDPPC,
 bperm
 ```
 
-### Visualising Monte Carlo Moran's I 
+### Visualising Monte Carlo Moran's I
 
 Examine the simulated Moran's test stats in greater details.
 
@@ -141,7 +139,7 @@ abline(v=0,
 
 The histogram shows a normal distribution range there are a few outliers which lies at around 0.3.
 
-### Global Spatial Autocorrelation: Geary\'s
+### Global Spatial Autocorrelation: Geary's
 
 performing Geary's C test
 
@@ -149,7 +147,7 @@ performing Geary's C test
 geary.test(hunan$GDPPC, listw=rswm_q)
 ```
 
-### Monte Carlo in Geary's C 
+### Monte Carlo in Geary's C
 
 ```{r}
 set.seed(1234)
@@ -180,11 +178,11 @@ abline(v=1, col="red")
 
 As compared with the Moran's I histogram, both are normally distibuted. However, for Geary C, it is more standardized as there are no outliers at both ends.
 
-## Spatial Correlogram 
+## Spatial Correlogram
 
 Spatial correlograms are great to examine patterns of spatial autocorrelation in your data or model residuals. They are very useful as an exploratory and descriptive tool.
 
-## Compute Moran's I correlogram 
+## Compute Moran's I correlogram
 
 The code below is used to compute a 6-lag spatial correlogram of GDPPC.
 
@@ -203,7 +201,7 @@ By plotting the output **might not allow us to provide complete interpretation**
 print(MI_corr)
 ```
 
-### Compute Geary\'s C correlogram and plot
+### Compute Geary's C correlogram and plot
 
 ```{r}
 GC_corr <- sp.correlogram(wm_q, 
@@ -218,5 +216,4 @@ plot(GC_corr)
 print(GC_corr)
 ```
 
-Moran\'s I and Geary\'s c are well known tests for spatial autocorrelation. They represent two special cases of the general cross-product statistic that measures spatial autocorrelation. Moran\'s I is produced by standardizing the spatial autocovariance by the variance of the data. Geary\'s c uses the sum of the squared differences between pairs of data values as its measure of covariation. Both of these statistics depend on a spatial structural specification such as a spatial weights matrix or a distance related decline function.
-
+Moran's I and Geary's c are well known tests for spatial autocorrelation. They represent two special cases of the general cross-product statistic that measures spatial autocorrelation. Moran's I is produced by standardizing the spatial autocovariance by the variance of the data. Geary's c uses the sum of the squared differences between pairs of data values as its measure of covariation. Both of these statistics depend on a spatial structural specification such as a spatial weights matrix or a distance related decline function.

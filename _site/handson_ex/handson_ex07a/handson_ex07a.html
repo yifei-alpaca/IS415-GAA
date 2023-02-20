@@ -214,7 +214,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
  <span class="dropdown-text">Take-Home Exercise 1</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex02/Take-home_Ex02.qmd">
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html">
  <span class="dropdown-text">Take-Home Exercise 2</span></a>
   </li>  
         <li>
@@ -257,7 +257,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">February 19, 2023</p>
+      <p class="date-modified">February 20, 2023</p>
     </div>
   </div>
     
@@ -333,7 +333,7 @@ Geodetic CRS:  WGS 84</code></pre>
 <p>Before we can compute the global spatial autocorrelation statistics, we need to construct a spatial weights of the study area.</p>
 <p>*** <strong><em>The spatial weights is used to define the neighbourhood relationships between the geographical units</em></strong>.</p>
 <p>In the code chunk below, <a href="https://r-spatial.github.io/spdep/reference/poly2nb.html"><em>poly2nb()</em></a> of <strong>spdep</strong> package is used to compute contiguity weight matrices for the study area. This function builds a neighbours list based on regions with contiguous boundaries.</p>
-<p>NOTE! you can pass a "queen" argument that takes TRUE or FALSE as options. If you do not specify this argument the default is set to TRUE, that is, if you don't specify queen = FALSE this function will return a list of first order neighbours using the Queen criteria.</p>
+<p>NOTE! you can pass a “queen” argument that takes TRUE or FALSE as options. If you do not specify this argument the default is set to TRUE, that is, if you don’t specify queen = FALSE this function will return a list of first order neighbours using the Queen criteria.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(hunan, </span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">queen=</span><span class="cn">TRUE</span>)</span>
@@ -358,7 +358,7 @@ Link number distribution:
 </section>
 <section id="row-standardised-weights-matrix" class="level2">
 <h2 class="anchored" data-anchor-id="row-standardised-weights-matrix">Row-standardised weights matrix</h2>
-<p>In our case, each neighboring polygon will be assigned equal weight (style="W") for simplicity's sake but note that other more robust options are available, notably style="B".</p>
+<p>In our case, each neighboring polygon will be assigned equal weight (style=“W”) for simplicity’s sake but note that other more robust options are available, notably style=“B”.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>rswm_q <span class="ot">&lt;-</span> <span class="fu">nb2listw</span>(wm_q, </span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">style=</span><span class="st">"W"</span>, </span>
@@ -462,7 +462,7 @@ alternative hypothesis: greater</code></pre>
 <p>The histogram shows a normal distribution range there are a few outliers which lies at around 0.3.</p>
 </section>
 <section id="global-spatial-autocorrelation-gearys" class="level3">
-<h3 class="anchored" data-anchor-id="global-spatial-autocorrelation-gearys">Global Spatial Autocorrelation: Geary's</h3>
+<h3 class="anchored" data-anchor-id="global-spatial-autocorrelation-gearys">Global Spatial Autocorrelation: Geary’s</h3>
 <p>performing Geary’s C test</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">geary.test</span>(hunan<span class="sc">$</span>GDPPC, <span class="at">listw=</span>rswm_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -569,7 +569,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 </div>
 <section id="compute-gearys-c-correlogram-and-plot" class="level3">
-<h3 class="anchored" data-anchor-id="compute-gearys-c-correlogram-and-plot">Compute Geary's C correlogram and plot</h3>
+<h3 class="anchored" data-anchor-id="compute-gearys-c-correlogram-and-plot">Compute Geary’s C correlogram and plot</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>GC_corr <span class="ot">&lt;-</span> <span class="fu">sp.correlogram</span>(wm_q, </span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>                          hunan<span class="sc">$</span>GDPPC, </span>
@@ -597,7 +597,7 @@ method: Geary's C
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 </div>
-<p>Moran's I and Geary's c are well known tests for spatial autocorrelation. They represent two special cases of the general cross-product statistic that measures spatial autocorrelation. Moran's I is produced by standardizing the spatial autocovariance by the variance of the data. Geary's c uses the sum of the squared differences between pairs of data values as its measure of covariation. Both of these statistics depend on a spatial structural specification such as a spatial weights matrix or a distance related decline function.</p>
+<p>Moran’s I and Geary’s c are well known tests for spatial autocorrelation. They represent two special cases of the general cross-product statistic that measures spatial autocorrelation. Moran’s I is produced by standardizing the spatial autocovariance by the variance of the data. Geary’s c uses the sum of the squared differences between pairs of data values as its measure of covariation. Both of these statistics depend on a spatial structural specification such as a spatial weights matrix or a distance related decline function.</p>
 
 
 </section>

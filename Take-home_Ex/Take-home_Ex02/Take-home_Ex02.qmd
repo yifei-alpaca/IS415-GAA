@@ -1,0 +1,14 @@
+---
+title: "Take Home Ex 2"
+date: "20 Feburary 2023"
+date-modified: "`r Sys.Date()`"
+format:
+ html:
+  toc: true
+  toc-location: right
+  number-depth: 3
+execute: 
+  message: false
+  warning: false
+editor: visual
+---
