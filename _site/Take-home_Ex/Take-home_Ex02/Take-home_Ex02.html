@@ -21,6 +21,69 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -108,6 +171,10 @@ ul.task-list li input[type="checkbox"] {
     <a class="dropdown-item" href="../../inclass_ex/inclass_ex06/inclass_ex06.html">
  <span class="dropdown-text">In-Class Exercise 6</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../inclass_ex/inclass_ex07/inclass_ex07.html">
+ <span class="dropdown-text">In-Class Exercise 7</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -171,7 +238,24 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#questions" id="toc-questions" class="nav-link active" data-scroll-target="#questions">Questions</a></li>
+  <li><a href="#load-r-packages" id="toc-load-r-packages" class="nav-link" data-scroll-target="#load-r-packages">Load R packages</a></li>
+  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">Getting started</a></li>
+  <li><a href="#import-data-and-preparation" id="toc-import-data-and-preparation" class="nav-link" data-scroll-target="#import-data-and-preparation">Import data and preparation</a></li>
+  <li><a href="#exploratory-data-analysis-eda" id="toc-exploratory-data-analysis-eda" class="nav-link" data-scroll-target="#exploratory-data-analysis-eda">Exploratory Data Analysis (EDA)</a>
+  <ul class="collapse">
+  <li><a href="#joining-the-attribute-data-and-geospatial-data" id="toc-joining-the-attribute-data-and-geospatial-data" class="nav-link" data-scroll-target="#joining-the-attribute-data-and-geospatial-data">Joining the attribute data and geospatial data</a></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a>
+  <ul class="collapse">
+  <li><a href="#population-choropleth-map" id="toc-population-choropleth-map" class="nav-link" data-scroll-target="#population-choropleth-map">Population choropleth map</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -196,7 +280,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">February 20, 2023</p>
+      <p class="date-modified">February 26, 2023</p>
     </div>
   </div>
     
@@ -205,8 +289,388 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
+<section id="questions" class="level1">
+<h1>Questions</h1>
+<p>“The question is where are the <strong>sub-districts</strong> with <strong>relatively higher number of vaccination</strong> rate and <strong>how they changed over time</strong>.”</p>
+</section>
+<section id="load-r-packages" class="level1">
+<h1>Load R packages</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(dplyr, sf, spdep, tmap, tidyverse, readxl, ggplot2,moments)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="getting-started" class="level1">
+<h1>Getting started</h1>
+<p>At first, I have loaded the beginning month of the data as shown below:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/pic1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>However, July 2021 has only 21 variables. I decided to to further research. Based on research, there was a change in the category of vaccination recipient in DKI Jakarta starting from 4 July 2021 which they have mentioned on the website itself <a href="https://riwayat-file-vaksinasi-dki-jakarta-jakartagis.hub.arcgis.com/">here</a>. Hence, I have decided to change the data to end of the month for easier analysis.</p>
+</section>
+<section id="import-data-and-preparation" class="level1">
+<h1>Import data and preparation</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>jul<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/Juli 2021.xlsx"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>aug21<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/Agustus 2021.xlsx"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>sep21<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/September 2021.xlsx"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>oct21<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/Oktober 2021.xlsx"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>nov21<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/November 2021.xlsx"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>dec21<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/Desember 2021.xlsx"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>jan22<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/Januari 2022.xlsx"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>feb22<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/Februari 2022.xlsx"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>mar22<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/Maret 2022.xlsx"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>apr22<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/April 2022.xlsx"</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>may22<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/Mei 2022.xlsx"</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>jun22<span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/aspatial/Juni 2022.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/pic2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>After analyzing the dataset, there are different number of variables.</p>
+<ol type="1">
+<li>Jul 2021 to Feb 2022: <strong>27 variables</strong></li>
+<li>March 2022 to June 2022: <strong>34 variables</strong></li>
+</ol>
+<p>The additional columns include categories such as TAHAPAN and REMAJA which means General Public and Children Age 12-17 respectively and also introduces the 3rd dose for all the categories.</p>
+<p>In the section below, I decided to take total dose 1 to dose 3 value for all categories and compare them for exploratory purposes.</p>
+<p>Columns to keep:</p>
+<ul>
+<li><p>KODE KELURAHAN = SUB DISTRICT CODE</p></li>
+<li><p>WILATAH KOTA = NSEW REGION</p></li>
+<li><p>KECAMATAN = DISTRICT</p></li>
+<li><p>KELURAHAN = SUB DISTRICT</p></li>
+<li><p>SASARAN = TARGETED VACCINE</p></li>
+<li><p>BELUM VAKSIN = NOT YET VACCINATED</p></li>
+<li><p>JUMLAH DOSIS 1 = TOTAL AMOUNT OF DOSE 1 GIVEN</p></li>
+<li><p>JUMLAH DOSIS 2 = TOTAL AMOUNT OF DOSE 2 GIVEN</p></li>
+<li><p>JUMLAH DOSIS 3 = TOTAL AMOUNT OF DOSE 3 GIVEN</p></li>
+<li><p>TOTAL VAKSIN DIBERIKAN = TOTAL VACCINE GIVEN</p></li>
+</ul>
+<p>Change column</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jul)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_jul21"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jul)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_jul21"</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jul)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_jul21"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jul)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"TotalV_jul21"</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>jul21<span class="ot">&lt;-</span>jul[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">10</span><span class="sc">:</span><span class="dv">27</span>)]</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(aug21)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_aug21"</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(aug21)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_aug21"</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(aug21)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_aug21"</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(aug21)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"TotalV_aug21"</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>aug21<span class="ot">&lt;-</span>aug21[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">10</span><span class="sc">:</span><span class="dv">27</span>)]</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sep21)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_sep21"</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sep21)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_sep21"</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sep21)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_sep21"</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sep21)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"TotalV_sep21"</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>sep21<span class="ot">&lt;-</span> sep21[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">10</span><span class="sc">:</span><span class="dv">27</span>)]</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(oct21)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_oct21"</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(oct21)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_oct21"</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(oct21)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_oct21"</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(oct21)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"TotalV_oct21"</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>oct21<span class="ot">&lt;-</span>oct21[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">10</span><span class="sc">:</span><span class="dv">27</span>)]</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(nov21)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_nov21"</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(nov21)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_nov21"</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(nov21)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_nov21"</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(nov21)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"TotalV_nov21"</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>nov21<span class="ot">&lt;-</span>nov21[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">10</span><span class="sc">:</span><span class="dv">27</span>)]</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(dec21)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_dec21"</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(dec21)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_dec21"</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(dec21)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_dec21"</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(dec21)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"TotalV_dec21"</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>dec21<span class="ot">&lt;-</span>dec21[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">10</span><span class="sc">:</span><span class="dv">27</span>)]</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jan22)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_jan21"</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jan22)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_jan22"</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jan22)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_jan22"</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jan22)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"TotalV_jan22"</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>jan22<span class="ot">&lt;-</span>jan22[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">10</span><span class="sc">:</span><span class="dv">27</span>)]</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(feb22)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_jan21"</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(feb22)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_feb22"</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(feb22)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_feb22"</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(feb22)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"TotalV_feb22"</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>feb22<span class="ot">&lt;-</span>feb22[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">10</span><span class="sc">:</span><span class="dv">27</span>)]</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(mar22)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_mar21"</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(mar22)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_mar22"</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(mar22)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_mar22"</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(mar22)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"D3_mar22"</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(mar22)[<span class="dv">10</span>] <span class="ot">=</span><span class="st">"TotalV_mar22"</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>mar22<span class="ot">&lt;-</span>mar22[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">11</span><span class="sc">:</span><span class="dv">34</span>)]</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(apr22)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_apr21"</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(apr22)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_apr22"</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(apr22)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_apr22"</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(apr22)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"D3_apr22"</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(apr22)[<span class="dv">10</span>] <span class="ot">=</span><span class="st">"TotalV_apr22"</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>apr22<span class="ot">&lt;-</span>apr22[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">11</span><span class="sc">:</span><span class="dv">34</span>)]</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(may22)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_may21"</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(may22)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_may22"</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(may22)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_may22"</span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(may22)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"D3_may22"</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(may22)[<span class="dv">10</span>] <span class="ot">=</span><span class="st">"TotalV_may22"</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>may22<span class="ot">&lt;-</span>may22[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">11</span><span class="sc">:</span><span class="dv">34</span>)]</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jun22)[<span class="dv">6</span>] <span class="ot">=</span><span class="st">"NotYetV_jun21"</span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jun22)[<span class="dv">7</span>] <span class="ot">=</span><span class="st">"D1_jun22"</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jun22)[<span class="dv">8</span>] <span class="ot">=</span><span class="st">"D2_jun22"</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jun22)[<span class="dv">9</span>] <span class="ot">=</span><span class="st">"D3_jun22"</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(jun22)[<span class="dv">10</span>] <span class="ot">=</span><span class="st">"TotalV_jun22"</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>jun22<span class="ot">&lt;-</span>jun22[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">11</span><span class="sc">:</span><span class="dv">34</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For column 1 to 5, It shows a constant rows names across all the months. Furthermore, I will keep column 6 to 9 for every month as it has done a rowsum across dose 1 and dose 2 for all the categories for us. Take note from march onwards there is dose 3, thus we need to change range from 9 to 10.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># we will repeat this code for all the months but remember we have to change the month name</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine <span class="ot">&lt;-</span>jul[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>)]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, aug21, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, sep21, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, oct21, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, nov21, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, dec21, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, jan22, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, feb22, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, mar22, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, apr22, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, may22, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>FY21_22Vaccine<span class="ot">&lt;-</span> <span class="fu">left_join</span>(FY21_22Vaccine, jun22, <span class="at">by=</span><span class="st">"KELURAHAN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We will be using FY21_22Vaccine data frame from now on.</p>
+<p>After tidying data for aspatial, lets import geospatial data. The projected coordinate system is:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/pic3.png" class="img-fluid figure-img" width="484"></p>
+</figure>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>jakarta <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial"</span>, </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">layer =</span> <span class="st">"BATAS_DESA_DESEMBER_2019_DUKCAPIL_DKI_JAKARTA"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">23845</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `BATAS_DESA_DESEMBER_2019_DUKCAPIL_DKI_JAKARTA' from data source 
+  `C:\yifei-alpaca\IS415-GAA\Take-home_Ex\Take-home_Ex02\data\geospatial' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 269 features and 161 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 106.3831 ymin: -6.370815 xmax: 106.9728 ymax: -5.184322
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>jakarta <span class="ot">&lt;-</span> jakarta[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Columns to keep:</p>
+<ul>
+<li><p>KODE DESA = SUB DISTRICT CODE</p></li>
+<li><p>DESA = SUB DISTRICT</p></li>
+<li><p>KODE = CODE</p></li>
+<li><p>PROVINISI = PROVINCE</p></li>
+<li><p>KAB KOTA= NSEW REGION</p></li>
+<li><p>KECAMATAN = DISTRICT</p></li>
+<li><p>DESA_KELUR = SUB DISTRICT (can be removed same value as DESA)</p></li>
+<li><p>JUMLAH_PEN = TOTAL POPULATION</p></li>
+</ul>
+<p>The jakarta data frame contains population number on a district level. We will do a basic EDA to understand the data more.</p>
+</section>
+<section id="exploratory-data-analysis-eda" class="level1">
+<h1>Exploratory Data Analysis (EDA)</h1>
+<p>Let’s plot the population map! And look there are regions that is outside of Jakarta, below we will be excluding them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(jakarta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>As mentioned in the requirement, we should exclude all the outer islands from the DKI Jakarta sf data frame. we can check based on regions, if its not in Jakarta, we should remove them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(jakarta<span class="sc">$</span>KAB_KOTA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "JAKARTA BARAT"    "JAKARTA PUSAT"    "KEPULAUAN SERIBU" "JAKARTA UTARA"   
+[5] "JAKARTA TIMUR"    "JAKARTA SELATAN"  NA                </code></pre>
+</div>
+</div>
+<p>In the above result, KEPULAUAN SERIBU is the <strong>Thousand Islands</strong> and is a chain of islands to the north of Jakarta’s coast which is out of our analysis interest.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>jakarta<span class="ot">&lt;-</span> <span class="fu">filter</span>(jakarta, KAB_KOTA <span class="sc">!=</span> <span class="st">"KEPULAUAN SERIBU"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Plot the latest data frame</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(jakarta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="joining-the-attribute-data-and-geospatial-data" class="level2">
+<h2 class="anchored" data-anchor-id="joining-the-attribute-data-and-geospatial-data">Joining the attribute data and geospatial data</h2>
+<p>Before we can perform georelational join, one extra step is required to check which column can be join together. After looking at both dataset, we can join by KODE KELURAHAN in FY21_22Vaccine to CODE_DESA in jakarta dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>jakarta_vaccine <span class="ot">&lt;-</span> <span class="fu">left_join</span>(jakarta, FY21_22Vaccine,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"KODE_DESA"</span> <span class="ot">=</span> <span class="st">"KODE KELURAHAN"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Convert to sf objects</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>jakarta_vaccine <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(jakarta_vaccine)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section"></h2>
+<p>Choropleth Mapping Geospatial Data using tmap</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(jakarta_vaccine, </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"KAB_KOTA"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li><p>BARAT = WEST</p></li>
+<li><p>PUSAT = CENTER</p></li>
+<li><p>SELATANT = SOUTH</p></li>
+<li><p>TIMUR = EAST</p></li>
+<li><p>UTARA = NORTH</p></li>
+</ul>
+<section id="population-choropleth-map" class="level3">
+<h3 class="anchored" data-anchor-id="population-choropleth-map">Population choropleth map</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(jakarta_vaccine, </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"JUMLAH_PEN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>As we can see from the graph above, the west side of Jakarta is more dense as compared to the rest of the region. This shows that there are more population in the west area followed by east area.</p>
+<p>Lets visualize our combined data in terms of total dose 1,2 and 3. a basic goal of a classification scheme is to group together similar observations and split apart observations that are substantially different.</p>
+<p>Based on the skewness below, we can see that all more positively skewed towards the right which means it is not appropriate to use equal methods.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_jul21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8814528</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_aug21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.005361</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_sep21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.045357</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_oct21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.041591</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_nov21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.047173</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_dec21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.050825</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_jan22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.050915</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_feb22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.053374</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_mar22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.033162</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_apr22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.0492</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_may22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.044524</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(jakarta_vaccine<span class="sc">$</span>TotalV_jun22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.043669</code></pre>
+</div>
+</div>
+<p>In the following code chunck, I will be using Natural Breaks (Jenks) method and will be classifying into 6 classes for my analysis. Natural Breaks are good for mapping values that are not evenly distributed on a histogram which is is suitable in our case.</p>
+<p>The below code is a function to help us iterate multiple times, limiting the amount of large code.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>jenks_plot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, varname) {</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(jakarta_vaccine) <span class="sc">+</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(df) <span class="sc">+</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_fill</span>(varname, </span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">n=</span> <span class="dv">6</span>,</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">style =</span> <span class="st">"jenks"</span>, </span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="st">"Number of people vaccinated"</span>) <span class="sc">+</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_layout</span>(<span class="at">main.title =</span> varname,</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">main.title.position =</span> <span class="st">"center"</span>,</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">main.title.size =</span> <span class="fl">1.2</span>,</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>          <span class="at">legend.height =</span> <span class="fl">0.45</span>, </span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>          <span class="at">legend.width =</span> <span class="fl">0.35</span>,</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>          <span class="at">frame =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_borders</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>)</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Lets visualize the data in months:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_arrange</span>(<span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D1_jul21"</span>),</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D2_jul21"</span>),</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D1_aug21"</span>),</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D2_aug21"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_arrange</span>(<span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D1_sep21"</span>),</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D2_sep21"</span>),</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D1_oct21"</span>),</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D2_oct21"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_arrange</span>(<span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D1_nov21"</span>),</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D2_nov21"</span>),</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D1_dec21"</span>),</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D2_dec21"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_arrange</span>(<span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D1_jan22"</span>),</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D2_jan22"</span>),</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D1_feb22"</span>),</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>             <span class="fu">jenks_plot</span>(jakarta_vaccine, <span class="st">"D2_feb22"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li><p>do a bar chart to analysis maybe can pie chart also (later)</p></li>
+<li><p>do population analysis - see which has the most populated district (DONE)</p></li>
+<li><p>combine points and polygon for dose 1,2,3 compare them based on district and also by month (doing)</p></li>
+<li><p>see the trend by month ( maybe can do interactive map)</p></li>
+</ul>
 
 
+</section>
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
