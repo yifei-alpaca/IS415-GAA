@@ -24,7 +24,7 @@ hunan <- st_read(dsn = "data/geospatial",
 hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
 ```
 
-## Relational Join 
+## Relational Join
 
 ```{r}
 hunan_GDPPC <- left_join(hunan,hunan2012) %>%
@@ -45,7 +45,7 @@ tm_shape(hunan_GDPPC) +
 
 ```
 
-## Deriving contiguity weights Queen's method 
+## Deriving contiguity weights Queen's method
 
 ```{r}
 wm_q <- hunan_GDPPC %>%
@@ -55,7 +55,7 @@ wm_q <- hunan_GDPPC %>%
         .before = 1)
 ```
 
-## Computing Global Moran I 
+## Computing Global Moran I
 
 ```{r}
 moranI <- global_moran(wm_q$GDPPC,
@@ -72,7 +72,7 @@ global_moran_test(wm_q$GDPPC,
                   )
 ```
 
-## Performing Global Moran I permutation test 
+## Performing Global Moran I permutation test
 
 ```{r}
 set.seed(1234)
@@ -82,7 +82,7 @@ global_moran_perm(wm_q$GDPPC,
                   nsim =99)
 ```
 
-## Computing Local Moran I 
+## Computing Local Moran I
 
 unnest() is important
 
@@ -130,7 +130,7 @@ tm_shape(lisa_sig) +
   tm_borders(alpha= 0.4) 
 ```
 
-## Hot and Cold spot analysis 
+## Hot and Cold spot analysis
 
 ```{r}
 HCSA <- wm_q %>% 
@@ -152,7 +152,7 @@ tm_shape(HCSA) +
   tm_view(set.zoom.limits = c(6,8))
 ```
 
-## Emerging hotspot analysis 
+## Emerging hotspot analysis
 
 can refer to megan's work
 
@@ -181,7 +181,7 @@ GDPPC_nb <- GDPPC_st %>%
   set_wts("wt")
 ```
 
-## Computing Gi 
+## Computing Gi
 
 ```{r}
 gi_star <- GDPPC_nb %>% 

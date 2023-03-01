@@ -20,14 +20,14 @@ editor: visual
 # Load R packages
 
 ```{r}
-pacman::p_load(dplyr, sf, spdep, tmap, tidyverse, readxl, ggplot2,moments)
+pacman::p_load(dplyr, sf, spdep, tmap, tidyverse, readxl, ggplot2,moments,plotly, sfdep)
 ```
 
 # Getting started
 
 At first, I have loaded the beginning month of the data as shown below:
 
-![](images/pic1.png){fig-align="center"}
+![](data/images/pic1.png){fig-align="center"}
 
 However, July 2021 has only 21 variables. I decided to to further research. Based on research, there was a change in the category of vaccination recipient in DKI Jakarta starting from 4 July 2021 which they have mentioned on the website itself [here](https://riwayat-file-vaksinasi-dki-jakarta-jakartagis.hub.arcgis.com/). Hence, I have decided to change the data to end of the month for easier analysis.
 
@@ -48,7 +48,7 @@ may22<- read_excel("data/aspatial/Mei 2022.xlsx")
 jun22<- read_excel("data/aspatial/Juni 2022.xlsx")
 ```
 
-![](images/pic2.png){fig-align="center"}
+![](data/images/pic2.png){fig-align="center"}
 
 After analyzing the dataset, there are different number of variables.
 
@@ -81,7 +81,7 @@ Columns to keep:
 
 -   TOTAL VAKSIN DIBERIKAN = TOTAL VACCINE GIVEN
 
-Change column
+Change column name:
 
 ```{r}
 colnames(jul)[6] ="NotYetV_jul21"
@@ -187,12 +187,10 @@ We will be using FY21_22Vaccine data frame from now on.
 
 After tidying data for aspatial, lets import geospatial data. The projected coordinate system is:
 
-![](images/pic3.png){fig-align="center" width="484"}
-
 ```{r}
 jakarta <- st_read(dsn = "data/geospatial", 
                 layer = "BATAS_DESA_DESEMBER_2019_DUKCAPIL_DKI_JAKARTA") %>%
-  st_transform(crs = 23845)
+  st_transform(crs = 4326)
 
 
 jakarta <- jakarta[c(1:9)]
@@ -244,7 +242,7 @@ Plot the latest data frame
 qtm(jakarta)
 ```
 
-## Joining the attribute data and geospatial data 
+## Joining the attribute data and geospatial data
 
 Before we can perform georelational join, one extra step is required to check which column can be join together. After looking at both dataset, we can join by KODE KELURAHAN in FY21_22Vaccine to CODE_DESA in jakarta dataset.
 
@@ -259,8 +257,7 @@ Convert to sf objects
 jakarta_vaccine <- st_as_sf(jakarta_vaccine)
 ```
 
-## 
-Choropleth Mapping Geospatial Data using tmap 
+# Choropleth Mapping Geospatial Data using tmap
 
 ```{r}
 tmap_mode("plot")
@@ -278,7 +275,7 @@ qtm(jakarta_vaccine,
 
 -   UTARA = NORTH
 
-### Population choropleth map
+## Population choropleth map
 
 ```{r}
 tmap_mode("plot")
@@ -288,23 +285,40 @@ qtm(jakarta_vaccine,
 
 As we can see from the graph above, the west side of Jakarta is more dense as compared to the rest of the region. This shows that there are more population in the west area followed by east area.
 
-Lets visualize our combined data in terms of total dose 1,2 and 3. a basic goal of a classification scheme is to group together similar observations and split apart observations that are substantially different.
+## Visualizing Dose 1 to 3
 
-Based on the skewness below, we can see that all more positively skewed towards the right which means it is not appropriate to use equal methods.
+Lets visualize our combined data in terms of total dose 1,2 and 3. A basic goal of a classification scheme is to group together similar observations and split apart observations that are substantially different.
+
+Based on the skewness below, we can see that all more positively skewed towards the right which means it is not appropriate to use equal and quartile methods.
 
 ```{r}
-skewness(jakarta_vaccine$TotalV_jul21)
-skewness(jakarta_vaccine$TotalV_aug21)
-skewness(jakarta_vaccine$TotalV_sep21)
-skewness(jakarta_vaccine$TotalV_oct21)
-skewness(jakarta_vaccine$TotalV_nov21)
-skewness(jakarta_vaccine$TotalV_dec21)
-skewness(jakarta_vaccine$TotalV_jan22)
-skewness(jakarta_vaccine$TotalV_feb22)
-skewness(jakarta_vaccine$TotalV_mar22)
-skewness(jakarta_vaccine$TotalV_apr22)
-skewness(jakarta_vaccine$TotalV_may22)
-skewness(jakarta_vaccine$TotalV_jun22)
+skewness(jakarta_vaccine$D1_jul21)
+skewness(jakarta_vaccine$D1_aug21)
+skewness(jakarta_vaccine$D1_sep21)
+skewness(jakarta_vaccine$D1_oct21)
+skewness(jakarta_vaccine$D1_nov21)
+skewness(jakarta_vaccine$D1_dec21)
+skewness(jakarta_vaccine$D1_jan22)
+skewness(jakarta_vaccine$D1_feb22)
+skewness(jakarta_vaccine$D1_mar22)
+skewness(jakarta_vaccine$D1_apr22)
+skewness(jakarta_vaccine$D1_may22)
+skewness(jakarta_vaccine$D1_jun22)
+```
+
+```{r}
+skewness(jakarta_vaccine$D2_jul21)
+skewness(jakarta_vaccine$D2_aug21)
+skewness(jakarta_vaccine$D2_sep21)
+skewness(jakarta_vaccine$D2_oct21)
+skewness(jakarta_vaccine$D2_nov21)
+skewness(jakarta_vaccine$D2_dec21)
+skewness(jakarta_vaccine$D2_jan22)
+skewness(jakarta_vaccine$D2_feb22)
+skewness(jakarta_vaccine$D2_mar22)
+skewness(jakarta_vaccine$D2_apr22)
+skewness(jakarta_vaccine$D2_may22)
+skewness(jakarta_vaccine$D2_jun22)
 ```
 
 In the following code chunck, I will be using Natural Breaks (Jenks) method and will be classifying into 6 classes for my analysis. Natural Breaks are good for mapping values that are not evenly distributed on a histogram which is is suitable in our case.
@@ -319,14 +333,14 @@ jenks_plot <- function(df, varname) {
     tm_fill(varname, 
           n= 6,
           style = "jenks", 
-          title = "Number of people vaccinated") +
+          title = "No of people vaccinated") +
     tm_layout(main.title = varname,
           main.title.position = "center",
           main.title.size = 1.2,
           legend.height = 0.45, 
           legend.width = 0.35,
           frame = TRUE) +
-    tm_borders(alpha = 0.5)
+    tm_borders(alpha = 0.2)
 }
 ```
 
@@ -361,10 +375,390 @@ tmap_arrange(jenks_plot(jakarta_vaccine, "D1_jan22"),
              jenks_plot(jakarta_vaccine, "D2_feb22"))
 ```
 
--   do a bar chart to analysis maybe can pie chart also (later)
+```{r}
+tmap_arrange(jenks_plot(jakarta_vaccine, "D1_mar22"),
+             jenks_plot(jakarta_vaccine, "D2_mar22"),
+             jenks_plot(jakarta_vaccine, "D1_apr22"),
+             jenks_plot(jakarta_vaccine, "D2_apr22"))
+```
 
--   do population analysis - see which has the most populated district (DONE)
+```{r}
+tmap_arrange(jenks_plot(jakarta_vaccine, "D1_may22"),
+             jenks_plot(jakarta_vaccine, "D2_may22"),
+             jenks_plot(jakarta_vaccine, "D1_jun22"),
+             jenks_plot(jakarta_vaccine, "D2_jun22"))
+```
 
--   combine points and polygon for dose 1,2,3 compare them based on district and also by month (doing)
+As compare the charts above, it is a little hard to visualized. We will be using a gif maker tool to compile the images and see the difference. (*this idea credits to our senior megan*) [ezgif](https://ezgif.com/)
+
+The GIF below is for Dose 1 by months. Based on the image, we can see that July 2021 is particularly more dense as compared to other months.
+
+![](/_site/Take-home_Ex/Take-home_Ex02/images/d1/ezgif.com-gif-maker.gif){fig-align="center" width="640"}
+
+The GIF below shows Dose 2 by months. Based on the image, we can see that July and August 2021 is particularly more dense as compared to other months.
+
+![](/_site/Take-home_Ex/Take-home_Ex02/images/d2/ezgif.com-gif-maker%20(1).gif){fig-align="center"}
+
+The GIF below shows Dose 3 by months. Based on the image, we can see that April to Jun 2022 are particularly more dense compared to other months.
+
+![](/_site/Take-home_Ex/Take-home_Ex02/images/d3/ezgif.com-gif-maker.gif){fig-align="center"}
+
+The COVID-19 vaccination program in Jakarta, Indonesia started on January 13, 2021. The first doses of the vaccine were given to healthcare workers in several hospitals across Jakarta. The vaccination program was rolled out in phases, with priority given to healthcare workers, public service officers, and the elderly population. On 1 April 2021, the Ministry of Health announced the postponement of the vaccination schedule for the general public to June or July because of a vaccine shortage. On 14 July, the daily number of people vaccinated crossed two million mark for the first time. This could probably show that why July 2021 is more dense for Dose 1 and 2. We can see that **Jakarta Barat** which is the **west area** has a higher vaccination rate.
+
+We can also see the difference in Dose 1 and Dose 2 rate, the threshold are much higher for dose 1 as compared to dose 2. One factor is vaccine hesitancy or a lack of access to the second dose. Some individuals may be hesitant to get the second dose due to concerns about side effects, while others may face barriers in accessing the vaccine, such as limited availability or difficulty scheduling appointments.
+
+For Dose 3, we can see an interesting increase dense pattern from April 2022 to Jun 2022. As time goes by, studies have shown that vaccination can increase protection against COVID-19 and its variants, particularly among older adults and those with weakened immune systems. It can help increase the level of antibodies in the body, which can provide added protection against the virus. Thus, this probably drives residents to take booster shots. Another factor could be the government may have expanded the eligibility criteria for booster shots, allowing more people to receive them. Initially, the booster shots were provided to healthcare workers and elderly individuals, but the government may have opened up the booster program to other groups.
+
+## Visualizing Overall Vaccination rate
+
+Since we have visualized the Dose pattern. Now let's find out which area has the most number of people who have vaccinated. But before that, we can check the skewness of the data.
+
+Looks like mostly all are more positively skewed towards the right which means it is not appropriate to use equal methods.
+
+```{r}
+skewness(jakarta_vaccine$TotalV_jul21)
+skewness(jakarta_vaccine$TotalV_aug21)
+skewness(jakarta_vaccine$TotalV_sep21)
+skewness(jakarta_vaccine$TotalV_oct21)
+skewness(jakarta_vaccine$TotalV_nov21)
+skewness(jakarta_vaccine$TotalV_dec21)
+skewness(jakarta_vaccine$TotalV_jan22)
+skewness(jakarta_vaccine$TotalV_feb22)
+skewness(jakarta_vaccine$TotalV_mar22)
+skewness(jakarta_vaccine$TotalV_apr22)
+skewness(jakarta_vaccine$TotalV_may22)
+skewness(jakarta_vaccine$TotalV_jun22)
+```
+
+Similar as Dose 1 to 3, we will use Jenks classification methods. Since we have created a function earlier, we can just map it accordingly.
+
+```{r}
+tmap_mode("plot")
+tmap_arrange(jenks_plot(jakarta_vaccine, "TotalV_jul21"),
+             jenks_plot(jakarta_vaccine, "TotalV_aug21"),
+             jenks_plot(jakarta_vaccine, "TotalV_sep21"),
+             jenks_plot(jakarta_vaccine, "TotalV_oct21"))
+```
+
+```{r}
+tmap_mode("plot")
+tmap_arrange(jenks_plot(jakarta_vaccine, "TotalV_nov21"),
+             jenks_plot(jakarta_vaccine, "TotalV_dec21"),
+             jenks_plot(jakarta_vaccine, "TotalV_jan22"),
+             jenks_plot(jakarta_vaccine, "TotalV_feb22"))
+```
+
+```{r}
+tmap_mode("plot")
+tmap_arrange(jenks_plot(jakarta_vaccine, "TotalV_mar22"),
+             jenks_plot(jakarta_vaccine, "TotalV_apr22"),
+             jenks_plot(jakarta_vaccine, "TotalV_may22"),
+             jenks_plot(jakarta_vaccine, "TotalV_jun22"))
+```
+
+Let us check for the sub-disrticts with the highest cases rate at the early and later stage.
+
+Early stage:
+
+```{r}
+jakarta_vaccine$KELURAHAN[which.max(jakarta_vaccine$TotalV_jul21)]
+```
+
+Later stage:
+
+```{r}
+jakarta_vaccine$KELURAHAN[which.max(jakarta_vaccine$TotalV_jun22)]
+```
+
+Based on the which.max function, it gave us the same results that district KAPUK has the highest vaccination rate consistently.
+
+For curiosity sake, lets find out which has the lowest vaccination rate.
+
+```{r}
+jakarta_vaccine$KELURAHAN[which.min(jakarta_vaccine$TotalV_jul21)]
+```
+
+```{r}
+jakarta_vaccine$KELURAHAN[which.min(jakarta_vaccine$TotalV_jun22)]
+```
+
+With the results shown above, we can say that the higher the population, the higher the vaccination rate.
+
+# Local Gi Analysis
+
+-   Compute local Gi\* values of the monthly vaccination rate,
+
+-   Display the Gi\* maps of the monthly vaccination rate. The maps should only display the significant (i.e. p-value \< 0.05)
+
+-   With reference to the analysis results, draw statistical conclusions (not more than 250 words).
+
+Firstly, we need to construct a spatial weights of the study area. The spatial weights is used to define the neighbourhood relationships between the geographical units (i.e. county) in the study area. The below function would build a neighbours list based on regions with contiguous boundaries.
+
+In this TakeHome 2, we will be using Queen contiguity weight matrix. Using a Queen contiguity weight matrix can help to identify clusters of similar values or patterns in a spatial dataset, which has the tendency for nearby geographic units to be more similar to each other than to more distant units.
+
+```{r}
+jv_q <- poly2nb(jakarta, 
+                queen=TRUE)
+summary(jv_q)
+```
+
+The summary report above shows that there are 261 area units in Jakarta. The most connected area unit has 11 neighbours which is in the West area of Jakarta.There are 5 area units with only one neighbours.
+
+In the below code chuck, we can plot the area to show the neighbours based on the largest number of contiguities.
+
+```{r}
+#neighbour distance
+cards <- card(jv_q)
+maxconts <- which(cards == max(cards))
+if(length(maxconts) > 1) maxconts <- maxconts[1]
+fg <- rep("grey", length(cards))
+fg[maxconts] <- "red"
+fg[jv_q[[maxconts]]] <- "green"
+plot(st_geometry(jakarta_vaccine), col=fg)
+title(main="Sub District with largest number of contiguities")
+```
+
+The code below list all the neighbouring polygons of the ID we call. So for polygon ID 1: 2,39,152, 158 and 166 are all its neighbours. We can find out the name of the ID as well, lets check for the most connected region which is ID 174.
+
+```{r}
+jv_q[[174]]
+```
+
+```{r}
+jakarta_vaccine$KELURAHAN[174]
+```
+
+We can also check all the list of 261 area neighbours
+
+```{r}
+str(jv_q)
+```
+
+Next, we need to assign weights to each neighboring polygon. The function adds a weights list with values given by the coding scheme style chosen. B is the basic binary coding, W is row standardised (sums over all links to n), C is globally standardised (sums over all links to n), U is equal to C divided by the number of neighbours (sums over all links to unity), while S is the variance-stabilizing coding scheme proposed by Tiefelsdorf et al
+
+```{r}
+#this is the weight
+rsjv_q <- nb2listw(jv_q, 
+                   style="W", 
+                   zero.policy = TRUE)
+rsjv_q
+```
+
+## 
+Computing Local Gi statistics 
+
+Unlike global measures that summarize the overall spatial autocorrelation of the study area in one single value, local measures of spatial association identify local clusters (observations nearby have similar attribute values) or spatial outliers (observations nearby have different attribute values).
+
+In the below section we will then check if we can find the sub district in which the
+**relatively higher number of vaccination** rate is significantly higher.
+
+we will be using localG() functions to compute the Local Gi statistic.
+
+Local Gi stats allows the detection of a local concentration of high and low values in neighboring objects and studies the statistical significance of that dependence.
+
+The analysis will be conducted with the previous variable (jv_q) and the neighborhood matrix -- Queen, row standardized (according to contiguity)
+
+```{r}
+set.seed(999)
+localgi_jul21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_aug21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_sep21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_oct21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_nov21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_dec21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_jan22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_feb22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_mar22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_apr22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_may22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_jun22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+
+```
+
+```{r}
+jv.localGi_jul21 <- cbind(jakarta_vaccine,localgi_jul21)
+jv.localGi_aug21 <- cbind(jakarta_vaccine,localgi_aug21)
+jv.localGi_sep21 <- cbind(jakarta_vaccine,localgi_sep21)
+jv.localGi_oct21 <- cbind(jakarta_vaccine,localgi_oct21)
+jv.localGi_nov21 <- cbind(jakarta_vaccine,localgi_nov21)
+jv.localGi_dec21 <- cbind(jakarta_vaccine,localgi_dec21)
+jv.localGi_jan22 <- cbind(jakarta_vaccine,localgi_jan22)
+jv.localGi_feb22 <- cbind(jakarta_vaccine,localgi_feb22)
+jv.localGi_mar22 <- cbind(jakarta_vaccine,localgi_mar22)
+jv.localGi_apr22 <- cbind(jakarta_vaccine,localgi_apr22)
+jv.localGi_may22 <- cbind(jakarta_vaccine,localgi_may22)
+jv.localGi_jun22 <- cbind(jakarta_vaccine,localgi_jun22)
+```
+
+## Mapping Local Gi with sig \< 0.5 
+
+```{r}
+tmap_mode("plot")
+tm_shape(jv.localGi_jul21) +
+    tm_polygons() +
+    tm_shape(jv.localGi_jul21 %>% filter(p_value < 0.05)) +
+    tm_fill(col= "p_value",
+             palette = "Paired") +
+    tm_borders(alpha = 0.4) +
+    tm_layout(main.title = paste("local Gi p-value <0.05 JUL21"),
+              main.title.size = 1)
+```
+
+## Create functions and Maps
+
+```{r}
+localgi_plot <- function(df, varname) {
+  tm_shape(df) +
+    tm_polygons() +
+  tm_shape(df %>% filter(p_value < 0.05)) +
+    tm_fill(varname, 
+          palette = "Paired") +
+    tm_layout(
+          legend.height = 0.45, 
+          legend.width = 0.35,
+          frame = TRUE) +
+    tm_borders(alpha = 0.2)
+}
+```
+
+```{r}
+tmap_arrange(localgi_plot(jv.localGi_jul21, "p_value"),
+             localgi_plot(jv.localGi_aug21, "p_value"),
+             localgi_plot(jv.localGi_sep21, "p_value"),
+             localgi_plot(jv.localGi_oct21, "p_value")
+             )
+  
+```
+
+```{r}
+tmap_arrange(localgi_plot(jv.localGi_nov21, "p_value"),
+             localgi_plot(jv.localGi_dec21, "p_value"),
+             localgi_plot(jv.localGi_jan22, "p_value"),
+             localgi_plot(jv.localGi_feb22, "p_value")
+             )
+```
+
+```{r}
+tmap_arrange(localgi_plot(jv.localGi_mar22, "p_value"),
+             localgi_plot(jv.localGi_apr22, "p_value"),
+             localgi_plot(jv.localGi_may22, "p_value"),
+             localgi_plot(jv.localGi_jun22, "p_value")
+             )
+```
+
+Let's put them in to a gif for better comparison
+
+![](data/images/localgi/ezgif.com-gif-maker.gif){width="676"}
+
+
+
+
+A tmap above displays the total vaccine parameter by month estimates for vaccination rates in sub district that are statistically significant (*p* \< 0.05); However, based on the tmap above, we can see that Jakarta Barat & Pusat the west & central area has been constantly very significant over a year. As for the grey area, it shows not significant.
+
+## Hot and Cold Spot for Local Gi 
+
+The term \'hot spot\' has been used generically across disciplines to describe a region or value that is higher relative to its surroundings.
+
+It looks at neighbours within a defined proximity to identify where either high or low values clutser spatially. Here, statistically significant hot-spots are recognised as areas of high values where other areas within a neighbourhood range also share high values too.
+
+The analysis consists of three steps:
+
+-   Deriving spatial weight matrix
+
+-   Computing Gi statistics
+
+-   Mapping Gi statistics
+
+In this take home, we will be using **fixed distance**. As refer to the slides deck 7, Prof Kam mention that
+
+"
+The fixed distance method works well for point data. It is often a good option for polygon
+data when there is a large variation in polygon size (**very large polygons at the edge of the
+study area and very small polygons at the center of the study area**, for example), and you
+want to ensure a consistent scale of analysis.\]
+"
+
+In Jakarta map, it shows a large polygons at the edge and smaller ones at the center.
+
+But first we need to derive the centroid first.
+
+```{r}
+jakarta <- st_transform(jakarta, 4326)
+```
+
+```{r}
+longitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[1]])
+```
+
+```{r}
+latitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[2]])
+```
+
+```{r}
+coords <- cbind(longitude, latitude)
+```
+
+Next we need to determine the cut-off distance. we need to determine the upper limit for distance band.
+
+```{r}
+#coords <- coordinates(hunan)
+k1 <- knn2nb(knearneigh(coords))
+k1dists <- unlist(nbdists(k1, coords, longlat = TRUE))
+summary(k1dists)
+```
+
+## Computing Fixed distance weight matrix
+
+```{r}
+wm_d62 <- dnearneigh(coords, 0, 62, longlat = TRUE)
+wm_d62
+```
+
+```{r}
+localgi_HCplot <- function(df, varname) {
+  tm_shape(df) +
+    tm_polygons() +
+  tm_shape(df %>% filter(p_value < 0.05)) +
+    tm_fill(varname,
+            palette = "-RdBu") +
+    tm_layout(
+          legend.height = 0.45, 
+          legend.width = 0.35,
+          frame = TRUE) +
+    tm_borders(alpha = 0.2)
+}
+```
+
+```{r}
+tmap_arrange(localgi_HCplot(jv.localGi_jul21, "gi_star"),
+             localgi_HCplot(jv.localGi_aug21, "gi_star"),
+             localgi_HCplot(jv.localGi_sep21, "gi_star"),
+             localgi_HCplot(jv.localGi_oct21, "gi_star")
+             )
+```
+
+```{r}
+tmap_arrange(localgi_HCplot(jv.localGi_nov21, "gi_star"),
+             localgi_HCplot(jv.localGi_dec21, "gi_star"),
+             localgi_HCplot(jv.localGi_jan22, "gi_star"),
+             localgi_HCplot(jv.localGi_feb22, "gi_star")
+             )
+```
+
+```{r}
+tmap_arrange(localgi_HCplot(jv.localGi_mar22, "gi_star"),
+             localgi_HCplot(jv.localGi_apr22, "gi_star"),
+             localgi_HCplot(jv.localGi_may22, "gi_star"),
+             localgi_HCplot(jv.localGi_jun22, "gi_star")
+             )
+```
+
+![](data/images/hotcold/ezgif.com-gif-maker%20(1).gif){width="688"}
+
+For hot and cold spot analysis,
+
+-   Hotspot emerging
+
+-   https://gistbok.ucgis.org/bok-topics/2022-quarter-04/local-measures-spatial-association
 
 -   see the trend by month ( maybe can do interactive map)
