@@ -20,7 +20,7 @@ editor: visual
 # Load R packages
 
 ```{r}
-pacman::p_load(dplyr, sf, spdep, tmap, tidyverse, readxl, ggplot2,moments,plotly, sfdep)
+pacman::p_load(dplyr, sf, spdep, tmap, tidyverse, readxl, ggplot2,moments,plotly, sfdep,Kendall, spacetime, lubridate,anytime)
 ```
 
 # Getting started
@@ -192,7 +192,6 @@ jakarta <- st_read(dsn = "data/geospatial",
                 layer = "BATAS_DESA_DESEMBER_2019_DUKCAPIL_DKI_JAKARTA") %>%
   st_transform(crs = 4326)
 
-
 jakarta <- jakarta[c(1:9)]
 ```
 
@@ -262,7 +261,8 @@ jakarta_vaccine <- st_as_sf(jakarta_vaccine)
 ```{r}
 tmap_mode("plot")
 qtm(jakarta_vaccine, 
-    fill = "KAB_KOTA")
+    fill = "KAB_KOTA"
+    )
 ```
 
 -   BARAT = WEST
@@ -277,13 +277,115 @@ qtm(jakarta_vaccine,
 
 ## Population choropleth map
 
+Making the chart interactive so that we can see which sub district has the largest population and we can analyse it further in the below section.
+
 ```{r}
-tmap_mode("plot")
+tmap_mode("view")
+
 qtm(jakarta_vaccine, 
-    fill = "JUMLAH_PEN")
+    fill = "JUMLAH_PEN",
+        text= "KELURAHAN",
+    text.size = 0.5)
+
+tmap_mode("plot")
 ```
 
-As we can see from the graph above, the west side of Jakarta is more dense as compared to the rest of the region. This shows that there are more population in the west area followed by east area.
+```{r}
+jul21total = data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month =  ymd("2021-07-31"),
+                           TotalDose = jakarta_vaccine$TotalV_jul21,
+                          population = jakarta_vaccine$JUMLAH_PEN,
+                           geometry = jakarta_vaccine$geometry
+                           )
+
+aug21total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-08-31"),
+                           TotalDose = jakarta_vaccine$TotalV_aug21,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+sep21total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-09-30"),
+                           TotalDose = jakarta_vaccine$TotalV_sep21,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+oct21total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-10-31"),
+                           TotalDose = jakarta_vaccine$TotalV_oct21,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+nov21total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-11-30"),
+                           TotalDose = jakarta_vaccine$TotalV_nov21,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+dec21total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-12-31"),
+                           TotalDose = jakarta_vaccine$TotalV_dec21,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+
+jan22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-01-31"),
+                           TotalDose = jakarta_vaccine$TotalV_jan22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+feb22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-02-28"),
+                           TotalDose = jakarta_vaccine$TotalV_feb22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+mar22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-03-31"),
+                           TotalDose = jakarta_vaccine$TotalV_mar22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+apr22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-04-30"),
+                           TotalDose = jakarta_vaccine$TotalV_apr22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+may22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-05-31"),
+                           TotalDose = jakarta_vaccine$TotalV_may22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+jun22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-06-30"),
+                           TotalDose = jakarta_vaccine$TotalV_jun22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+```
+
+```{r}
+total_vaccine <- rbind(jul21total, aug21total,sep21total,oct21total,nov21total,dec21total,jan22total,feb22total,mar22total,apr22total,may22total,jun22total)
+```
+
+As we know that there are 200 plus subdistrict,I decided to plot TOP 5 and BOTTOM 5 populated sub district.
+
+```{r}
+
+agg_tbl <- total_vaccine %>% group_by(SubDistrict) %>% 
+  summarise(sum_pop = sum(population),
+            .groups = 'drop')
+agg_tbl
+
+agg_tbl <- agg_tbl[order(-agg_tbl$sum_pop),]
+
+
+barplot(agg_tbl$sum_pop[1:5],names.arg=agg_tbl$SubDistrict[1:5], cex.lab = 0.5)
+
+
+```
+
+Finding the Bottom 5 sub district
+
+```{r}
+agg_tbl <- agg_tbl[order(agg_tbl$sum_pop),]
+
+barplot(agg_tbl$sum_pop[1:5],names.arg=agg_tbl$SubDistrict[1:5], cex.lab = 0.5)
+```
+
+As we can see from the graph above, the west side of Jakarta(Kapuk, Tegal Alur, Cekareng Timur) is more dense as compared to the rest of the region. This shows that there are more population in the west area followed by east area.
 
 ## Visualizing Dose 1 to 3
 
@@ -482,6 +584,17 @@ jakarta_vaccine$KELURAHAN[which.min(jakarta_vaccine$TotalV_jul21)]
 jakarta_vaccine$KELURAHAN[which.min(jakarta_vaccine$TotalV_jun22)]
 ```
 
+```{r}
+jakarta <- st_transform(jakarta, 4326)
+longitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[1]])
+latitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[2]])
+coords <- cbind(longitude, latitude)
+```
+
+```{r}
+
+```
+
 With the results shown above, we can say that the higher the population, the higher the vaccination rate.
 
 # Local Gi Analysis
@@ -492,65 +605,84 @@ With the results shown above, we can say that the higher the population, the hig
 
 -   With reference to the analysis results, draw statistical conclusions (not more than 250 words).
 
-Firstly, we need to construct a spatial weights of the study area. The spatial weights is used to define the neighbourhood relationships between the geographical units (i.e. county) in the study area. The below function would build a neighbours list based on regions with contiguous boundaries.
+Firstly, we need to construct a spatial weights of the study area. The spatial weights is used to define the neighbourhood relationships between the geographical units (i.e. sub district) in the study area. The below function would build a neighbours list based on regions with contiguous boundaries.
 
-In this TakeHome 2, we will be using Queen contiguity weight matrix. Using a Queen contiguity weight matrix can help to identify clusters of similar values or patterns in a spatial dataset, which has the tendency for nearby geographic units to be more similar to each other than to more distant units.
+The analysis consists of three steps:
+
+-   Deriving spatial weight matrix
+
+-   Computing Gi statistics
+
+-   Mapping Gi statistics
+
+In this take home, we will be using **fixed distance**. As refer to the slides deck 7, Prof Kam mention that
+
+" The fixed distance method works well for point data. It is often a good option for polygon data when there is a large variation in polygon size (**very large polygons at the edge of the study area and very small polygons at the center of the study area**, for example), and you want to ensure a consistent scale of analysis.\]"
+
+In Jakarta map, it shows a large polygons at the edge and smaller ones at the center.
+
+But first we need to derive the centroid first.
 
 ```{r}
-jv_q <- poly2nb(jakarta, 
-                queen=TRUE)
-summary(jv_q)
+k1 <- knn2nb(knearneigh(coords))
+k1dists <- unlist(nbdists(k1, coords, longlat = TRUE))
+all.linked <- max(unlist(nbdists(k1, coords, longlat = TRUE)))
+summary(k1dists)
 ```
 
-The summary report above shows that there are 261 area units in Jakarta. The most connected area unit has 11 neighbours which is in the West area of Jakarta.There are 5 area units with only one neighbours.
+## **K nearest neighbours**
+
+Next we need to determine the cut-off distance. we need to determine the upper limit for distance band.
+
+```{r}
+fix_d <- dnearneigh(coords, 0, all.linked, longlat = TRUE)
+fix_d
+```
+
+Next, we need to assign weights to each neighboring polygon. The function adds a weights list with values given by the coding scheme style chosen. B is the basic binary coding, W is row standardised (sums over all links to n), C is globally standardised (sums over all links to n), U is equal to C divided by the number of neighbours (sums over all links to unity), while S is the variance-stabilizing coding scheme proposed by Tiefelsdorf et al. ***nb2listw()*** is used to convert the nb object into spatial weights object.
+
+```{r}
+fix_lw <- nb2listw(fix_d, style = 'W')
+summary(fix_lw)
+```
+
+The summary report above shows that there are 261 area units in Jakarta. The most connected area unit has 33 neighbours which is in the West area of Jakarta.There are 4 area units with only one neighbours.
 
 In the below code chuck, we can plot the area to show the neighbours based on the largest number of contiguities.
 
 ```{r}
 #neighbour distance
-cards <- card(jv_q)
+cards <- card(fix_d)
 maxconts <- which(cards == max(cards))
 if(length(maxconts) > 1) maxconts <- maxconts[1]
 fg <- rep("grey", length(cards))
 fg[maxconts] <- "red"
-fg[jv_q[[maxconts]]] <- "green"
-plot(st_geometry(jakarta_vaccine), col=fg)
+fg[fix_d[[maxconts]]] <- "green"
+plot(st_geometry(jakarta), col=fg)
 title(main="Sub District with largest number of contiguities")
 ```
 
-The code below list all the neighbouring polygons of the ID we call. So for polygon ID 1: 2,39,152, 158 and 166 are all its neighbours. We can find out the name of the ID as well, lets check for the most connected region which is ID 174.
+The code below list all the neighbouring polygons of the ID we call. So for polygon ID : 2,39,152, 158 and 166 are all its neighbours. We can find out the name of the ID as well, lets check for the most connected region which is ID 120.
 
 ```{r}
-jv_q[[174]]
+fix_d[[120]]
 ```
 
 ```{r}
-jakarta_vaccine$KELURAHAN[174]
+jakarta_vaccine$KELURAHAN[120]
 ```
 
 We can also check all the list of 261 area neighbours
 
 ```{r}
-str(jv_q)
+str(fix_d)
 ```
 
-Next, we need to assign weights to each neighboring polygon. The function adds a weights list with values given by the coding scheme style chosen. B is the basic binary coding, W is row standardised (sums over all links to n), C is globally standardised (sums over all links to n), U is equal to C divided by the number of neighbours (sums over all links to unity), while S is the variance-stabilizing coding scheme proposed by Tiefelsdorf et al
-
-```{r}
-#this is the weight
-rsjv_q <- nb2listw(jv_q, 
-                   style="W", 
-                   zero.policy = TRUE)
-rsjv_q
-```
-
-## 
-Computing Local Gi statistics 
+## Computing Local Gi statistics
 
 Unlike global measures that summarize the overall spatial autocorrelation of the study area in one single value, local measures of spatial association identify local clusters (observations nearby have similar attribute values) or spatial outliers (observations nearby have different attribute values).
 
-In the below section we will then check if we can find the sub district in which the
-**relatively higher number of vaccination** rate is significantly higher.
+In the below section we will then check if we can find the sub district in which the **relatively higher number of vaccination** rate is significantly higher.
 
 we will be using localG() functions to compute the Local Gi statistic.
 
@@ -560,18 +692,18 @@ The analysis will be conducted with the previous variable (jv_q) and the neighbo
 
 ```{r}
 set.seed(999)
-localgi_jul21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_aug21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_sep21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_oct21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_nov21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_dec21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_jan22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_feb22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_mar22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_apr22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_may22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
-localgi_jun22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, jv_q, rsjv_q, nsim=39)
+localgi_jul21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_aug21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_sep21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_oct21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_nov21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_dec21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_jan22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_feb22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_mar22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_apr22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_may22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_jun22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
 
 ```
 
@@ -590,17 +722,17 @@ jv.localGi_may22 <- cbind(jakarta_vaccine,localgi_may22)
 jv.localGi_jun22 <- cbind(jakarta_vaccine,localgi_jun22)
 ```
 
-## Mapping Local Gi with sig \< 0.5 
+## Mapping Local Gi with sig \< 0.5
 
 ```{r}
 tmap_mode("plot")
-tm_shape(jv.localGi_jul21) +
+tm_shape(jv.localGi_jun22) +
     tm_polygons() +
-    tm_shape(jv.localGi_jul21 %>% filter(p_value < 0.05)) +
+    tm_shape(jv.localGi_jun22 %>% filter(p_value < 0.05)) +
     tm_fill(col= "p_value",
              palette = "Paired") +
     tm_borders(alpha = 0.4) +
-    tm_layout(main.title = paste("local Gi p-value <0.05 JUL21"),
+    tm_layout(main.title = paste("local Gi p-value <0.05 JUN22"),
               main.title.size = 1)
 ```
 
@@ -648,71 +780,19 @@ tmap_arrange(localgi_plot(jv.localGi_mar22, "p_value"),
 
 Let's put them in to a gif for better comparison
 
-![](data/images/localgi/ezgif.com-gif-maker.gif){width="676"}
-
-
-
+![](data/images/localgi/ezgif.com-gif-maker.gif){fig-align="center"}
 
 A tmap above displays the total vaccine parameter by month estimates for vaccination rates in sub district that are statistically significant (*p* \< 0.05); However, based on the tmap above, we can see that Jakarta Barat & Pusat the west & central area has been constantly very significant over a year. As for the grey area, it shows not significant.
 
-## Hot and Cold Spot for Local Gi 
+## Hot and Cold Spot for Local Gi
 
-The term \'hot spot\' has been used generically across disciplines to describe a region or value that is higher relative to its surroundings.
+In this section, Hot and Cold spot will be prepared.
+
+The term 'hot spot' has been used generically across disciplines to describe a region or value that is higher relative to its surroundings.
 
 It looks at neighbours within a defined proximity to identify where either high or low values clutser spatially. Here, statistically significant hot-spots are recognised as areas of high values where other areas within a neighbourhood range also share high values too.
 
-The analysis consists of three steps:
-
--   Deriving spatial weight matrix
-
--   Computing Gi statistics
-
--   Mapping Gi statistics
-
-In this take home, we will be using **fixed distance**. As refer to the slides deck 7, Prof Kam mention that
-
-"
-The fixed distance method works well for point data. It is often a good option for polygon
-data when there is a large variation in polygon size (**very large polygons at the edge of the
-study area and very small polygons at the center of the study area**, for example), and you
-want to ensure a consistent scale of analysis.\]
-"
-
-In Jakarta map, it shows a large polygons at the edge and smaller ones at the center.
-
-But first we need to derive the centroid first.
-
-```{r}
-jakarta <- st_transform(jakarta, 4326)
-```
-
-```{r}
-longitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[1]])
-```
-
-```{r}
-latitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[2]])
-```
-
-```{r}
-coords <- cbind(longitude, latitude)
-```
-
-Next we need to determine the cut-off distance. we need to determine the upper limit for distance band.
-
-```{r}
-#coords <- coordinates(hunan)
-k1 <- knn2nb(knearneigh(coords))
-k1dists <- unlist(nbdists(k1, coords, longlat = TRUE))
-summary(k1dists)
-```
-
-## Computing Fixed distance weight matrix
-
-```{r}
-wm_d62 <- dnearneigh(coords, 0, 62, longlat = TRUE)
-wm_d62
-```
+Lets re create a function for hot and cold spot.
 
 ```{r}
 localgi_HCplot <- function(df, varname) {
@@ -755,10 +835,243 @@ tmap_arrange(localgi_HCplot(jv.localGi_mar22, "gi_star"),
 
 ![](data/images/hotcold/ezgif.com-gif-maker%20(1).gif){width="688"}
 
-For hot and cold spot analysis,
+In general, for hot spot, we can see that its is generally at Jakarta Barat which is the WEST area across the year while the cold spot are usually at Jakarta Pusat which is the CENTER area. This findings also aligns wells with the population analysis and p-value analysis in the previous section. There is a higher hot spot at the west area is probably due to a larger population living there, whereas for a higher cold spot is probably because there is a lower population living there. However, one thing got me curious to find out more is that Jakarta is the capital of Indonesia which I believed is much more urbanized as compared to other region like Medan or Surabaya etc, yet, the the cold spot area is quite high as compared to the hot spot. Does it mean that the resident is very much not convinced in getting vaccinated? or does the government did not educate or promote enough on the benefits of getting vaccinated? or is there a shortage of dose around the area? Does it mean that other regions of Indonesia has a worse results? But, we also notice that at earlier stage, cold spot is more dense as compared to the later stage. This shows that as time goes by, the results has improve probably due to the wide spread of news that the vaccine has proved to be effective giving health benefits to the people.
 
--   Hotspot emerging
+# Emerging Hot Spot Analysis(EHSA)
 
--   https://gistbok.ucgis.org/bok-topics/2022-quarter-04/local-measures-spatial-association
+In this section we will be using Mann Kendal Trend Test. A **Mann-Kendall Trend Test** is used to determine whether or not a trend exists in time series data.
 
--   see the trend by month ( maybe can do interactive map)
+The hypotheses for the test are as follows:
+
+**H~0~ (null hypothesis):** There is no trend present in the data.
+
+**H~A~ (alternative hypothesis):** A trend is present in the data. (This could be a positive or negative trend)
+
+If the p-value of the test is lower than some significance level (common choices are 0.10, 0.05, and 0.01), then there is statistically significant evidence that a trend is present in the time series data.
+
+But before we continue, we can transpose the data in a way that only has column of Sub District, Month and gi_star for all the month.
+
+```{r}
+jul21total = data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-07-31"),
+                           gi_star = jv.localGi_jul21$gi_star
+                           )
+aug21total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-08-31"),
+                           gi_star = jv.localGi_aug21$gi_star
+                      )
+sep21total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-09-30"),
+                           gi_star = jv.localGi_sep21$gi_star)
+oct21total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-10-31"),
+                           gi_star = jv.localGi_oct21$gi_star)
+nov21total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-11-30"),
+                           gi_star = jv.localGi_nov21$gi_star)
+dec21total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-12-31"),
+                           gi_star = jv.localGi_dec21$gi_star)
+
+jan22total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-01-31"),
+                           gi_star = jv.localGi_jan22$gi_star)
+feb22total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-02-28"),
+                           gi_star = jv.localGi_feb22$gi_star)
+mar22total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-03-31"),
+                           gi_star = jv.localGi_mar22$gi_star)
+apr22total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-04-30"),
+                           gi_star = jv.localGi_apr22$gi_star)
+may22total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-05-31"),
+                           gi_star = jv.localGi_may22$gi_star)
+jun22total <- data.frame(DESA = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-06-30"),
+                           gi_star = jv.localGi_jun22$gi_star)
+```
+
+```{r}
+total_vaccine_EHSA <- rbind(jul21total, aug21total,sep21total,oct21total,nov21total,dec21total,jan22total,feb22total,mar22total,apr22total,may22total,jun22total)
+```
+
+```{r}
+vacc_rate<- left_join(total_vaccine_EHSA, jakarta, 
+                         by = c("DESA")) %>%
+            na.exclude() %>%
+            st_as_sf()
+vacc_rate_st<- as_spacetime(vacc_rate,
+                        .loc_col = "DESA",
+                        .time_col = "Month")
+```
+
+Below code checks whether the data frame is in time series or not.
+
+```{r}
+is_spacetime_cube(vacc_rate_st)
+```
+
+# **Mann-Kendall Test**
+
+In the below section, I have decided to select 2 highest populated area and 1 least populated area for Mann-Kendall Test.
+
+1.  TOP 1: Kapuk
+
+2.  TOP 2: Penggilingan
+
+3.  BOTTOM 1: Gambir
+
+```{r}
+cbg1 <- vacc_rate_st %>%
+  ungroup() %>%
+  filter(DESA == "KAPUK")|> 
+  select(DESA, Month, gi_star)
+  
+```
+
+```{r}
+cbg2 <- vacc_rate_st %>%
+  ungroup() %>%
+  filter(DESA == "PENGGILINGAN")|> 
+  select(DESA, Month, gi_star)
+```
+
+```{r}
+ cbg3 <- vacc_rate_st %>%
+  ungroup() %>%
+  filter(DESA == "GAMBIR")|> 
+  select(DESA, Month, gi_star)
+```
+
+```{r}
+p1<- ggplot(data = cbg1, 
+       aes(x = Month, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+ggplotly(p1)
+```
+
+```{r}
+p2<- ggplot(data = cbg2, 
+       aes(x = Month, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+ggplotly(p2)
+```
+
+```{r}
+p3<- ggplot(data = cbg3, 
+       aes(x = Month, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+ggplotly(p3)
+```
+
+```{r}
+cbg1 %>%
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr::unnest_wider(mk)
+```
+
+sl which is refers tot he p-value. It tell us that it is a slight upward but insignificant trend.
+
+```{r}
+cbg2 %>%
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr::unnest_wider(mk)
+```
+
+sl tell us that it is a insignificant trend.
+
+```{r}
+cbg3 %>%
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr::unnest_wider(mk)
+```
+
+sl tell us that it is a significant trend.
+
+```{r}
+ehsa <- vacc_rate %>%
+  group_by(DESA) %>%
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>%
+  tidyr::unnest_wider(mk)
+```
+
+Lets arrange to show significant emerging hot/cold spots. Below we will be slicing 5
+
+```{r}
+emerging <- ehsa %>% 
+  arrange(sl, abs(tau))%>% 
+  slice(1:5)
+```
+
+## Performing Emerging Hotspot Analysis
+
+Lastly, we will be perfoming EHSA analysis by using emerging_hotspot_analysis().
+
+```{r}
+set.seed(999)
+ehsa <- emerging_hotspot_analysis(
+  x = vacc_rate_st, 
+  .var = "gi_star", 
+  k = 1, 
+  nsim = 99
+)
+
+colnames(ehsa)[1] <- "DESA"
+```
+
+```{r}
+g1 <- ggplot(data = ehsa,
+       aes(x = classification)) +
+  geom_bar()
+ggplotly(g1)
+```
+
+Figure above shows that no pattern detected class has the high numbers of count followed by persistent cold spot.
+
+## 
+Visualizing EHSA 
+
+```{r}
+jakarta_ehsa <- left_join(jakarta, ehsa, by="DESA")
+  
+```
+
+```{r}
+ehsa_sig <- jakarta_ehsa  %>%
+  filter(p_value < 0.05)
+tmap_mode("plot")
+tm_shape(jakarta_ehsa) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(ehsa_sig) +
+  tm_fill("classification") + 
+  tm_borders(alpha = 0.4)
+```
+
+From the graph we can see that **no pattern detected** has fall in many of the sub district area of the hot/cold spot pattern. Second highest would be **persistent cold spot**, based on this [link](https://pro.arcgis.com/en/pro-app/latest/tool-reference/space-time-pattern-mining/learnmoreemerging.htm#:~:text=Oscillating%20Cold%20Spot,been%20statistically%20significant%20cold%20spots) it refers to these location has been statistically significant cold spot for 90 percent of the time-step intervals with no discernible trend in the intensity of clustering of counts over time. Third highest would be **persistent hot spot**, which refers to a location that has been a statistically significant hot spot for 90 percent of the time-step intervals with no discernible trend in the intensity of clustering over time. Fourth would be **sporadic hot spot**, which means a statistically significant hot spot for the final time-step interval with a history of also being an on-again and off-again hot spot. Less than 90 percent of the time-step intervals have been statistically significant hot spots and none of the time-step intervals have been statistically significant cold spots.
+
+For cold spot area, although they are not in the most populated area. However, there are a few strategies can be implemented by the government. Firstly, It is important to educate the public about the importance of getting vaccinated, the benefits of the vaccines, and dispelling any myths or misconceptions. This can be done through various channels such as social media, television, radio, and billboards. Next is setting up mobile vaccination sites in various districts can make it easier for people to get vaccinated, especially for those who have mobility issues or those who live far away from vaccination centers.
+
+
+With that, thank you for this takehome2! :)
+
+
+
+
+
