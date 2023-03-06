@@ -1,6 +1,6 @@
 ---
 title: "Inclass Ex09 - GWR Method"
-date: "060 March 2023"
+date: "06 March 2023"
 date-modified: "`r Sys.Date()`"
 format:
  html:
