@@ -362,7 +362,7 @@ total_vaccine <- rbind(jul21total, aug21total,sep21total,oct21total,nov21total,d
 
 As we know that there are 200 plus subdistrict,I decided to plot TOP 5 and BOTTOM 5 populated sub district.
 
-### Finding Top 5 Sub District 
+### Finding Top 5 Sub District
 
 ```{r}
 
@@ -379,7 +379,7 @@ barplot(agg_tbl$sum_pop[1:5],names.arg=agg_tbl$SubDistrict[1:5], las=2)
 
 ```
 
-### Finding the Bottom 5 Sub District 
+### Finding the Bottom 5 Sub District
 
 ```{r}
 agg_tbl <- agg_tbl[order(agg_tbl$sum_pop),]
@@ -1046,7 +1046,7 @@ ggplotly(g1)
 
 Figure above shows that no pattern detected class has the high numbers of count followed by persistent cold spot.
 
-## Visualizing EHSA 
+## Visualizing EHSA
 
 ```{r}
 jakarta_ehsa <- left_join(jakarta, ehsa, by="DESA")
@@ -1069,10 +1069,4 @@ From the graph we can see that **no pattern detected** has fall in many of the s
 
 For cold spot area, although they are not in the most populated area but there are in the mid populated range. With that, there are a few strategies can be implemented by the government. Firstly, It is important to educate the public about the importance of getting vaccinated, the benefits of the vaccines, and dispelling any myths or misconceptions. This can be done through various channels such as social media, television, radio, and billboards. Next is setting up mobile vaccination sites in various districts can make it easier for people to get vaccinated, especially for those who have mobility issues or those who live far away from vaccination centers.
 
-
 With that, thank you for this takehome2! :)
-
-
-
-
-
