@@ -16,13 +16,17 @@ editor: visual
 ## Getting started
 
 ```{r}
-pacman::p_load(olsrr, corrplot, ggpubr, sf, spdep, GWmodel, tmap, tidyverse, gtsummary)
+pacman::p_load(olsrr, corrplot, ggpubr, sf, spdep, GWmodel, tmap, tidyverse, gtsummary, readxl, readr, dplyr)
 ```
 
 ### Importing geospatial data
 
 ```{r}
-mpsz_svy21 = st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_WEB_PL") %>% st_transform(mpsz, 3414)
+mpsz_svy21 <- st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_WEB_PL")
+```
+
+```{r}
+mpsz_svy21 = st_transform(mpsz_svy21, 3414)
 ```
 
 ```{r}
@@ -32,7 +36,7 @@ st_bbox(mpsz_svy21) #view extent
 ### Importing aspatial data
 
 ```{r}
-condo_resale = read_csv("data/aspatial/Condo_resale_2015.csv")
+condo_resale <- read_csv("data/aspatial/Condo_resale_2015.csv")
 ```
 
 ```{r}
