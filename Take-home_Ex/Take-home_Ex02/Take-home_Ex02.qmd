@@ -362,8 +362,25 @@ total_vaccine <- rbind(jul21total, aug21total,sep21total,oct21total,nov21total,d
 
 As we know that there are 200 plus subdistrict,I decided to plot TOP 5 and BOTTOM 5 populated sub district.
 
+<<<<<<< HEAD
 ### Finding Top 5 Sub District
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+### Finding Top 5 Sub District
+
+=======
+>>>>>>> parent of 07a3ecf (final update takehome)
+=======
+>>>>>>> parent of 07a3ecf (final update takehome)
+=======
+>>>>>>> parent of 07a3ecf (final update takehome)
+=======
+>>>>>>> parent of 07a3ecf (final update takehome)
+>>>>>>> d677ff2350e57e250e2c57efba753040f4d61aac
 ```{r}
 
 agg_tbl <- total_vaccine %>% group_by(SubDistrict) %>% 
@@ -379,7 +396,27 @@ barplot(agg_tbl$sum_pop[1:5],names.arg=agg_tbl$SubDistrict[1:5], las=2)
 
 ```
 
+<<<<<<< HEAD
 ### Finding the Bottom 5 Sub District
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+### Finding the Bottom 5 Sub District
+=======
+Finding the Bottom 5 sub district
+>>>>>>> parent of 07a3ecf (final update takehome)
+=======
+Finding the Bottom 5 sub district
+>>>>>>> parent of 07a3ecf (final update takehome)
+=======
+Finding the Bottom 5 sub district
+>>>>>>> parent of 07a3ecf (final update takehome)
+=======
+Finding the Bottom 5 sub district
+>>>>>>> parent of 07a3ecf (final update takehome)
+>>>>>>> d677ff2350e57e250e2c57efba753040f4d61aac
 
 ```{r}
 agg_tbl <- agg_tbl[order(agg_tbl$sum_pop),]
@@ -1046,7 +1083,31 @@ ggplotly(g1)
 
 Figure above shows that no pattern detected class has the high numbers of count followed by persistent cold spot.
 
+<<<<<<< HEAD
 ## Visualizing EHSA
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+## Visualizing EHSA
+=======
+## 
+Visualizing EHSA 
+>>>>>>> parent of 07a3ecf (final update takehome)
+=======
+## 
+Visualizing EHSA 
+>>>>>>> parent of 07a3ecf (final update takehome)
+=======
+## 
+Visualizing EHSA 
+>>>>>>> parent of 07a3ecf (final update takehome)
+=======
+## 
+Visualizing EHSA 
+>>>>>>> parent of 07a3ecf (final update takehome)
+>>>>>>> d677ff2350e57e250e2c57efba753040f4d61aac
 
 ```{r}
 jakarta_ehsa <- left_join(jakarta, ehsa, by="DESA")
@@ -1067,6 +1128,20 @@ tm_shape(ehsa_sig) +
 
 From the graph we can see that **no pattern detected** has fall in many of the sub district area of the hot/cold spot pattern. Second highest would be **persistent cold spot**, based on this [link](https://pro.arcgis.com/en/pro-app/latest/tool-reference/space-time-pattern-mining/learnmoreemerging.htm#:~:text=Oscillating%20Cold%20Spot,been%20statistically%20significant%20cold%20spots) it refers to these location has been statistically significant cold spot for 90 percent of the time-step intervals with no discernible trend in the intensity of clustering of counts over time. Third highest would be **persistent hot spot**, which refers to a location that has been a statistically significant hot spot for 90 percent of the time-step intervals with no discernible trend in the intensity of clustering over time. Fourth would be **sporadic hot spot**, which means a statistically significant hot spot for the final time-step interval with a history of also being an on-again and off-again hot spot. Less than 90 percent of the time-step intervals have been statistically significant hot spots and none of the time-step intervals have been statistically significant cold spots.
 
+<<<<<<< HEAD
 For cold spot area, although they are not in the most populated area but there are in the mid populated range. With that, there are a few strategies can be implemented by the government. Firstly, It is important to educate the public about the importance of getting vaccinated, the benefits of the vaccines, and dispelling any myths or misconceptions. This can be done through various channels such as social media, television, radio, and billboards. Next is setting up mobile vaccination sites in various districts can make it easier for people to get vaccinated, especially for those who have mobility issues or those who live far away from vaccination centers.
+=======
+For cold spot area, although they are not in the most populated area. However, there are a few strategies can be implemented by the government. Firstly, It is important to educate the public about the importance of getting vaccinated, the benefits of the vaccines, and dispelling any myths or misconceptions. This can be done through various channels such as social media, television, radio, and billboards. Next is setting up mobile vaccination sites in various districts can make it easier for people to get vaccinated, especially for those who have mobility issues or those who live far away from vaccination centers.
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> parent of 07a3ecf (final update takehome)
+=======
+>>>>>>> parent of 07a3ecf (final update takehome)
+
+>>>>>>> parent of 07a3ecf (final update takehome)
+>>>>>>> d677ff2350e57e250e2c57efba753040f4d61aac
 
 With that, thank you for this takehome2! :)
