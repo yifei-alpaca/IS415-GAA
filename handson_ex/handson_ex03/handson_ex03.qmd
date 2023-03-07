@@ -12,7 +12,7 @@ editor: visual
 ## Getting started
 
 ```{r}
-pacman::p_load(sf, tmap, tidyverse)
+pacman::p_load(sf, tmap, tidyverse, readxl, readr)
 ```
 
 ### Importing Geospatial Data into R
