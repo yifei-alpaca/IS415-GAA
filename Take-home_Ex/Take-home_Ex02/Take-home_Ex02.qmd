@@ -27,7 +27,7 @@ pacman::p_load(dplyr, sf, spdep, tmap, tidyverse, readxl, ggplot2,moments,plotly
 
 At first, I have loaded the beginning month of the data as shown below:
 
-![](pic1.png){fig-align="center"}
+![](data/images/pic1.png){fig-align="center"}
 
 However, July 2021 has only 21 variables. I decided to to further research. Based on research, there was a change in the category of vaccination recipient in DKI Jakarta starting from 4 July 2021 which they have mentioned on the website itself [here](https://riwayat-file-vaksinasi-dki-jakarta-jakartagis.hub.arcgis.com/). Hence, I have decided to change the data to end of the month for easier analysis.
 
@@ -48,7 +48,7 @@ may22<- read_excel("data/aspatial/Mei 2022.xlsx")
 jun22<- read_excel("data/aspatial/Juni 2022.xlsx")
 ```
 
-![](pic2.png){fig-align="center"}
+![](data/images/pic2.png){fig-align="center"}
 
 After analyzing the dataset, there are different number of variables.
 
@@ -362,8 +362,11 @@ total_vaccine <- rbind(jul21total, aug21total,sep21total,oct21total,nov21total,d
 
 As we know that there are 200 plus subdistrict,I decided to plot TOP 5 and BOTTOM 5 populated sub district.
 
+<<<<<<< HEAD
 ### Finding Top 5 Sub District
 
+=======
+>>>>>>> parent of 07a3ecf (final update takehome)
 ```{r}
 
 agg_tbl <- total_vaccine %>% group_by(SubDistrict) %>% 
@@ -374,17 +377,21 @@ agg_tbl
 agg_tbl <- agg_tbl[order(-agg_tbl$sum_pop),]
 
 
-barplot(agg_tbl$sum_pop[1:5],names.arg=agg_tbl$SubDistrict[1:5], las=2)
+barplot(agg_tbl$sum_pop[1:5],names.arg=agg_tbl$SubDistrict[1:5], cex.lab = 0.5)
 
 
 ```
 
+<<<<<<< HEAD
 ### Finding the Bottom 5 Sub District
+=======
+Finding the Bottom 5 sub district
+>>>>>>> parent of 07a3ecf (final update takehome)
 
 ```{r}
 agg_tbl <- agg_tbl[order(agg_tbl$sum_pop),]
 
-barplot(agg_tbl$sum_pop[1:5],names.arg=agg_tbl$SubDistrict[1:5], las=2)
+barplot(agg_tbl$sum_pop[1:5],names.arg=agg_tbl$SubDistrict[1:5], cex.lab = 0.5)
 ```
 
 As we can see from the graph above, the west side of Jakarta(Kapuk, Tegal Alur, Cekareng Timur) is more dense as compared to the rest of the region. This shows that there are more population in the west area followed by east area.
@@ -394,8 +401,6 @@ As we can see from the graph above, the west side of Jakarta(Kapuk, Tegal Alur, 
 Lets visualize our combined data in terms of total dose 1,2 and 3. A basic goal of a classification scheme is to group together similar observations and split apart observations that are substantially different.
 
 Based on the skewness below, we can see that all more positively skewed towards the right which means it is not appropriate to use equal and quartile methods.
-
-### Dose 1
 
 ```{r}
 skewness(jakarta_vaccine$D1_jul21)
@@ -411,8 +416,6 @@ skewness(jakarta_vaccine$D1_apr22)
 skewness(jakarta_vaccine$D1_may22)
 skewness(jakarta_vaccine$D1_jun22)
 ```
-
-### Dose 2
 
 ```{r}
 skewness(jakarta_vaccine$D2_jul21)
@@ -590,6 +593,17 @@ jakarta_vaccine$KELURAHAN[which.min(jakarta_vaccine$TotalV_jul21)]
 jakarta_vaccine$KELURAHAN[which.min(jakarta_vaccine$TotalV_jun22)]
 ```
 
+```{r}
+jakarta <- st_transform(jakarta, 4326)
+longitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[1]])
+latitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[2]])
+coords <- cbind(longitude, latitude)
+```
+
+```{r}
+
+```
+
 With the results shown above, we can say that the higher the population, the higher the vaccination rate.
 
 # Local Gi Analysis
@@ -617,13 +631,6 @@ In this take home, we will be using **fixed distance**. As refer to the slides d
 In Jakarta map, it shows a large polygons at the edge and smaller ones at the center.
 
 But first we need to derive the centroid first.
-
-```{r}
-jakarta <- st_transform(jakarta, 4326)
-longitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[1]])
-latitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[2]])
-coords <- cbind(longitude, latitude)
-```
 
 ```{r}
 k1 <- knn2nb(knearneigh(coords))
@@ -782,7 +789,7 @@ tmap_arrange(localgi_plot(jv.localGi_mar22, "p_value"),
 
 Let's put them in to a gif for better comparison
 
-![](ezgif.com-gif-maker.gif){fig-align="center"}
+![](data/images/localgi/ezgif.com-gif-maker.gif){fig-align="center"}
 
 A tmap above displays the total vaccine parameter by month estimates for vaccination rates in sub district that are statistically significant (*p* \< 0.05); However, based on the tmap above, we can see that Jakarta Barat & Pusat the west & central area has been constantly very significant over a year. As for the grey area, it shows not significant.
 
@@ -835,7 +842,7 @@ tmap_arrange(localgi_HCplot(jv.localGi_mar22, "gi_star"),
              )
 ```
 
-![](ezgif.com-gif-maker%20(1).gif){fig-align="center"}
+![](data/images/hotcold/ezgif.com-gif-maker%20(1).gif){width="688"}
 
 In general, for hot spot, we can see that its is generally at Jakarta Barat which is the WEST area across the year while the cold spot are usually at Jakarta Pusat which is the CENTER area. This findings also aligns wells with the population analysis and p-value analysis in the previous section. There is a higher hot spot at the west area is probably due to a larger population living there, whereas for a higher cold spot is probably because there is a lower population living there. However, one thing got me curious to find out more is that Jakarta is the capital of Indonesia which I believed is much more urbanized as compared to other region like Medan or Surabaya etc, yet, the the cold spot area is quite high as compared to the hot spot. Does it mean that the resident is very much not convinced in getting vaccinated? or does the government did not educate or promote enough on the benefits of getting vaccinated? or is there a shortage of dose around the area? Does it mean that other regions of Indonesia has a worse results? But, we also notice that at earlier stage, cold spot is more dense as compared to the later stage. This shows that as time goes by, the results has improve probably due to the wide spread of news that the vaccine has proved to be effective giving health benefits to the people.
 
@@ -915,7 +922,7 @@ Below code checks whether the data frame is in time series or not.
 is_spacetime_cube(vacc_rate_st)
 ```
 
-## **Mann-Kendall Test**
+# **Mann-Kendall Test**
 
 In the below section, I have decided to select 2 highest populated area and 1 least populated area for Mann-Kendall Test.
 
@@ -1046,7 +1053,12 @@ ggplotly(g1)
 
 Figure above shows that no pattern detected class has the high numbers of count followed by persistent cold spot.
 
+<<<<<<< HEAD
 ## Visualizing EHSA
+=======
+## 
+Visualizing EHSA 
+>>>>>>> parent of 07a3ecf (final update takehome)
 
 ```{r}
 jakarta_ehsa <- left_join(jakarta, ehsa, by="DESA")
@@ -1067,6 +1079,6 @@ tm_shape(ehsa_sig) +
 
 From the graph we can see that **no pattern detected** has fall in many of the sub district area of the hot/cold spot pattern. Second highest would be **persistent cold spot**, based on this [link](https://pro.arcgis.com/en/pro-app/latest/tool-reference/space-time-pattern-mining/learnmoreemerging.htm#:~:text=Oscillating%20Cold%20Spot,been%20statistically%20significant%20cold%20spots) it refers to these location has been statistically significant cold spot for 90 percent of the time-step intervals with no discernible trend in the intensity of clustering of counts over time. Third highest would be **persistent hot spot**, which refers to a location that has been a statistically significant hot spot for 90 percent of the time-step intervals with no discernible trend in the intensity of clustering over time. Fourth would be **sporadic hot spot**, which means a statistically significant hot spot for the final time-step interval with a history of also being an on-again and off-again hot spot. Less than 90 percent of the time-step intervals have been statistically significant hot spots and none of the time-step intervals have been statistically significant cold spots.
 
-For cold spot area, although they are not in the most populated area but there are in the mid populated range. With that, there are a few strategies can be implemented by the government. Firstly, It is important to educate the public about the importance of getting vaccinated, the benefits of the vaccines, and dispelling any myths or misconceptions. This can be done through various channels such as social media, television, radio, and billboards. Next is setting up mobile vaccination sites in various districts can make it easier for people to get vaccinated, especially for those who have mobility issues or those who live far away from vaccination centers.
+For cold spot area, although they are not in the most populated area. However, there are a few strategies can be implemented by the government. Firstly, It is important to educate the public about the importance of getting vaccinated, the benefits of the vaccines, and dispelling any myths or misconceptions. This can be done through various channels such as social media, television, radio, and billboards. Next is setting up mobile vaccination sites in various districts can make it easier for people to get vaccinated, especially for those who have mobility issues or those who live far away from vaccination centers.
 
 With that, thank you for this takehome2! :)
