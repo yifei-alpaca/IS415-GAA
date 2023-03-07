@@ -365,8 +365,11 @@ As we know that there are 200 plus subdistrict,I decided to plot TOP 5 and BOTTO
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ### Finding Top 5 Sub District
 
+=======
+>>>>>>> parent of 07a3ecf (final update takehome)
 =======
 >>>>>>> parent of 07a3ecf (final update takehome)
 =======
@@ -391,7 +394,11 @@ barplot(agg_tbl$sum_pop[1:5],names.arg=agg_tbl$SubDistrict[1:5], cex.lab = 0.5)
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ### Finding the Bottom 5 Sub District
+=======
+Finding the Bottom 5 sub district
+>>>>>>> parent of 07a3ecf (final update takehome)
 =======
 Finding the Bottom 5 sub district
 >>>>>>> parent of 07a3ecf (final update takehome)
@@ -1070,7 +1077,12 @@ Figure above shows that no pattern detected class has the high numbers of count 
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## Visualizing EHSA
+=======
+## 
+Visualizing EHSA 
+>>>>>>> parent of 07a3ecf (final update takehome)
 =======
 ## 
 Visualizing EHSA 
@@ -1106,7 +1118,10 @@ From the graph we can see that **no pattern detected** has fall in many of the s
 For cold spot area, although they are not in the most populated area. However, there are a few strategies can be implemented by the government. Firstly, It is important to educate the public about the importance of getting vaccinated, the benefits of the vaccines, and dispelling any myths or misconceptions. This can be done through various channels such as social media, television, radio, and billboards. Next is setting up mobile vaccination sites in various districts can make it easier for people to get vaccinated, especially for those who have mobility issues or those who live far away from vaccination centers.
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of 07a3ecf (final update takehome)
 =======
 >>>>>>> parent of 07a3ecf (final update takehome)
 
