@@ -1,0 +1,117 @@
+---
+title: "Handson Ex09 - GWR Method"
+date: "07 March 2023"
+date-modified: "`r Sys.Date()`"
+format:
+ html:
+  toc: true
+  toc-location: right
+  number-depth: 3
+execute: 
+  message: false
+  warning: false
+editor: visual
+---
+
+# Getting started 
+
+```{r}
+pacman::p_load(olsrr, corrplot, ggpubr, sf, spdep, GWmodel, tmap, tidyverse, gtsummary,readr,dplyr)
+```
+
+# Geospatial Data Wrangling 
+
+## Importing geospatial data 
+
+```{r}
+mpsz = st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_WEB_PL")
+```
+
+Update CRS information
+
+```{r}
+mpsz_svy21 <- st_transform(mpsz, 3414)
+```
+
+check the newly transformed data frame
+
+```{r}
+st_crs(mpsz_svy21)
+```
+
+st_box() of sf package.
+
+-   It obtains ranges of space and time coordinates.
+
+-   **stbox** returns a **data.frame**, with three columns representing x-, y- and time-coordinates, and two rows containing min and max values. **bbox** gives a matrix with coordinate min/max values, compatible to **bbox**
+
+```{r}
+st_bbox(mpsz_svy21) #view extent
+
+```
+
+## Importing aspatial data 
+
+```{r}
+condo_resale = read_csv("data/aspatial/Condo_resale_2015.csv")
+```
+
+Lets use glimpse() to display the data structure
+
+```{r}
+glimpse(condo_resale)
+```
+
+Lets see the top few X and Y coordinates
+
+```{r}
+head(condo_resale$LONGITUDE) #see the data in XCOORD column
+```
+
+```{r}
+head(condo_resale$LATITUDE) #see the data in YCOORD column
+```
+
+```{r}
+summary(condo_resale)
+```
+
+Notice that Family_friendly, freehold and leasehold are in binary format, 1 means yes and 0 means no.
+
+## Converting aspatial data frame into a sf object (point)
+
+```{r}
+condo_resale.sf <- st_as_sf(condo_resale,
+                            coords = c("LONGITUDE", "LATITUDE"),
+                            crs=4326) %>%
+  st_transform(crs=3414)
+```
+
+```{r}
+head(condo_resale.sf)
+```
+
+# Exploratory Data Analysis (EDA)
+
+## 
+EDA using statistical graphics 
+
+notice in the handson, the values of x axis is in scientific format. It is hard to interprest hence, by adding
+
+    options(scipen = 999)
+
+it would display the whole numerical value as shown below.
+
+```{r}
+options(scipen = 999)
+ggplot(data=condo_resale.sf, aes(x=`SELLING_PRICE`)) +
+  geom_histogram(bins=20, color="black", fill="light green") +
+   labs(title = "Distribution of Resale Prices",
+         x = "Selling Prices",
+         y = 'Frequency') 
+
+```
+
+Based on the chart above, we can infer that it reveals a right skewed distribution. This means that more condominium units were transacted at relative lower prices.
+
+
