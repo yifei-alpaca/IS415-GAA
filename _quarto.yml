@@ -39,7 +39,9 @@ website:
         - text: "Hands-On Exercise 7a"
           href: handson_ex/handson_ex07a/handson_ex07a.qmd
         - text: "Hands-On Exercise 7b"
-          href: handson_ex/handson_ex07b/handson_ex07b.qmd
+          href: handson_ex/handson_ex07b/handson_ex07b.qmd        
+        - text: "Hands-On Exercise 9"
+          href: handson_ex/handson_ex09/handson_ex09.qmd
           
       - text: "Take-Home Exercises"
         menu:
