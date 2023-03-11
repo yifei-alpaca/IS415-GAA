@@ -1,0 +1,437 @@
+---
+title: "Take Home Ex 2"
+date: "20 Feburary 2023"
+date-modified: "`r Sys.Date()`"
+format:
+ html:
+  toc: true
+  toc-location: right
+  number-depth: 3
+execute: 
+  message: false
+  warning: false
+editor: visual
+---
+
+```{r}
+pacman::p_load(dplyr, sf, spdep, tmap, tidyverse, readxl, ggplot2,moments,plotly, sfdep,Kendall, spacetime, lubridate,anytime)
+```
+
+```{r}
+jul<- read_excel("data/aspatial/Juli 2021.xlsx")
+aug21<- read_excel("data/aspatial/Agustus 2021.xlsx")
+sep21<- read_excel("data/aspatial/September 2021.xlsx")
+oct21<- read_excel("data/aspatial/Oktober 2021.xlsx")
+nov21<- read_excel("data/aspatial/November 2021.xlsx")
+dec21<- read_excel("data/aspatial/Desember 2021.xlsx")
+jan22<- read_excel("data/aspatial/Januari 2022.xlsx")
+feb22<- read_excel("data/aspatial/Februari 2022.xlsx")
+mar22<- read_excel("data/aspatial/Maret 2022.xlsx")
+apr22<- read_excel("data/aspatial/April 2022.xlsx")
+may22<- read_excel("data/aspatial/Mei 2022.xlsx")
+jun22<- read_excel("data/aspatial/Juni 2022.xlsx")
+```
+
+```{r}
+colnames(jul)[6] ="NotYetV_jul21"
+colnames(jul)[7] ="D1_jul21"
+colnames(jul)[8] ="D2_jul21"
+colnames(jul)[9] ="TotalV_jul21"
+jul21<-jul[-c(1:3,5,10:27)]
+
+
+colnames(aug21)[6] ="NotYetV_aug21"
+colnames(aug21)[7] ="D1_aug21"
+colnames(aug21)[8] ="D2_aug21"
+colnames(aug21)[9] ="TotalV_aug21"
+aug21<-aug21[-c(1:3,5,10:27)]
+
+colnames(sep21)[6] ="NotYetV_sep21"
+colnames(sep21)[7] ="D1_sep21"
+colnames(sep21)[8] ="D2_sep21"
+colnames(sep21)[9] ="TotalV_sep21"
+sep21<- sep21[-c(1:3,5,10:27)]
+
+colnames(oct21)[6] ="NotYetV_oct21"
+colnames(oct21)[7] ="D1_oct21"
+colnames(oct21)[8] ="D2_oct21"
+colnames(oct21)[9] ="TotalV_oct21"
+oct21<-oct21[-c(1:3,5,10:27)]
+
+colnames(nov21)[6] ="NotYetV_nov21"
+colnames(nov21)[7] ="D1_nov21"
+colnames(nov21)[8] ="D2_nov21"
+colnames(nov21)[9] ="TotalV_nov21"
+nov21<-nov21[-c(1:3,5,10:27)]
+
+colnames(dec21)[6] ="NotYetV_dec21"
+colnames(dec21)[7] ="D1_dec21"
+colnames(dec21)[8] ="D2_dec21"
+colnames(dec21)[9] ="TotalV_dec21"
+dec21<-dec21[-c(1:3,5,10:27)]
+
+colnames(jan22)[6] ="NotYetV_jan21"
+colnames(jan22)[7] ="D1_jan22"
+colnames(jan22)[8] ="D2_jan22"
+colnames(jan22)[9] ="TotalV_jan22"
+jan22<-jan22[-c(1:3,5,10:27)]
+
+colnames(feb22)[6] ="NotYetV_jan21"
+colnames(feb22)[7] ="D1_feb22"
+colnames(feb22)[8] ="D2_feb22"
+colnames(feb22)[9] ="TotalV_feb22"
+feb22<-feb22[-c(1:3,5,10:27)]
+
+colnames(mar22)[6] ="NotYetV_mar21"
+colnames(mar22)[7] ="D1_mar22"
+colnames(mar22)[8] ="D2_mar22"
+colnames(mar22)[9] ="D3_mar22"
+colnames(mar22)[10] ="TotalV_mar22"
+mar22<-mar22[-c(1:3,5,11:34)]
+
+colnames(apr22)[6] ="NotYetV_apr21"
+colnames(apr22)[7] ="D1_apr22"
+colnames(apr22)[8] ="D2_apr22"
+colnames(apr22)[9] ="D3_apr22"
+colnames(apr22)[10] ="TotalV_apr22"
+apr22<-apr22[-c(1:3,5,11:34)]
+
+colnames(may22)[6] ="NotYetV_may21"
+colnames(may22)[7] ="D1_may22"
+colnames(may22)[8] ="D2_may22"
+colnames(may22)[9] ="D3_may22"
+colnames(may22)[10] ="TotalV_may22"
+may22<-may22[-c(1:3,5,11:34)]
+
+colnames(jun22)[6] ="NotYetV_jun21"
+colnames(jun22)[7] ="D1_jun22"
+colnames(jun22)[8] ="D2_jun22"
+colnames(jun22)[9] ="D3_jun22"
+colnames(jun22)[10] ="TotalV_jun22"
+jun22<-jun22[-c(1:3,5,11:34)]
+```
+
+```{r}
+FY21_22Vaccine <-jul[c(1:9)]
+FY21_22Vaccine<- left_join(FY21_22Vaccine, aug21, by="KELURAHAN")
+FY21_22Vaccine<- left_join(FY21_22Vaccine, sep21, by="KELURAHAN")
+FY21_22Vaccine<- left_join(FY21_22Vaccine, oct21, by="KELURAHAN")
+FY21_22Vaccine<- left_join(FY21_22Vaccine, nov21, by="KELURAHAN")
+FY21_22Vaccine<- left_join(FY21_22Vaccine, dec21, by="KELURAHAN")
+FY21_22Vaccine<- left_join(FY21_22Vaccine, jan22, by="KELURAHAN")
+FY21_22Vaccine<- left_join(FY21_22Vaccine, feb22, by="KELURAHAN")
+FY21_22Vaccine<- left_join(FY21_22Vaccine, mar22, by="KELURAHAN")
+FY21_22Vaccine<- left_join(FY21_22Vaccine, apr22, by="KELURAHAN")
+FY21_22Vaccine<- left_join(FY21_22Vaccine, may22, by="KELURAHAN")
+FY21_22Vaccine<- left_join(FY21_22Vaccine, jun22, by="KELURAHAN")
+
+```
+
+```{r}
+jakarta <- st_read(dsn = "data/geospatial", 
+                layer = "BATAS_DESA_DESEMBER_2019_DUKCAPIL_DKI_JAKARTA") %>% st_transform(crs=23845)
+
+jakarta <- jakarta[c(1:9)]
+```
+
+```{r}
+st_crs(jakarta)
+```
+
+```{r}
+qtm(jakarta)
+```
+
+```{r}
+jakarta<- filter(jakarta, KAB_KOTA != "KEPULAUAN SERIBU")
+```
+
+```{r}
+qtm(jakarta)
+```
+
+```{r}
+jakarta_vaccine <- left_join(jakarta, FY21_22Vaccine,
+                          by = c("KODE_DESA" = "KODE KELURAHAN"))
+```
+
+```{r}
+jakarta_vaccine <- st_as_sf(jakarta_vaccine)
+```
+
+```{r}
+tmap_mode("plot")
+qtm(jakarta_vaccine, 
+    fill = "KAB_KOTA"
+    )
+```
+
+```{r}
+tmap_mode("view")
+
+qtm(jakarta_vaccine, 
+    fill = "JUMLAH_PEN",
+        text= "KELURAHAN",
+    text.size = 0.5)
+
+tmap_mode("plot")
+```
+
+```{r}
+jul21total = data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month =  ymd("2021-07-31"),
+                           TotalDose = jakarta_vaccine$TotalV_jul21,
+                          population = jakarta_vaccine$JUMLAH_PEN,
+                           geometry = jakarta_vaccine$geometry
+                           )
+
+aug21total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-08-31"),
+                           TotalDose = jakarta_vaccine$TotalV_aug21,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+sep21total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-09-30"),
+                           TotalDose = jakarta_vaccine$TotalV_sep21,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+oct21total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-10-31"),
+                           TotalDose = jakarta_vaccine$TotalV_oct21,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+nov21total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-11-30"),
+                           TotalDose = jakarta_vaccine$TotalV_nov21,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+dec21total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2021-12-31"),
+                           TotalDose = jakarta_vaccine$TotalV_dec21,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+
+jan22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-01-31"),
+                           TotalDose = jakarta_vaccine$TotalV_jan22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+feb22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-02-28"),
+                           TotalDose = jakarta_vaccine$TotalV_feb22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+mar22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-03-31"),
+                           TotalDose = jakarta_vaccine$TotalV_mar22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+apr22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-04-30"),
+                           TotalDose = jakarta_vaccine$TotalV_apr22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+may22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-05-31"),
+                           TotalDose = jakarta_vaccine$TotalV_may22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+jun22total <- data.frame(SubDistrict = jakarta_vaccine$KELURAHAN,
+                            Month = ymd("2022-06-30"),
+                           TotalDose = jakarta_vaccine$TotalV_jun22,
+                         population = jakarta_vaccine$JUMLAH_PEN,
+                         geometry = jakarta_vaccine$geometry)
+```
+
+```{r}
+total_vaccine <- rbind(jul21total, aug21total,sep21total,oct21total,nov21total,dec21total,jan22total,feb22total,mar22total,apr22total,may22total,jun22total)
+```
+
+```{r}
+jenks_plot <- function(df, varname) {
+  tm_shape(jakarta_vaccine) +
+    tm_polygons() +
+  tm_shape(df) +
+    tm_fill(varname, 
+          n= 6,
+          style = "jenks", 
+          title = "No of people vaccinated") +
+    tm_layout(main.title = varname,
+          main.title.position = "center",
+          main.title.size = 1.2,
+          legend.height = 0.45, 
+          legend.width = 0.35,
+          frame = TRUE) +
+    tm_borders(alpha = 0.2)
+}
+```
+
+```{r}
+tmap_mode("plot")
+tmap_arrange(jenks_plot(jakarta_vaccine, "D1_jul21"),
+             jenks_plot(jakarta_vaccine, "D2_jul21"),
+             jenks_plot(jakarta_vaccine, "D1_aug21"),
+             jenks_plot(jakarta_vaccine, "D2_aug21"))
+```
+
+```{r}
+tmap_arrange(jenks_plot(jakarta_vaccine, "D1_sep21"),
+             jenks_plot(jakarta_vaccine, "D2_sep21"),
+             jenks_plot(jakarta_vaccine, "D1_oct21"),
+             jenks_plot(jakarta_vaccine, "D2_oct21"))
+```
+
+```{r}
+tmap_arrange(jenks_plot(jakarta_vaccine, "D1_nov21"),
+             jenks_plot(jakarta_vaccine, "D2_nov21"),
+             jenks_plot(jakarta_vaccine, "D1_dec21"),
+             jenks_plot(jakarta_vaccine, "D2_dec21"))
+```
+
+```{r}
+tmap_arrange(jenks_plot(jakarta_vaccine, "D1_jan22"),
+             jenks_plot(jakarta_vaccine, "D2_jan22"),
+             jenks_plot(jakarta_vaccine, "D1_feb22"),
+             jenks_plot(jakarta_vaccine, "D2_feb22"))
+```
+
+```{r}
+tmap_arrange(jenks_plot(jakarta_vaccine, "D1_mar22"),
+             jenks_plot(jakarta_vaccine, "D2_mar22"),
+             jenks_plot(jakarta_vaccine, "D1_apr22"),
+             jenks_plot(jakarta_vaccine, "D2_apr22"))
+```
+
+```{r}
+tmap_arrange(jenks_plot(jakarta_vaccine, "D1_may22"),
+             jenks_plot(jakarta_vaccine, "D2_may22"),
+             jenks_plot(jakarta_vaccine, "D1_jun22"),
+             jenks_plot(jakarta_vaccine, "D2_jun22"))
+```
+
+```{r}
+tmap_mode("plot")
+tmap_arrange(jenks_plot(jakarta_vaccine, "TotalV_jul21"),
+             jenks_plot(jakarta_vaccine, "TotalV_aug21"),
+             jenks_plot(jakarta_vaccine, "TotalV_sep21"),
+             jenks_plot(jakarta_vaccine, "TotalV_oct21"))
+```
+
+```{r}
+tmap_arrange(jenks_plot(jakarta_vaccine, "TotalV_nov21"),
+             jenks_plot(jakarta_vaccine, "TotalV_dec21"),
+             jenks_plot(jakarta_vaccine, "TotalV_jan22"),
+             jenks_plot(jakarta_vaccine, "TotalV_feb22"))
+```
+
+```{r}
+tmap_arrange(jenks_plot(jakarta_vaccine, "TotalV_mar22"),
+             jenks_plot(jakarta_vaccine, "TotalV_apr22"),
+             jenks_plot(jakarta_vaccine, "TotalV_may22"),
+             jenks_plot(jakarta_vaccine, "TotalV_jun22"))
+```
+
+## Computing Local Gi statistics
+
+Unlike global measures that summarize the overall spatial autocorrelation of the study area in one single value, local measures of spatial association identify local clusters (observations nearby have similar attribute values) or spatial outliers (observations nearby have different attribute values).
+
+In the below section we will then check if we can find the sub district in which the \*\*relatively higher number of vaccination\*\* rate is significantly higher.
+
+we will be using local_gstar_perm() functions to compute the Local Gi statistic.
+
+Local Gi stats allows the detection of a local concentration of high and low values in neighboring objects and studies the statistical significance of that dependence.
+
+```{r}
+longitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[1]])
+latitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[2]])
+coords <- cbind(longitude, latitude)
+```
+
+```{r}
+#coords <- coordinates(hunan)
+k1 <- knn2nb(knearneigh(coords))
+k1dists <- unlist(nbdists(k1, coords, longlat = TRUE))
+all.linked <- max(unlist(nbdists(k1, coords, longlat = TRUE)))
+summary(k1dists)
+```
+
+```{r}
+fix_d <- dnearneigh(coords, 0, all.linked, longlat = TRUE)
+fix_d
+```
+
+```{r}
+fix_lw <- nb2listw(fix_d, style = 'W')
+summary(fix_lw)
+```
+
+```{r}
+set.seed(999)
+localgi_jul21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_aug21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_sep21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_oct21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_nov21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_dec21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_jan22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_feb22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_mar22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_apr22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_may22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_jun22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+
+```
+
+```{r}
+jv.localGi_jul21 <- cbind(jakarta_vaccine,localgi_jul21)
+jv.localGi_aug21 <- cbind(jakarta_vaccine,localgi_aug21)
+jv.localGi_sep21 <- cbind(jakarta_vaccine,localgi_sep21)
+jv.localGi_oct21 <- cbind(jakarta_vaccine,localgi_oct21)
+jv.localGi_nov21 <- cbind(jakarta_vaccine,localgi_nov21)
+jv.localGi_dec21 <- cbind(jakarta_vaccine,localgi_dec21)
+jv.localGi_jan22 <- cbind(jakarta_vaccine,localgi_jan22)
+jv.localGi_feb22 <- cbind(jakarta_vaccine,localgi_feb22)
+jv.localGi_mar22 <- cbind(jakarta_vaccine,localgi_mar22)
+jv.localGi_apr22 <- cbind(jakarta_vaccine,localgi_apr22)
+jv.localGi_may22 <- cbind(jakarta_vaccine,localgi_may22)
+jv.localGi_jun22 <- cbind(jakarta_vaccine,localgi_jun22)
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(jv.localGi_jun22) +
+    tm_polygons() +
+    tm_shape(jv.localGi_jun22 %>% filter(p_value < 0.05)) +
+    tm_fill(col= "p_sim",
+             palette = "Paired") +
+    tm_borders(alpha = 0.4) +
+    tm_layout(main.title = paste("local Gi p-value <0.05 JUN22"),
+              main.title.size = 1)
+```
+
+```{r}
+localgi_HCplot <- function(df, varname) {
+  tm_shape(df) +
+    tm_polygons() +
+  tm_shape(df %>% filter(p_value < 0.05)) +
+    tm_fill(varname,
+            palette = "-RdBu") +
+    tm_layout(
+          legend.height = 0.45, 
+          legend.width = 0.35,
+          frame = TRUE) +
+    tm_borders(alpha = 0.2)
+}
+```
+
+```{r}
+tmap_arrange(localgi_HCplot(jv.localGi_jul21, "gi_star"),
+             localgi_HCplot(jv.localGi_aug21, "gi_star"),
+             localgi_HCplot(jv.localGi_sep21, "gi_star"),
+             localgi_HCplot(jv.localGi_oct21, "gi_star")
+             )
+```
+
+```{r}
+jun2022testing <- jv.localGi_jun22 %>% filter(p_value < 0.05)
+```

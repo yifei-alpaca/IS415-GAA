@@ -20,7 +20,8 @@ editor: visual
 # Load R packages
 
 ```{r}
-pacman::p_load(dplyr, sf, spdep, tmap, tidyverse, readxl, ggplot2,moments,plotly, sfdep,Kendall, spacetime, lubridate,anytime)
+pacman::p_load(sf, spdep, tmap, tidyverse, readxl, ggplot2, moments, 
+               plotly, sfdep, Kendall, lubridate, anytime)
 ```
 
 # Getting started
@@ -34,7 +35,7 @@ However, July 2021 has only 21 variables. I decided to to further research. Base
 # Import data and preparation
 
 ```{r}
-jul<- read_excel("data/aspatial/Juli 2021.xlsx")
+jul <- read_excel("data/aspatial/Juli 2021.xlsx")
 aug21<- read_excel("data/aspatial/Agustus 2021.xlsx")
 sep21<- read_excel("data/aspatial/September 2021.xlsx")
 oct21<- read_excel("data/aspatial/Oktober 2021.xlsx")
@@ -179,8 +180,6 @@ FY21_22Vaccine<- left_join(FY21_22Vaccine, mar22, by="KELURAHAN")
 FY21_22Vaccine<- left_join(FY21_22Vaccine, apr22, by="KELURAHAN")
 FY21_22Vaccine<- left_join(FY21_22Vaccine, may22, by="KELURAHAN")
 FY21_22Vaccine<- left_join(FY21_22Vaccine, jun22, by="KELURAHAN")
-
-
 ```
 
 We will be using FY21_22Vaccine data frame from now on.
@@ -190,7 +189,7 @@ After tidying data for aspatial, lets import geospatial data. The projected coor
 ```{r}
 jakarta <- st_read(dsn = "data/geospatial", 
                 layer = "BATAS_DESA_DESEMBER_2019_DUKCAPIL_DKI_JAKARTA") %>%
-  st_transform(crs = 4326)
+  st_transform(crs = 23845)
 
 jakarta <- jakarta[c(1:9)]
 ```
@@ -362,31 +361,11 @@ total_vaccine <- rbind(jul21total, aug21total,sep21total,oct21total,nov21total,d
 
 As we know that there are 200 plus subdistrict,I decided to plot TOP 5 and BOTTOM 5 populated sub district.
 
-<<<<<<< HEAD
-### Finding Top 5 Sub District
-
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-### Finding Top 5 Sub District
-
-=======
->>>>>>> parent of 07a3ecf (final update takehome)
-=======
->>>>>>> parent of 07a3ecf (final update takehome)
-=======
->>>>>>> parent of 07a3ecf (final update takehome)
-=======
->>>>>>> parent of 07a3ecf (final update takehome)
->>>>>>> d677ff2350e57e250e2c57efba753040f4d61aac
 ```{r}
 
 agg_tbl <- total_vaccine %>% group_by(SubDistrict) %>% 
   summarise(sum_pop = sum(population),
             .groups = 'drop')
-agg_tbl
 
 agg_tbl <- agg_tbl[order(-agg_tbl$sum_pop),]
 
@@ -395,28 +374,6 @@ barplot(agg_tbl$sum_pop[1:5],names.arg=agg_tbl$SubDistrict[1:5], las=2)
 
 
 ```
-
-<<<<<<< HEAD
-### Finding the Bottom 5 Sub District
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-### Finding the Bottom 5 Sub District
-=======
-Finding the Bottom 5 sub district
->>>>>>> parent of 07a3ecf (final update takehome)
-=======
-Finding the Bottom 5 sub district
->>>>>>> parent of 07a3ecf (final update takehome)
-=======
-Finding the Bottom 5 sub district
->>>>>>> parent of 07a3ecf (final update takehome)
-=======
-Finding the Bottom 5 sub district
->>>>>>> parent of 07a3ecf (final update takehome)
->>>>>>> d677ff2350e57e250e2c57efba753040f4d61aac
 
 ```{r}
 agg_tbl <- agg_tbl[order(agg_tbl$sum_pop),]
@@ -656,7 +613,7 @@ In Jakarta map, it shows a large polygons at the edge and smaller ones at the ce
 But first we need to derive the centroid first.
 
 ```{r}
-jakarta <- st_transform(jakarta, 4326)
+jakarta <- st_transform(jakarta, 23845)
 longitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[1]])
 latitude <- map_dbl(jakarta$geometry, ~st_centroid(.x)[[2]])
 coords <- cbind(longitude, latitude)
@@ -664,8 +621,8 @@ coords <- cbind(longitude, latitude)
 
 ```{r}
 k1 <- knn2nb(knearneigh(coords))
-k1dists <- unlist(nbdists(k1, coords, longlat = TRUE))
-all.linked <- max(unlist(nbdists(k1, coords, longlat = TRUE)))
+k1dists <- unlist(nbdists(k1, coords, longlat = FALSE))
+all.linked <- max(unlist(nbdists(k1, coords, longlat = FALSE)))
 summary(k1dists)
 ```
 
@@ -674,7 +631,7 @@ summary(k1dists)
 Next we need to determine the cut-off distance. we need to determine the upper limit for distance band.
 
 ```{r}
-fix_d <- dnearneigh(coords, 0, all.linked, longlat = TRUE)
+fix_d <- dnearneigh(coords, 0, all.linked, longlat = FALSE)
 fix_d
 ```
 
@@ -732,17 +689,17 @@ The analysis will be conducted with the previous variable (jv_q) and the neighbo
 ```{r}
 set.seed(999)
 localgi_jul21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_aug21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_sep21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_oct21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_nov21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_dec21 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_jan22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_feb22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_mar22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_apr22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_may22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
-localgi_jun22 <- local_gstar_perm(jakarta_vaccine$TotalV_jul21, fix_d, fix_lw, nsim=39)
+localgi_aug21 <- local_gstar_perm(jakarta_vaccine$TotalV_aug21, fix_d, fix_lw, nsim=39)
+localgi_sep21 <- local_gstar_perm(jakarta_vaccine$TotalV_sep21, fix_d, fix_lw, nsim=39)
+localgi_oct21 <- local_gstar_perm(jakarta_vaccine$TotalV_oct21, fix_d, fix_lw, nsim=39)
+localgi_nov21 <- local_gstar_perm(jakarta_vaccine$TotalV_nov21, fix_d, fix_lw, nsim=39)
+localgi_dec21 <- local_gstar_perm(jakarta_vaccine$TotalV_dec21, fix_d, fix_lw, nsim=39)
+localgi_jan22 <- local_gstar_perm(jakarta_vaccine$TotalV_jan22, fix_d, fix_lw, nsim=39)
+localgi_feb22 <- local_gstar_perm(jakarta_vaccine$TotalV_feb22, fix_d, fix_lw, nsim=39)
+localgi_mar22 <- local_gstar_perm(jakarta_vaccine$TotalV_mar22, fix_d, fix_lw, nsim=39)
+localgi_apr22 <- local_gstar_perm(jakarta_vaccine$TotalV_apr22, fix_d, fix_lw, nsim=39)
+localgi_may22 <- local_gstar_perm(jakarta_vaccine$TotalV_may22, fix_d, fix_lw, nsim=39)
+localgi_jun22 <- local_gstar_perm(jakarta_vaccine$TotalV_jun22, fix_d, fix_lw, nsim=39)
 
 ```
 
@@ -1083,32 +1040,6 @@ ggplotly(g1)
 
 Figure above shows that no pattern detected class has the high numbers of count followed by persistent cold spot.
 
-<<<<<<< HEAD
-## Visualizing EHSA
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-## Visualizing EHSA
-=======
-## 
-Visualizing EHSA 
->>>>>>> parent of 07a3ecf (final update takehome)
-=======
-## 
-Visualizing EHSA 
->>>>>>> parent of 07a3ecf (final update takehome)
-=======
-## 
-Visualizing EHSA 
->>>>>>> parent of 07a3ecf (final update takehome)
-=======
-## 
-Visualizing EHSA 
->>>>>>> parent of 07a3ecf (final update takehome)
->>>>>>> d677ff2350e57e250e2c57efba753040f4d61aac
-
 ```{r}
 jakarta_ehsa <- left_join(jakarta, ehsa, by="DESA")
   
@@ -1128,20 +1059,8 @@ tm_shape(ehsa_sig) +
 
 From the graph we can see that **no pattern detected** has fall in many of the sub district area of the hot/cold spot pattern. Second highest would be **persistent cold spot**, based on this [link](https://pro.arcgis.com/en/pro-app/latest/tool-reference/space-time-pattern-mining/learnmoreemerging.htm#:~:text=Oscillating%20Cold%20Spot,been%20statistically%20significant%20cold%20spots) it refers to these location has been statistically significant cold spot for 90 percent of the time-step intervals with no discernible trend in the intensity of clustering of counts over time. Third highest would be **persistent hot spot**, which refers to a location that has been a statistically significant hot spot for 90 percent of the time-step intervals with no discernible trend in the intensity of clustering over time. Fourth would be **sporadic hot spot**, which means a statistically significant hot spot for the final time-step interval with a history of also being an on-again and off-again hot spot. Less than 90 percent of the time-step intervals have been statistically significant hot spots and none of the time-step intervals have been statistically significant cold spots.
 
-<<<<<<< HEAD
 For cold spot area, although they are not in the most populated area but there are in the mid populated range. With that, there are a few strategies can be implemented by the government. Firstly, It is important to educate the public about the importance of getting vaccinated, the benefits of the vaccines, and dispelling any myths or misconceptions. This can be done through various channels such as social media, television, radio, and billboards. Next is setting up mobile vaccination sites in various districts can make it easier for people to get vaccinated, especially for those who have mobility issues or those who live far away from vaccination centers.
-=======
-For cold spot area, although they are not in the most populated area. However, there are a few strategies can be implemented by the government. Firstly, It is important to educate the public about the importance of getting vaccinated, the benefits of the vaccines, and dispelling any myths or misconceptions. This can be done through various channels such as social media, television, radio, and billboards. Next is setting up mobile vaccination sites in various districts can make it easier for people to get vaccinated, especially for those who have mobility issues or those who live far away from vaccination centers.
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> parent of 07a3ecf (final update takehome)
-=======
->>>>>>> parent of 07a3ecf (final update takehome)
 
->>>>>>> parent of 07a3ecf (final update takehome)
->>>>>>> d677ff2350e57e250e2c57efba753040f4d61aac
+For cold spot area, although they are not in the most populated area. However, there are a few strategies can be implemented by the government. Firstly, It is important to educate the public about the importance of getting vaccinated, the benefits of the vaccines, and dispelling any myths or misconceptions. This can be done through various channels such as social media, television, radio, and billboards. Next is setting up mobile vaccination sites in various districts can make it easier for people to get vaccinated, especially for those who have mobility issues or those who live far away from vaccination centers.
 
 With that, thank you for this takehome2! :)
