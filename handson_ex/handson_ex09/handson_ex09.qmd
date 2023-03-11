@@ -306,7 +306,7 @@ ols_vif_tol(condo.mlr1)
 
 VIF less than than 10, we can conclude that there are no sign of multicollinearity among the independent variables.
 
-## Test for Non-Linearity 
+## Test for Non-Linearity
 
 ```{r}
 ols_plot_resid_fit(condo.mlr1)
@@ -314,7 +314,7 @@ ols_plot_resid_fit(condo.mlr1)
 
 The figure above shows that data point are scattered arounf the 0 line, we can conclude that the relationship between the dependent variable and independent variable are linear.
 
-## Test for Normality Assumption 
+## Test for Normality Assumption
 
 ```{r}
 ols_plot_resid_hist(condo.mlr1)
