@@ -24,6 +24,8 @@ website:
           href: inclass_ex/inclass_ex07/inclass_ex07.qmd
         - text: "In-Class Exercise 9"
           href: inclass_ex/inclass_ex09/inclass_ex09.qmd
+        - text: "In-Class Exercise 9b"
+          href: inclass_ex/inclass_ex09b/inclass_ex09b.qmd
 
           
       - text: "Hands-On Exercises"
@@ -50,7 +52,7 @@ website:
         - text: "Take-Home Exercise 2"
           href: Take-home_Ex/Take-home_Ex02/Take-home_Ex02.qmd
         - text: "Take-Home Exercise 3"
-          href: Take-home_Ex/Take-home_Ex03/Take-home_Ex03.qmd
+          href: Take-home_Ex/Take-home_Ex03/Take-home_Ex003.qmd
         
 format:
   html:
