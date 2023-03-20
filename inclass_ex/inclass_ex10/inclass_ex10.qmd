@@ -1,0 +1,157 @@
+---
+title: "Inclass Ex10"
+date: "20 March 2023"
+date-modified: "`r Sys.Date()`"
+format:
+ html:
+  toc: true
+  toc-location: right
+  number-depth: 3
+execute: 
+  message: false
+  warning: false
+editor: visual
+---
+
+# Getting started 
+
+```{r}
+pacman::p_load(tmap, SpatialAcc, sf, 
+               ggstatsplot, reshape2,
+               tidyverse, fca)
+```
+
+**fca**- is additional from the website. This is another method to do floating point catchment area (3 stage).
+
+Matrix
+
+-   row is the destination
+
+-   column is the origin
+
+## Import the data 
+
+```{r}
+hexagons <- st_read(dsn = "data/geospatial", layer = "hexagons") 
+eldercare <- st_read(dsn = "data/geospatial", layer = "ELDERCARE") 
+mpsz <- st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_NO_SEA_PL")
+```
+
+## Change the cooordinates 
+
+```{r}
+mpsz <- st_transform(mpsz, 3414)
+eldercare <- st_transform(eldercare, 3414)
+hexagons <- st_transform(hexagons, 3414)
+```
+
+## Tidy the data
+
+```{r}
+eldercare <- eldercare %>%
+  select(fid, ADDRESSPOS) %>%
+  rename(destination_id = fid,
+         postal_code= ADDRESSPOS) %>%
+  mutate(capacity = 100)
+```
+
+```{r}
+hexagons <- hexagons %>%
+  select(fid) %>%
+  rename(origin_id = fid) %>%
+  mutate(demand = 100)
+```
+
+## Importing Distance Matrix 
+
+```{r}
+ODMatrix <- read_csv("data/aspatial/OD_Matrix.csv")
+```
+
+this steps convert from dataframe to matrix.
+
+```{r}
+distmat <- ODMatrix %>%
+  select(origin_id, destination_id, total_cost) %>%
+  spread(destination_id, total_cost)%>%
+  select(c(-c('origin_id')))
+```
+
+new function called pivot_wider()
+
+```{r}
+distmat_km <- as.matrix(distmat/1000)
+```
+
+![](matrix.png){fig-align="center"}
+
+## Computing Distance Matrix 
+
+```{r}
+eldercare_coord <- st_coordinates(eldercare)
+haxegon_coord <- st_coordinates(hexagons)
+```
+
+```{r}
+EucMatrix <- SpatialAcc::distance(haxegon_coord,
+                                  eldercare_coord,
+                                  type = "euclidean")
+```
+
+```{r}
+EucMatrix_km <- as.matrix(EucMatrix/1000)
+```
+
+## Computing Hansen accessibility 
+
+```{r}
+acc_Hansen <- data.frame(ac(hexagons$demand,
+                            eldercare$capacity,
+                            distmat_km, 
+                            #d0 = 50, #threshold of 50km 
+                            power = 2, 
+                            family = "Hansen"))
+```
+
+```{r}
+colnames(acc_Hansen) <- "accHansen"
+```
+
+```{r}
+acc_Hansen <- as_tibble(acc_Hansen)
+```
+
+Acc hansen will be added in to the hexagon data frame
+
+```{r}
+hexagon_Hansen <- bind_cols(hexagons, acc_Hansen)
+```
+
+```{r}
+mapex <- st_bbox(hexagons)
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(hexagon_Hansen,
+         bbox = mapex) + 
+  tm_fill(col = "accHansen",
+          n = 10,
+          style = "quantile",
+          border.col = "black",
+          border.lwd = 1) +
+tm_shape(eldercare) +
+  tm_symbols(size = 0.1) +
+  tm_layout(main.title = "Accessibility to eldercare: Hansen method",
+            main.title.position = "center",
+            main.title.size = 2,
+            legend.outside = FALSE,
+            legend.height = 0.45, 
+            legend.width = 3.0,
+            legend.format = list(digits = 6),
+            legend.position = c("right", "top"),
+            frame = TRUE) +
+  tm_compass(type="8star", size = 2) +
+  tm_scale_bar(width = 0.15) +
+  tm_grid(lwd = 0.1, alpha = 0.5)
+```

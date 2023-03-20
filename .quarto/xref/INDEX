@@ -82,5 +82,23 @@
   },
   "Take-home_Ex/Take-home_Ex03/data/geospatial/MPSZ-2019.qmd": {
     "MPSZ-2019.html": "2feaaaa3"
+  },
+  "Take-home_Ex/Take-home_Ex03/data/aspatial/ChildcareServices.qmd": {
+    "ChildcareServices.html": "c1b2e4f3"
+  },
+  "Take-home_Ex/Take-home_Ex03/data/aspatial/offices/Offices.qmd": {
+    "Offices.html": "f3cf9ff9"
+  },
+  "Take-home_Ex/Take-home_Ex03/data/aspatial/poi_singapore/Singapore_POIS.qmd": {
+    "Singapore_POIS.html": "f595cd86"
+  },
+  "inclass_ex/inclass_ex10/inclass_ex10.qmd": {
+    "inclass_ex10.html": "fbbcd73e"
+  },
+  "inclass_ex/inclass_ex10/data/geospatial/ELDERCARE.qmd": {
+    "ELDERCARE.html": "3898580b"
+  },
+  "inclass_ex/inclass_ex10/data/geospatial/hexagons.qmd": {
+    "hexagons.html": "ef2c38a8"
   }
 }
