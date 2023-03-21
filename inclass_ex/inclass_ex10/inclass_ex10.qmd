@@ -13,7 +13,7 @@ execute:
 editor: visual
 ---
 
-# Getting started 
+# Getting started
 
 ```{r}
 pacman::p_load(tmap, SpatialAcc, sf, 
@@ -29,7 +29,7 @@ Matrix
 
 -   column is the origin
 
-## Import the data 
+## Import the data
 
 ```{r}
 hexagons <- st_read(dsn = "data/geospatial", layer = "hexagons") 
@@ -37,7 +37,7 @@ eldercare <- st_read(dsn = "data/geospatial", layer = "ELDERCARE")
 mpsz <- st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_NO_SEA_PL")
 ```
 
-## Change the cooordinates 
+## Change the cooordinates
 
 ```{r}
 mpsz <- st_transform(mpsz, 3414)
@@ -62,7 +62,7 @@ hexagons <- hexagons %>%
   mutate(demand = 100)
 ```
 
-## Importing Distance Matrix 
+## Importing Distance Matrix
 
 ```{r}
 ODMatrix <- read_csv("data/aspatial/OD_Matrix.csv")
@@ -85,7 +85,7 @@ distmat_km <- as.matrix(distmat/1000)
 
 ![](matrix.png){fig-align="center"}
 
-## Computing Distance Matrix 
+## Computing Distance Matrix
 
 ```{r}
 eldercare_coord <- st_coordinates(eldercare)
@@ -102,7 +102,7 @@ EucMatrix <- SpatialAcc::distance(haxegon_coord,
 EucMatrix_km <- as.matrix(EucMatrix/1000)
 ```
 
-## Computing Hansen accessibility 
+## Computing Hansen accessibility
 
 ```{r}
 acc_Hansen <- data.frame(ac(hexagons$demand,
