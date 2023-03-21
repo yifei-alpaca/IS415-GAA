@@ -1,0 +1,1142 @@
+---
+title: "Take Home Ex 3"
+date: "11 March 2023"
+date-modified: "`r Sys.Date()`"
+format:
+ html:
+  toc: true
+  toc-location: right
+  number-depth: 3
+execute: 
+  message: false
+  warning: false
+editor: visual
+---
+
+# Getting Started
+
+In this take-home exercise, you are tasked to **predict HDB resale prices at the sub-market level** (i.e.HDB 3-room, HDB 4-room and HDB 5-room) for the month of January and February 2023 in Singapore. The predictive models must be built by using by **using conventional OLS method** and **GWR methods**. You are also required to compare the performance of the conventional OLS method versus the geographical weighted methods.
+
+The study should focus on **either three-room, four-room or five-room flat** and transaction period should be from **1st January 2021 to 31st December 2022**. The test data should be January and February 2023 resale prices.
+
+## The Data
+
+Data sets will be used in this model building exercise, they are:
+
+1.  [MP 2014 Subzone Boundary](https://data.gov.sg/dataset/master-plan-2014-subzone-boundary-web)
+
+2.  [Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling, June 2011-2020](https://www.singstat.gov.sg/find-data/search-by-theme/population/geographic-distribution/latest-data)
+
+3.  [HDB Resale Price](https://data.gov.sg/dataset/resale-flat-prices)
+
+4.  
+
+## Loading of packages
+
+```{r}
+pacman::p_load(olsrr, corrplot, ggpubr, sf, spdep, GWmodel, tmap, tidyverse, gtsummary,mapview,leaflet,RColorBrewer,tidygeocoder,jsonlite,httr,onemapsgapi,reporter,magrittr,readxl,gdata, units,matrixStats, SpatialML,rsample, Metrics)
+```
+
+## Importing Geospatial Data
+
+After I imported the subzone layer and analysed below, I've found out that there are some subzone area which can be removed because the area are mostly industrial/campsite and would not have any residents living there.
+
+```{r}
+mpsz19 <- st_read(dsn = "data/geospatial", layer = "MPSZ-2019") %>% 
+  st_transform(3414) %>% filter(SUBZONE_N != "NORTH-EASTERN ISLANDS" & SUBZONE_N != "SOUTHERN GROUP"& SUBZONE_N != "SEMAKAU"& SUBZONE_N != "SUDONG")
+
+```
+
+```{r}
+st_crs(mpsz19)
+```
+
+```{r}
+st_bbox(mpsz19)
+```
+
+After plotting a map, we can see that there is an island called NORTH-EASTERN ISLAND, SOUTHERN GROUP, SEMAKAU and SUDONG which is out of analysis area. we should remove them for the purpose of this takehome exercise. We can re-import the data with out this names by doing a filter(). Re run the map and look! its clean now. We can move on to our analysis.
+
+# Population Analysis
+
+## Importing Aspatial Data Population
+
+In this section, I will be importing Singapore population data. In our Hands-on Ex03 we have use a choropleth map to portray the spatial distribution of aged population of Singapore by Master Plan 2014 Subzone Boundary. Let's further analyse this data and code further for our analysis.
+
+```{r}
+popdata <- read_csv("data/aspatial/population_2011to2020.csv")
+```
+
+```{r}
+popdata2020 <- popdata %>%
+  filter(Time == 2020) %>%
+  group_by(PA, SZ, AG) %>%
+  summarise(`POP` = sum(`Pop`)) %>%
+  ungroup()%>%
+  pivot_wider(names_from=AG, 
+              values_from=POP) %>%
+  mutate(YOUNG = rowSums(.[3:6])
+         +rowSums(.[12])) %>%
+mutate(`ECONOMY ACTIVE` = rowSums(.[7:11])+
+rowSums(.[13:15]))%>%
+mutate(`AGED`=rowSums(.[16:21])) %>%
+mutate(`TOTAL`=rowSums(.[3:21])) %>%  
+mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)
+/`ECONOMY ACTIVE`) %>%
+  select(`PA`, `SZ`, `YOUNG`, 
+       `ECONOMY ACTIVE`, `AGED`, 
+       `TOTAL`, `DEPENDENCY`)
+```
+
+As we look at the raw data, we can create a new dataframe to combine the number of population and group by PA and SZ.
+
+## Joining the attribute data and geospatial data
+
+For master plan and Pop data frame, there are 2 common variable which we can join them together. PLN_AREA_N = PA & SUBZONE_N = SZ but we have to convert them to upper case first
+
+```{r}
+popdata2020 <- popdata2020 %>%
+  mutate_at(.vars = vars(PA, SZ), 
+          .funs = funs(toupper)) %>%
+  filter(`ECONOMY ACTIVE` > 0)
+```
+
+left join both master plan and population data by their sub zone level.
+
+```{r}
+mpsz_pop2020 <- left_join(mpsz19, popdata2020,
+                          by = c("SUBZONE_N" = "SZ"))
+```
+
+## Exploratory Data Analysis (EDA)
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          style = "quantile",
+          palette = "Greens") +
+  tm_borders(alpha = 0.5)
+```
+
+```{r}
+tmap_options(check.and.fix = TRUE)
+tm_shape(mpsz_pop2020)+
+  tm_fill("TOTAL",
+          style = "quantile",
+          palette = "Blues") +
+  tm_borders(alpha = 0.5)
+```
+
+Based on the chart above, we can see that in general, the east area is more dense as compared to the other region. In our handson 3, we compare the young and age, but for analyzing the resale price, it would be more useful to compare economic active and aged group instead young and aged group. Because these 2 age group is more appropriate to get housing as compared to the young.
+
+Lets compare between the Active and Aged groups
+
+```{r}
+tmap_mode("view")
+```
+
+```{r}
+tmap_options(check.and.fix = TRUE)
+activemap <- tm_shape(mpsz_pop2020)+ 
+  tm_polygons("ECONOMY ACTIVE", 
+              style = "quantile", 
+              palette = "Blues",
+              )+ 
+  tm_view(set.zoom.limits = c(9,14))
+
+agedmap <- tm_shape(mpsz_pop2020)+ 
+  tm_polygons("AGED", 
+              style = "quantile", 
+              palette = "Oranges") +
+  tm_view(set.zoom.limits = c(9,14))
+
+tmap_arrange(activemap, agedmap, asp=1, ncol=2, sync = TRUE)
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+Based on the interactive graph above, we can say that the east area has a more dense aged group as compared to the economy active group. In general, I can also say that; the east area has a higher aging population as compared to other areas. Furthermore, we can also conclude that there are more resident staying in the east side than other region.
+
+# Existing Dwelling Analysis
+
+Notice that in the excel sheet, there is a column called ***dwelling*** as shown below. We can also further analysis the current type of dwelling to narrow down which type of housing are most common/popular.
+
+![](img/1.png){fig-align="center"}
+
+```{r}
+dwelling2020 <- popdata %>%
+  filter(Time == 2020 & 
+           TOD == "HDB 3-Room Flats" |
+           TOD == "HDB 4-Room Flats" |
+           TOD == "HDB 5-Room and Executive Flats") %>%
+  group_by(PA, SZ, TOD) %>%
+  summarise(`POP` = sum(`Pop`))
+```
+
+## Joining the attribute data and geospatial data
+
+```{r}
+dwelling2020 <- dwelling2020 %>%
+  mutate_at(.vars = vars(PA, SZ), 
+          .funs = funs(toupper)) %>%
+  filter(`POP` > 0)
+```
+
+```{r}
+mpsz_dwelling2020 <- left_join(mpsz19, dwelling2020,
+                          by = c("SUBZONE_N" = "SZ"))
+```
+
+## Exploratory Data Analysis (EDA)
+
+```{r}
+ tmap_mode("view")
+HDB3room <- tm_shape(mpsz_dwelling2020 %>% filter( TOD == "HDB 3-Room Flats"))+
+  tm_fill("POP",
+          style = "quantile",
+          palette = "Greens") +
+  tm_view(set.zoom.limits = c(10,14))
+
+HDB4room <- tm_shape(mpsz_dwelling2020 %>% filter( TOD == "HDB 4-Room Flats"))+ 
+  tm_polygons("POP", 
+              style = "quantile", 
+              palette = "Blues",
+              )+ 
+  tm_view(set.zoom.limits = c(10,14))
+
+HDB5room <- tm_shape(mpsz_dwelling2020 %>% filter( TOD == "HDB 5-Room and Executive Flats"))+ 
+  tm_polygons("POP", 
+              style = "quantile", 
+              palette = "Reds") +
+  tm_view(set.zoom.limits = c(10,14))
+
+tmap_arrange(HDB3room, HDB4room, HDB5room, asp=1, ncol=3, sync = TRUE)
+```
+
+Mentioned above that the study should focus on **either** three-room, four-room or five-room flat. Based on the chart above, we can see that 4-room flat has a higher results as compared to 3-room and 5-room due to its scale of 536,920 for 4-room, next highest is 495,380 for 5-room and 30,880 for 3-room. With this dwelling analysis, I **will be focusing on 4-Room flat** cause of its popularity in Singapore.
+
+# Importing Locational factors
+
+The data mostly are taken from [data.gov](data.gov.sg) or [LTA data mall](https://datamall.lta.gov.sg/content/datamall/en/dynamic-data.html) factors include:
+
+1.  Bus stop location
+2.  Eldercare
+3.  Foodarea
+4.  schools
+5.  childcare
+6.  train station [kaggel](https://www.kaggle.com/datasets/yxlee245/singapore-train-station-coordinates)
+7.  malls from [kaggle](https://www.kaggle.com/datasets/karthikgangula/shopping-mall-coordinates?resource=download)
+8.  supermarket
+9.  hospital (collated manually) [SGhospital](https://www.healthhub.sg/directory/hospitals)
+10. primary schools
+11. good primary schools
+    -   As there are many views about elite schools in Singapore as attending an elite primary school in Singapore is important depends on an individual's unique circumstances and goals. In this take home exercise, I will be picking the top 10 most common popular primary schools. These are the top 10 popular schools according to this [website](https://smiletutor.sg/primary-school-ranking-choose-the-best-primary-schools-in-singapore/).
+
+```{r}
+busstops <- st_read(dsn = "data/aspatial/BusStopLocation", layer = "BusStop")
+```
+
+```{r}
+eldercare <- st_read(dsn = "data/aspatial/eldercare-services-shp", layer = "ELDERCARE")
+```
+
+```{r}
+poi <- st_read(dsn = "data/aspatial/poi_singapore", layer = "Singapore_POIS")
+```
+
+After we see the poi datafame, lets check for unique values under fclass
+
+```{r}
+unique(poi$fclass)
+```
+
+We notice that there are a lot of category, lets only select supermarket for our analysis as there are some inaccuracy in certain classes.
+
+```{r}
+supermarkets <- st_read(dsn = "data/aspatial/poi_singapore", layer = "Singapore_POIS") %>% 
+  filter(fclass == "supermarket")
+```
+
+```{r}
+foodarea <- st_read(dsn = "data/aspatial/poi_singapore", layer = "Singapore_POIS") %>% 
+  filter(fclass == "food_court"| fclass == "fast_food"
+         |fclass =="restaurant" |fclass =="cafe")
+```
+
+```{r}
+trainstation <- read_csv("data/aspatial/mrt_lrt_data.csv")
+  
+```
+
+```{r}
+childcare <- st_read(dsn = "data/aspatial", layer = "ChildcareServices")
+```
+
+```{r}
+hospital <- read_excel("data/aspatial/hospital.xlsx")
+```
+
+```{r}
+good_prischool <- read_csv("data/aspatial/school-directory-and-information/general-information-of-schools.csv") %>% filter(
+  school_name == "NANYANG PRIMARY SCHOOL" | 
+    school_name == "CATHOLIC HIGH SCHOOL" |
+    school_name == "TAO NAN SCHOOL" |
+    school_name == "NAN HUA PRIMARY SCHOOL" |
+    school_name == "ST. HILDA'S PRIMARY SCHOOL" |
+    school_name == "HENRY PARK PRIMARY SCHOOL" |
+    school_name == "ANGLO-CHINESE SCHOOL (PRIMARY)" |
+    school_name == "RAFFLES GIRLS' PRIMARY SCHOOL" |
+    school_name == "PEI HWA PRESBYTERIAN PRIMARY SCHOOL" |
+     school_name == "CHIJ ST. NICHOLAS GIRLS' SCHOOL")
+```
+
+```{r}
+primaryschool <- read_csv("data/aspatial/school-directory-and-information/general-information-of-schools.csv") %>% filter(mainlevel_code =="PRIMARY")
+```
+
+```{r}
+shoppingmalls <- read_csv("data/aspatial/shopping_mall_coordinates.csv")
+```
+
+## Change dataframe to sf format
+
+```{r}
+busstop.sf <- st_transform(busstops, crs=3414)
+eldercare.sf <- st_transform(eldercare, crs=3414)
+foodarea.sf <- st_transform(foodarea, crs=3414)
+supermarkets.sf <- st_transform(supermarkets, crs=3414)
+childcare.sf <- st_transform(childcare, crs=3414)
+hospital.sf <- st_as_sf(hospital,
+                            coords = c("Long", "Lat"),
+                            crs=4326) %>%
+  st_transform(crs=3414)
+trainstation.sf <- st_as_sf(trainstation,
+                            coords = c("lng", "lat"),
+                            crs=4326) %>%
+  st_transform(crs=3414)
+```
+
+We note that there are no Lat and Long in the primary school data frame. we need to tidy the data for both primary and good primary schools. To prevent it from rendering the website for too long, I will be exporting and importing the tidied files.
+
+```{r}
+# primaryschool[c('block', 'street')] <- str_split_fixed(primaryschool$address, ' ', # 2)
+# primaryschool$street<- trim(primaryschool$street)
+# primaryschool$street<- toupper(primaryschool$street)
+```
+
+```{r}
+# good_prischool[c('block', 'street')] <- str_split_fixed(good_prischool$address, ' '# , 2)
+# good_prischool$street<- trim(good_prischool$street)
+# good_prischool$street<- toupper(good_prischool$street)
+```
+
+```{r}
+#library(httr)
+#geocode <- function(block, streetname) {
+#  base_url <- "https://developers.onemap.sg/commonapi/search"
+#  address <- paste(block, streetname, sep = " ")
+#  query <- list("searchVal" = address, 
+#                "returnGeom" = "Y",
+#                "getAddrDetails" = "N",
+#                "pageNum" = "1")
+#  
+#  res <- GET(base_url, query = query)
+#  restext<-content(res, as="text")
+#  
+#  output <- fromJSON(restext)  %>% 
+#    as.data.frame %>%
+#    select(results.LATITUDE, results.LONGITUDE)
+#
+#  return(output)
+#}
+```
+
+```{r}
+
+#good_prischool$LATITUDE <- 0
+#good_prischool$LONGITUDE <- 0
+#
+#for (i in 1:nrow(good_prischool)){
+#  temp_output <- geocode(good_prischool[i, 32], good_prischool[i, 33])
+#  
+#  good_prischool$LATITUDE[i] <- temp_output$results.LATITUDE
+#  good_prischool$LONGITUDE[i] <- temp_output$results.LONGITUDE
+#}
+```
+
+```{r}
+# primaryschool$LATITUDE <- 0
+# primaryschool$LONGITUDE <- 0
+# 
+# for (i in 1:nrow(primaryschool)){
+#   temp_output <- geocode(primaryschool[i, 32], primaryschool[i, 33])
+#   
+#   primaryschool$LATITUDE[i] <- temp_output$results.LATITUDE
+#   primaryschool$LONGITUDE[i] <- temp_output$results.LONGITUDE
+# }
+```
+
+## Export tidy data for schools
+
+```{r}
+#write.csv(primaryschool,"data/exported/primaryschool.csv")
+#write.csv(good_prischool,"data/exported/good_prischool.csv")
+```
+
+## Import tidy data for schools
+
+```{r}
+
+primaryschool <- read_csv("data/exported/primaryschool.csv")
+good_prischool <- read_csv("data/exported/good_prischool.csv")
+```
+
+After we have done, we can proceed to convert the df to sf.
+
+```{r}
+shoppingmalls.sf <- st_as_sf(shoppingmalls,
+                            coords = c("LONGITUDE", "LATITUDE"),
+                            crs=4326) %>%
+  st_transform(crs=3414)
+
+good_prischool.sf <- st_as_sf(good_prischool,
+                            coords = c("LONGITUDE", "LATITUDE"),
+                            crs=4326) %>%
+  st_transform(crs=3414)
+
+primaryschool.sf <- st_as_sf(primaryschool,
+                            coords = c("LONGITUDE", "LATITUDE"),
+                            crs=4326) %>%
+  st_transform(crs=3414)
+```
+
+## Exploratory Data Analysis (EDA)
+
+```{r}
+tmap_mode("plot")
+
+PLOT_BUS <- tm_shape(mpsz19) +
+  tm_borders(alpha = 0.5) +
+  tmap_options(check.and.fix = TRUE) +
+tm_shape(busstop.sf) +
+  tm_dots(col="red", size=0.05) +
+  tm_layout(main.title = "Bus Stops",
+          main.title.position = "center",
+          main.title.size = 1.2,
+          frame = TRUE)+
+  tm_view(set.zoom.limits = c(10,14))
+
+
+PLOT_TRAIN <- tm_shape(mpsz19) +
+  tm_borders(alpha = 0.5) +
+  tmap_options(check.and.fix = TRUE) +
+tm_shape(trainstation.sf) +
+  tm_dots(col="blue", size=0.05) +
+  tm_layout(main.title = "Train Station",
+          main.title.position = "center",
+          main.title.size = 1.2,
+          frame = TRUE)+
+  tm_view(set.zoom.limits = c(10,14))
+
+tmap_arrange(PLOT_BUS, PLOT_TRAIN, 
+             asp=1, ncol=2,
+             sync = FALSE)
+```
+
+Notice for bus stop, there are a few points that is out of Singapore, lets remove those points namely "LARKIN TER", "KOTARAYA II TER", "JOHOR BAHRU CHECKPT", "JB SENTRAL". After that, we can re-run the map above.
+
+```{r}
+busstop.sf <- busstop.sf  %>%
+  filter(LOC_DESC != "JOHOR BAHRU CHECKPT" & LOC_DESC != "LARKIN TER"& LOC_DESC != "KOTARAYA II TER"& LOC_DESC != "JB SENTRAL")
+```
+
+Lets looks at other data.
+
+```{r}
+
+tmap_mode("plot")
+
+PLOT_CHILD <- tm_shape(mpsz19) +
+  tm_borders(alpha = 0.5) +
+  tmap_options(check.and.fix = TRUE) +
+tm_shape(childcare.sf) +
+  tm_dots(col="orange", size=0.05) +
+  tm_layout(main.title = "Child Care",
+          main.title.position = "center",
+          main.title.size = 1.2,
+          frame = TRUE)+
+  tm_view(set.zoom.limits = c(10,14))
+
+
+PLOT_ELDER <- tm_shape(mpsz19) +
+  tm_borders(alpha = 0.5) +
+  tmap_options(check.and.fix = TRUE) +
+tm_shape(eldercare.sf) +
+  tm_dots(col="green", size=0.05) +
+  tm_layout(main.title = "Elder Care",
+          main.title.position = "center",
+          main.title.size = 1.2,
+          frame = TRUE)+
+  tm_view(set.zoom.limits = c(10,14))
+
+tmap_arrange(PLOT_CHILD, PLOT_ELDER, 
+             asp=1, ncol=2,
+             sync = FALSE)
+
+```
+
+```{r}
+tmap_mode("plot")
+
+PLOT_PRISCHOOL <- tm_shape(mpsz19) +
+  tm_borders(alpha = 0.5) +
+  tmap_options(check.and.fix = TRUE) +
+tm_shape(primaryschool.sf) +
+  tm_dots(col="#009999", size=0.05) +
+  tm_layout(main.title = "Primary school",
+          main.title.position = "center",
+          main.title.size = 1.2,
+          frame = TRUE)+
+  tm_view(set.zoom.limits = c(10,14))
+
+
+PLOT_GOODPRISCHOOL <- tm_shape(mpsz19) +
+  tm_borders(alpha = 0.5) +
+  tmap_options(check.and.fix = TRUE) +
+tm_shape(good_prischool.sf) +
+  tm_dots(col="red", size=0.05) +
+  tm_layout(main.title = "Good Primary School",
+          main.title.position = "center",
+          main.title.size = 1.2,
+          frame = TRUE)+
+  tm_view(set.zoom.limits = c(10,14))
+
+tmap_arrange(PLOT_PRISCHOOL, PLOT_GOODPRISCHOOL, 
+             asp=1, ncol=2,
+             sync = FALSE)
+```
+
+```{r}
+tmap_mode("plot")
+PLOT_FOOD <- tm_shape(mpsz19) +
+  tm_borders(alpha = 0.5) +
+  tmap_options(check.and.fix = TRUE) +
+tm_shape(foodarea.sf) +
+  tm_dots(col="#009999", size=0.05) +
+  tm_layout(main.title = "Food Area",
+          main.title.position = "center",
+          main.title.size = 1.2,
+          frame = TRUE)+
+  tm_view(set.zoom.limits = c(10,14))
+
+
+PLOT_SUPERMART <- tm_shape(mpsz19) +
+  tm_borders(alpha = 0.5) +
+  tmap_options(check.and.fix = TRUE) +
+tm_shape(supermarkets.sf) +
+  tm_dots(col="#0000FF", size=0.05) +
+  tm_layout(main.title = "Supermarket",
+          main.title.position = "center",
+          main.title.size = 1.2,
+          frame = TRUE)+
+  tm_view(set.zoom.limits = c(10,14))
+
+tmap_arrange(PLOT_FOOD, PLOT_SUPERMART, 
+             asp=1, ncol=2,
+             sync = FALSE)
+```
+
+After plotting, we saw a point which is not within SG, let's remove them and re run the map.
+
+```{r}
+foodarea.sf <- foodarea.sf  %>%
+  filter(osm_id	 != "4493618264")
+```
+
+```{r}
+tmap_mode("plot")
+
+PLOT_HOST <- tm_shape(mpsz19) +
+  tm_borders(alpha = 0.5) +
+  tmap_options(check.and.fix = TRUE) +
+tm_shape(hospital.sf) +
+  tm_dots(col="red", size=0.05) +
+  tm_layout(main.title = "Hospital",
+          main.title.position = "center",
+          main.title.size = 1.2,
+          frame = TRUE)+
+  tm_view(set.zoom.limits = c(10,14))
+
+
+PLOT_MALL <- tm_shape(mpsz19) +
+  tm_borders(alpha = 0.5) +
+  tmap_options(check.and.fix = TRUE) +
+tm_shape(shoppingmalls.sf) +
+  tm_dots(col="orange", size=0.05) +
+  tm_layout(main.title = "Shopping mall",
+          main.title.position = "center",
+          main.title.size = 1.2,
+          frame = TRUE)+
+  tm_view(set.zoom.limits = c(10,14))
+
+tmap_arrange(PLOT_HOST, PLOT_MALL, 
+             asp=1, ncol=2,
+             sync = FALSE)
+```
+
+Looks like all data points are within Singapore! Next, we will be preparing data for the HDB resale price.
+
+# Importing Aspatial Data HDB resale price
+
+We will import the HDB resale prices and also filter the data to 4-room flat from 1st January 2021 to 31st December 2022 fro training purposes
+
+```{r}
+hdb_resale <- read_csv("data/aspatial/resale_flat_price_full.csv")  %>% 
+  filter(flat_type == "4 ROOM") %>%
+  filter(month >= "2021-01" & month <= "2022-12")
+```
+
+```{r}
+glimpse(hdb_resale)
+```
+
+Next, we will be importing test data. The test data should be January and February 2023 resale prices. We will be filtering January to Feb 2023 and 4-room flat.
+
+```{r}
+hdb_resale_test <- read_csv("data/aspatial/resale_flat_price_full.csv")  %>% 
+  filter(flat_type == "4 ROOM") %>%
+  filter(month >= "2023-01" & month <= "2023-02")
+```
+
+In the below data prep, we should clean the data for both test and train.
+
+## Data Preparation
+
+Since there is no Long and Lat in the data, we need to create one. But before that we can combine the block with the street name, create category column representing story range, create Lat Long column and reformat remaining lease.
+
+1.  Combine block and street name
+
+```{r}
+hdb_resale$address <-  paste(hdb_resale$block, hdb_resale$street_name, sep=" ")
+```
+
+```{r}
+hdb_resale_test$address <-  paste(hdb_resale_test$block, hdb_resale_test$street_name, sep=" ")
+```
+
+2.  Looking at megan's Takehome, she created duplicate values representing the story range. I was thinking of something different, so I decided we can categories in 4 category Low, Mid, High, very High instead.
+
+-   Low: 01-06
+
+-   Middle: 07-12
+
+-   High: 13-24
+
+-   Very High: \>= 25
+
+```{r}
+unique(hdb_resale$storey_range)
+```
+
+Low
+
+```{r}
+hdb_resale$story_level_low <- ifelse(hdb_resale$storey_range=="01 TO 03"|hdb_resale$storey_range=="04 TO 06", 1, 0)
+```
+
+```{r}
+hdb_resale_test$story_level_low <- ifelse(hdb_resale_test$storey_range=="01 TO 03"|hdb_resale_test$storey_range=="04 TO 06", 1, 0)
+```
+
+Middle
+
+```{r}
+hdb_resale$story_level_mid <- ifelse(hdb_resale$storey_range=="07 TO 09"|hdb_resale$storey_range=="10 TO 12", 1, 0)
+```
+
+```{r}
+hdb_resale_test$story_level_mid <- ifelse(hdb_resale_test$storey_range=="07 TO 09"|hdb_resale_test$storey_range=="10 TO 12", 1, 0)
+```
+
+High
+
+```{r}
+hdb_resale$story_level_high <- ifelse(hdb_resale$storey_range=="13 TO 15"|hdb_resale$storey_range=="16 TO 18"|hdb_resale$storey_range=="19 TO 21"|hdb_resale$storey_range=="22 TO 24", 1, 0)
+```
+
+```{r}
+hdb_resale_test$story_level_high <- ifelse(hdb_resale_test$storey_range=="13 TO 15"|hdb_resale_test$storey_range=="16 TO 18"|hdb_resale_test$storey_range=="19 TO 21"|hdb_resale_test$storey_range=="22 TO 24", 1, 0)
+```
+
+Very High
+
+```{r}
+hdb_resale$story_level_veryhigh <- ifelse(hdb_resale$storey_range>="25 TO 27", 1, 0)
+```
+
+```{r}
+hdb_resale_test$story_level_veryhigh <- ifelse(hdb_resale_test$storey_range>="25 TO 27", 1, 0)
+```
+
+3.  Create Lat Long column
+
+The below code, i have copied the from our senior Megan [website](https://is415-msty.netlify.app/posts/2021-10-25-take-home-exercise-3/?panelset=base#geocoding-our-aspatial-data). The below code extracts the Latitude and Longitude of the address through OneMap API. I have commented after I ran the code once, the process took me about 1 hour to finish extracting the longlat.
+
+I will be exporting it into XLSX file and read in the file.
+
+```{r}
+#library(httr)
+#geocode <- function(block, streetname) {
+#  base_url <- "https://developers.onemap.sg/commonapi/search"
+#  address <- paste(block, streetname, sep = " ")
+#  query <- list("searchVal" = address, 
+#                "returnGeom" = "Y",
+#                "getAddrDetails" = "N",
+#                "pageNum" = "1")
+#  
+#  res <- GET(base_url, query = query)
+#  restext<-content(res, as="text")
+#  
+#  output <- fromJSON(restext)  %>% 
+#    as.data.frame %>%
+#    select(results.LATITUDE, results.LONGITUDE)
+#
+#  return(output)
+#}
+```
+
+```{r}
+
+#hdb_resale$LATITUDE <- 0
+#hdb_resale$LONGITUDE <- 0
+#
+#for (i in 1:nrow(hdb_resale)){
+#  temp_output <- geocode(hdb_resale[i, 4], hdb_resale[i, 5])
+#  
+#  hdb_resale$LATITUDE[i] <- temp_output$results.LATITUDE
+#  hdb_resale$LONGITUDE[i] <- temp_output$results.LONGITUDE
+#}
+```
+
+```{r}
+#hdb_resale_test$LATITUDE <- 0
+#hdb_resale_test$LONGITUDE <- 0
+#
+#for (i in 1:nrow(hdb_resale_test)){
+#  temp_output <- geocode(hdb_resale_test[i, 4], hdb_resale_test[i,5])
+#  
+#  hdb_resale_test$LATITUDE[i] <- temp_output$results.LATITUDE
+#  hdb_resale_test$LONGITUDE[i] <- temp_output$results.LONGITUDE
+#}
+```
+
+```{r}
+#write.csv(hdb_resale,"data/exported/hdb_resale_latlong.csv")
+```
+
+```{r}
+#write.csv(hdb_resale_test,"data/exported/hdb_resale_test_latlong.csv")
+```
+
+Read in the hdb resale price with latlong column.
+
+```{r}
+hdb_resale <- read_csv("data/exported/hdb_resale_latlong.csv")
+hdb_resale_test <- read_csv("data/exported/hdb_resale_test_latlong.csv")
+```
+
+Lets check for any NA values
+
+```{r}
+sum(is.na(hdb_resale$LATITUDE))
+sum(is.na(hdb_resale$LONGITUDE))
+sum(is.na(hdb_resale_test$LATITUDE))
+sum(is.na(hdb_resale_test$LONGITUDE))
+```
+
+There is no missing value and we can proceed to the next steps.
+
+4.  Convert Remaining lease format
+
+```{r}
+str_list <- str_split(hdb_resale$remaining_lease, " ")
+
+for (i in 1:length(str_list)) {
+  if (length(unlist(str_list[i])) > 2) {
+      year <- as.numeric(unlist(str_list[i])[1])
+      month <- as.numeric(unlist(str_list[i])[3])
+      hdb_resale$remaining_lease[i] <- year + round(month/12, 2)
+  }
+  else {
+    year <- as.numeric(unlist(str_list[i])[1])
+    hdb_resale$remaining_lease[i] <- year
+  }
+}
+str_list <- str_split(hdb_resale_test$remaining_lease, " ")
+
+for (i in 1:length(str_list)) {
+  if (length(unlist(str_list[i])) > 2) {
+      year <- as.numeric(unlist(str_list[i])[1])
+      month <- as.numeric(unlist(str_list[i])[3])
+      hdb_resale_test$remaining_lease[i] <- year + round(month/12, 2)
+  }
+  else {
+    year <- as.numeric(unlist(str_list[i])[1])
+    hdb_resale_test$remaining_lease[i] <- year
+  }
+}
+```
+
+## Converting aspatial data dataframe into a sf object.
+
+Currently, the *hdb_resale* tibble data frame is aspatial. We will convert it to a sf object and the output will be in point feature form. The code chunk below converts hdb_resale data frame into a simple feature data frame by using st_as_sf() of sf packages.
+
+```{r}
+hdb_resale.sf <- st_as_sf(hdb_resale,
+                            coords = c("LONGITUDE", "LATITUDE"),
+                            crs=4326) %>%
+  st_transform(crs=3414)
+
+hdb_resale_test.sf <- st_as_sf(hdb_resale_test,
+                            coords = c("LONGITUDE", "LATITUDE"),
+                            crs=4326) %>%
+  st_transform(crs=3414)
+```
+
+```{r}
+head(hdb_resale.sf)
+```
+
+## Proximity Distance Calculation
+
+Moving on, we need to find is the proximity to particular facilities - which we can compute with *st_distance()*, and find the closest facility (shortest distance) with the *rowMins()* function of our matrixStats package. The values will be appended to the data frame as a new column. (the below code will be credited to our senior [Megan](https://is415-msty.netlify.app/posts/2021-10-25-take-home-exercise-3/?panelset=base&panelset2=self-sourced3#proximity-distance-calculation))
+
+```{r}
+#library(units)
+#library(matrixStats)
+#proximity <- function(df1, df2, varname) {
+#  dist_matrix <- st_distance(df1, df2) %>%
+#    drop_units()
+#  df1[,varname] <- rowMins(dist_matrix)
+#  return(df1)
+#}
+
+```
+
+```{r}
+#hdb_resale_train.sf <- 
+#  # the columns will be truncated later on when viewing 
+#  # so we're limiting ourselves to two-character columns for ease of #viewing #etween
+#  proximity(hdb_resale.sf, busstop.sf, "PROX_BS") %>%
+#  proximity(.,childcare.sf, "PROX_CHILDCARE") %>%
+#  proximity(., eldercare.sf, "PROX_ELDERCARE") %>%
+#  proximity(., foodarea.sf, "PROX_FOOD") %>%
+#  proximity(., trainstation.sf, "PROX_MRT") %>%
+#  proximity(., good_prischool.sf, "PROX_TOPPRISCH") %>%
+#  proximity(., shoppingmalls.sf, "PROX_MALL") %>%
+#  proximity(., supermarkets.sf, "PROX_SPRMKT") %>%
+#  proximity(., hospital.sf, "PROX_HOST") 
+
+#hdb_resale_test <- 
+#  # the columns will be truncated later on when viewing 
+#  # so we're limiting ourselves to two-character columns for ease of #viewing #etween
+#  proximity(hdb_resale_test.sf, busstop.sf, "PROX_BS") %>%
+#  proximity(.,childcare.sf, "PROX_CHILDCARE") %>%
+#  proximity(., eldercare.sf, "PROX_ELDERCARE") %>%
+#  proximity(., foodarea.sf, "PROX_FOOD") %>%
+#  proximity(., trainstation.sf, "PROX_MRT") %>%
+#  proximity(., good_prischool.sf, "PROX_TOPPRISCH") %>%
+#  proximity(., shoppingmalls.sf, "PROX_MALL") %>%
+#  proximity(., supermarkets.sf, "PROX_SPRMKT") %>%
+#  proximity(., hospital.sf, "PROX_HOST") 
+```
+
+After we ran the proximity distance, lets run the number of radius as well.
+
+```{r}
+#num_radius <- function(df1, df2, varname, radius) {
+#  dist_matrix <- st_distance(df1, df2) %>%
+#    drop_units() %>%
+#    as.data.frame()
+#  df1[,varname] <- rowSums(dist_matrix <= radius)
+#  return(df1)
+#}
+```
+
+```{r}
+#hdb_resale_train_final <- 
+#  num_radius(hdb_resale_train.sf, foodarea.sf, "NUM_FOOD", 350) %>%
+#  num_radius(., childcare.sf, "NUM_CHILDCARE", 350) %>%
+#  num_radius(., busstop.sf, "NUM_BUS_STOP", 350) %>%
+#  num_radius(., supermarkets.sf, "NUM_SPMKT", 350) %>%
+#  num_radius(., primaryschool.sf, "NUM_SCHOOL", 1000)
+
+#hdb_resale_test_final <- 
+#  num_radius(hdb_resale_test, foodarea.sf, "NUM_FOOD", 350) %>%
+#  num_radius(., childcare.sf, "NUM_CHILDCARE", 350) %>%
+#  num_radius(., busstop.sf, "NUM_BUS_STOP", 350) %>%
+#  num_radius(., supermarkets.sf, "NUM_SPMKT", 350) %>%
+#  num_radius(., primaryschool.sf, "NUM_SCHOOL", 1000)
+```
+
+```{r}
+#st_write(hdb_resale_train_final, "data/exported/hdb_resale_train_final.shp")
+#st_write(hdb_resale_test_final, "data/exported/hdb_resale_test_final.shp")
+```
+
+```{r}
+#write.csv(hdb_resale_train_final, "data/exported/hdb_resale_train.csv")
+#write.csv(hdb_resale_test_final, "data/exported/hdb_resale_test.csv")
+```
+
+## Read in the exported file
+
+```{r}
+train_resale <- st_read(dsn = "data/exported", layer ="hdb_resale_train_final")
+test_resale <- st_read(dsn = "data/exported", layer ="hdb_resale_test_final")
+```
+
+# **Computing Correlation Matrix**
+
+Lets examine if there is a sign of multicolinearity.
+
+notice that we wanna check the correlation for remaining lease as well. we can swap the column position.
+
+```{r}
+train_resale<- train_resale[c(1,2,3,4,5,6,7,8,9,10,12,13,11,14:32)]
+```
+
+```{r}
+train_resale$rmnng_l <- as.numeric(as.character(train_resale$rmnng_l))
+
+```
+
+```{r}
+train_resale_nogeom <- train_resale %>%
+  st_drop_geometry()
+corrplot::corrplot(cor(train_resale_nogeom[,13:31]), 
+                   diag = FALSE, 
+                   order = "AOE",
+                   tl.pos = "td", 
+                   tl.cex = 0.5, 
+                   method = "number", 
+                   type = "upper")
+```
+
+In the correlation matrix, we can see that story_level_low AND story_level_middle has a negative correlation between each other. Negative correlation can deduce that when x increases, y decreases. This shows that when resident bought a higher level(decrease), the occupancy of lower level is high(increases). Hence, they show a negative correlation.
+
+we can see that NUM_SPM AND PROX_SP has a negative correlation between each other. Negative correlation can deduce that when x increases, y decreases. This shows that when a shopping mall distance is further (increase), the number of shopping mall resident would go is lower (decreases). Hence, they show a negative correlation.
+
+Even though the two variables may have a moderate negative correlation, this does not necessarily imply that the behavior of one has any causal influence on the other. Hence, I decided to keep them.
+
+# Building a non-spatial multiple linear regression
+
+```{r}
+set.seed(99)
+resale_train_mlr <- lm(rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m + stry_lvl_h + stry_lvl_v +
+                  PROX_BS + PROX_CH + PROX_EL +
+                  PROX_FO + PROX_MR + PROX_TO + 
+                  PROX_MA + PROX_SP + PROX_HO + NUM_FOO +
+                  NUM_CHI + NUM_BUS +
+                  NUM_SPM + NUM_SCH,
+                data=train_resale)
+summary(resale_train_mlr)
+
+```
+
+The R-squared of 0.629 reveals that the simple regression model built is able to explain about 63% of the resale prices.
+
+Since p-value is much smaller than 0.0001, we will reject the null hypothesis that mean is a good estimator of resale price. This will allow us to infer that simple linear regression model above is a good estimator of resale price.
+
+Looking at p-value \<0.05, we can see that not all the independent variables are statistically significant, and said variables should be removed. The variables I've identified as insignificant are surprisingly, PROX_BS and PROX_HO. We will revised the model by removing those variables which are not statistically significant and are ready to calibrate the revised model by using the code chunk below.
+
+```{r}
+resale_train_mlr_revised <- lm(rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m + stry_lvl_h  +
+                  PROX_CH + PROX_EL +
+                  PROX_FO + PROX_MR + PROX_TO + 
+                  PROX_MA + PROX_SP + NUM_FOO +
+                  NUM_CHI + NUM_BUS +
+                  NUM_SPM + NUM_SCH,
+                data=train_resale)
+ols_regress(resale_train_mlr_revised)
+```
+
+```{r}
+train_data_sp <- as_Spatial(train_resale)
+train_data_sp
+```
+
+The weights have a very large influence on the parameter estimation of the geographically weighted regression (GWR). The weights show the relationship between observations or locations in the model. Types of weights that are often used in GWR are Gaussian kernels. This weighting can also be arranged into two forms. There are the fixed Gaussian kernel and the adaptive Gaussian kernel. Fixed is used when each location has the same bandwidth value. Adaptive is used when each location has a different bandwidth value. Adaptive is appropriate if points are irregularly spread -- it ensures that there are enough points to calibrate the regression. In this take home, I've decided to use adaptive
+
+```{r}
+#bw_adaptive <- bw.gwr(rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m + #stry_lvl_h  +
+#                  PROX_CH + PROX_EL +
+#                  PROX_FO + PROX_MR + PROX_TO + 
+#                  PROX_MA + PROX_SP + NUM_FOO +
+#                  NUM_CHI + NUM_BUS +
+#                  NUM_SPM + NUM_SCH,
+#                  data=train_data_sp,
+#                  approach="CV",
+#                  kernel="gaussian",
+#                  adaptive=TRUE,
+#                  longlat=FALSE)
+```
+
+![](img/adaptive.png){fig-align="center"}
+
+```{r}
+#saveRDS(bw_adaptive, "bwadaptive.rds")
+```
+
+## Read in RDS
+
+```{r}
+bw_adaptive <- read_rds("bwadaptive.rds")
+```
+
+Now, we can go ahead to calibrate the gwr-based hedonic pricing model by using adaptive bandwidth and Gaussian kernel as shown in the code chunk below.
+
+```{r}
+#gwr_adaptive <- gwr.basic(formula = rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + #stry_lvl_m + stry_lvl_h  +
+#                  PROX_CH + PROX_EL +
+#                  PROX_FO + PROX_MR + PROX_TO + 
+#                  PROX_MA + PROX_SP + NUM_FOO +
+#                  NUM_CHI + NUM_BUS +
+#                  NUM_SPM + NUM_SCH,
+#                         data=train_data_sp,
+#                          bw=bw_adaptive, 
+#                          kernel = 'gaussian', 
+#                          adaptive=TRUE,
+#                          longlat = FALSE)
+```
+
+```{r}
+#gwr_adaptive
+```
+
+```{r}
+#saveRDS(gwr_adaptive, "gwradaptive.rds")
+```
+
+```{r}
+gwr_adaptive <- read_rds("gwradaptive.rds")
+```
+
+![](img/gwr0.png){fig-align="center"}
+
+![](img/gwr1.png)
+
+![](img/gwr2.png){fig-align="center"}
+
+## Preparing Coordinates data
+
+```{r}
+coords_train <- st_coordinates(train_resale)
+coords_test <- st_coordinates(test_resale)
+```
+
+```{r}
+#write_rds(coords_train, "coords_train.rds" )
+#write_rds(coords_test, "coords_test.rds" )
+```
+
+## Dropping geometry field
+
+```{r}
+train_data <- train_resale %>% 
+  st_drop_geometry()
+```
+
+## Calibrating Random Forest Model
+
+```{r}
+set.seed(999)
+rf <- ranger(rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m + stry_lvl_h  +
+                  PROX_CH + PROX_EL +
+                  PROX_FO + PROX_MR + PROX_TO + 
+                  PROX_MA + PROX_SP + NUM_FOO +
+                  NUM_CHI + NUM_BUS +
+                  NUM_SPM + NUM_SCH,
+             data=train_data)
+```
+
+```{r}
+print(rf)
+```
+
+## **Calibrating Geographical Random Forest Model**
+
+The code chunk below calibrate a geographic ranform forest model by using `grf()` of **SpatialML** package. Previously, we have calculated the adjusted bandwidth, we will use that value for our grf() function. We decided to use adaptive and should be consistent for the kernel
+
+```{r}
+#set.seed(99)
+#gwRF_adaptive <- grf(formula = rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m #+ stry_lvl_h  +
+#                  PROX_CH + PROX_EL +
+#                  PROX_FO + PROX_MR + PROX_TO + 
+#                  PROX_MA + PROX_SP + NUM_FOO +
+#                  NUM_CHI + NUM_BUS +
+#                  NUM_SPM + NUM_SCH,
+#                     dframe=train_data,
+#                      ntree=50,
+#                     bw=bw_adaptive,
+#                     kernel="adaptive",
+#                     coords=coords_train
+#                )
+```
+
+```{r}
+#write_rds(gwRF_adaptive, "gwRF_adaptive_50trees.rds")
+```
+
+```{r}
+gwRF_adaptive <- read_rds("gwRF_adaptive_50trees.rds")
+```
+
+## Predicting by using test data 
+
+```{r}
+test_data <- cbind(test_resale, coords_test) %>%
+  st_drop_geometry()
+```
+
+```{r}
+#gwRF_pred <- predict.grf(gwRF_adaptive, 
+#                           test_data, 
+#                           x.var.name="X",
+#                           y.var.name="Y", 
+#                           local.w=1,
+#                           global.w=0)
+```
+
+```{r}
+#write_rds(gwRF_pred, "GRF_pred.rds")
+```
+
+## **Converting the predicting output into a data frame**
+
+```{r}
+GRF_pred <- read_rds("GRF_pred.rds")
+GRF_pred_df <- as.data.frame(GRF_pred)
+```
+
+```{r}
+test_data_p <- cbind(test_data, GRF_pred_df)
+```
+
+## **Calculating Root Mean Square Error**
+
+```{r}
+rmse(test_data_p$rsl_prc, 
+     test_data_p$GRF_pred)
+```
+
+## Visualizing the predicted values 
+
+```{r}
+ggplot(data = test_data_p,
+       aes(x = GRF_pred,
+           y = rsl_prc)) +
+  geom_point()
+```
