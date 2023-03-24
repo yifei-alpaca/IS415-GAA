@@ -125,9 +125,9 @@ tm_shape(mpsz_pop2020)+
   tm_borders(alpha = 0.5)
 ```
 
-Based on the chart above, we can see that in general, the east area is more dense as compared to the other region. In our handson 3, we compare the young and age, but for analyzing the resale price, it would be more useful to compare economic active and aged group instead young and aged group. Because these 2 age group is more appropriate to get housing as compared to the young.
+Based on the chart above, we can see that in general, the east area is more dense as compared to the other region.
 
-Lets compare between the Active and Aged groups
+Lets compare between 3 groups.
 
 ```{r}
 tmap_mode("view")
@@ -138,7 +138,7 @@ tmap_options(check.and.fix = TRUE)
 youngmap <- tm_shape(mpsz_pop2020)+ 
   tm_polygons("YOUNG", 
               style = "quantile", 
-              palette = "Blues",
+              palette = "Reds",
               )+ 
   tm_view(set.zoom.limits = c(9,14))
 
@@ -601,7 +601,7 @@ tmap_arrange(PLOT_HOST, PLOT_MALL,
 
 Looks like all data points are within Singapore! Next, we will be preparing data for the HDB resale price.
 
-# Importing Aspatial Data HDB resale price 
+# Importing Aspatial Data HDB resale price
 
 We will import the HDB resale prices and also filter the data to 4-room flat from 1st January 2021 to 31st December 2022 fro training purposes
 
@@ -1026,7 +1026,7 @@ ols_vif_tol(resale_train_mlr_revised)
 
 Since the VIF of the independent variables are less than 10. We can safely conclude that there are no sign of multicollinearity among the independent variables.
 
-## Test for Non Linearity 
+## Test for Non Linearity
 
 ```{r}
 ols_plot_resid_hist(resale_train_mlr_revised)
@@ -1128,9 +1128,9 @@ gwr_adaptive <- read_rds("gwradaptive.rds")
 gwr_adaptive
 ```
 
-## Visualizing GWR Output 
+## Visualizing GWR Output
 
-Condition Number, LocalR2, Predicted, Residual, Coefficient standard error are all stored in a SpatialPointsDataFrame or SpatialPolygonsDataFrame object integrated with fit.points, GWR coefficient estimates, y value, predicted values, coefficient standard errors and t-values in its \"data\" slot in an object called **SDF** of the output list. [Chapter 13](https://r4gdsa.netlify.app/chap13.html#visualising-gwr-output)
+Condition Number, LocalR2, Predicted, Residual, Coefficient standard error are all stored in a SpatialPointsDataFrame or SpatialPolygonsDataFrame object integrated with fit.points, GWR coefficient estimates, y value, predicted values, coefficient standard errors and t-values in its "data" slot in an object called **SDF** of the output list. [Chapter 13](https://r4gdsa.netlify.app/chap13.html#visualising-gwr-output)
 
 ```{r}
 resale.sf.adaptive <- st_as_sf(gwr_adaptive$SDF) %>%
@@ -1346,7 +1346,7 @@ ggplot(data = test_data_p,
   geom_point()
 ```
 
-# Conclusion 
+# Conclusion
 
 From this analysis, we can see that the prices of 4-room resale flats in Singapore have generally increased over the years due to a variety of factors. The growing demand for housing in Singapore, which has led to higher prices for all types of homes, including 4-room resale flats. Additionally, the location of the flat can also impact its price, with flats located in more desirable areas commanding higher prices.
 
@@ -1373,19 +1373,14 @@ There are a some independent variable that are unable to measure, such as:
 5.  The **quality of finishes** and materials used in the property can also affect resale value. Properties with high-end finishes such as marble flooring or designer fixtures tend to command higher resale values or properties that have room for improvement or expansion may be more attractive to buyers and command higher resale values.
 6.  **Seller's price decision** can also affect the resale value of a property. When a seller prices a property too high, it may take longer to sell or may not sell at all. This can lead to a perception in the market that the property is overpriced, which can negatively impact the property's resale value.
 
-### Suggestion for future work 
+### Suggestion for future work
 
 We realized that there are a higher population staying in the east area, and most of the top schools are located around the central area. Where top schools are being the most important variable a few ways we can boost the reputation of the school. However increasing the number of top schools in Singapore can be a complex a issue that involves various stakeholders, including the government, educators, parents, and students. Strategies that could potentially help increase the number of top schools.
 
-1.   Increasing funding for education: Providing sufficient funding for schools can help ensure that they have access to the resources and facilities necessary to provide high-quality education. This could include funding for teacher salaries, classroom resources, and technology infrastructure.
+1.  Increasing funding for education: Providing sufficient funding for schools can help ensure that they have access to the resources and facilities necessary to provide high-quality education. This could include funding for teacher salaries, classroom resources, and technology infrastructure.
 
 2.  Encouraging parents to be actively involved in their children's education can help create a more supportive learning environment and improve student outcomes. This could involve initiatives such as parent-teacher conferences, volunteering opportunities, and parent education programs.
 
 3.  Creating a culture that values academic excellence and rewards high performance can motivate students to strive for academic success. This could include recognizing and celebrating student achievements, offering scholarships and other incentives for academic excellence, and encouraging healthy competition among students.
 
 4.  Encouraging collaboration and knowledge-sharing among schools can help promote best practices and improve overall educational outcomes. This could involve initiatives such as teacher exchanges, joint research projects, and shared training opportunities. Example: Hwa Chong X Tampines
-
-
-
-
-
