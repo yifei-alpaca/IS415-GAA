@@ -88,7 +88,7 @@ mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)
        `TOTAL`, `DEPENDENCY`)
 ```
 
-As we look at the raw data, we can create a new dataframe to combine the number of population and group by PA and SZ.
+As we look at the raw data, we can create a new data frame to combine the number of population and group by PA and SZ.
 
 ## Joining the attribute data and geospatial data
 
@@ -588,7 +588,7 @@ tmap_arrange(PLOT_HOST, PLOT_MALL,
 
 Looks like all data points are within Singapore! Next, we will be preparing data for the HDB resale price.
 
-# Importing Aspatial Data HDB resale price
+# Importing Aspatial Data HDB resale price (shift this up before the importing locational data)
 
 We will import the HDB resale prices and also filter the data to 4-room flat from 1st January 2021 to 31st December 2022 fro training purposes
 
@@ -809,6 +809,37 @@ hdb_resale_test.sf <- st_as_sf(hdb_resale_test,
 head(hdb_resale.sf)
 ```
 
+Let's visualize the 4-room price in a map view.
+
+```{r}
+tmap_mode("view")
+tmap_options(check.and.fix = TRUE)
+tm_shape(hdb_resale.sf) +  
+  tm_dots(col = "resale_price",
+          alpha = 0.6,
+          style="quantile") +
+  tm_view(set.zoom.limits = c(11,14))
+```
+
+By looking at the map, it becomes apparent that the central & east region of Singapore has a higher concentration of flats that command greater resale values.
+
+Let's find out the top 10 area that has the highest price.
+
+```{r}
+town_mean <- aggregate(hdb_resale.sf[,"resale_price"], list(hdb_resale.sf$town), mean)
+top10_town = top_n(town_mean, 10, `resale_price`) %>%
+  arrange(desc(`resale_price`))
+top10_town
+```
+
+Comparing to megan's previous analysis the [HDB resale flat](https://is415-msty.netlify.app/posts/2021-10-25-take-home-exercise-3/?panelset=base&panelset2=base3&panelset3=base4&panelset6=import&panelset5=healthcare%252Feducation&panelset4=mpsz#statistical-point-map) from **2019-01 to 2020-10** with the current **2021-01 to 2022-12**. We can see the increase in price just over 3 years. From my code chunk above, we can see that BUKIT TIMAH'S resale price has decrease from 4th position to 7th position. MARINE PARADE is not seen in the 10th position and it's over taken by ANG MO KIO.
+
+**Megan's 2019-01 to 2020-10**
+
+![](img/megans%20resaleprice.png){fig-align="center"}
+
+We can find out more insights by picking variety of factors that deem fit. Below will be the different factor that we will be analyzing.
+
 ## Proximity Distance Calculation
 
 Moving on, we need to find is the proximity to particular facilities - which we can compute with *st_distance()*, and find the closest facility (shortest distance) with the *rowMins()* function of our matrixStats package. The values will be appended to the data frame as a new column. (the below code will be credited to our senior [Megan](https://is415-msty.netlify.app/posts/2021-10-25-take-home-exercise-3/?panelset=base&panelset2=self-sourced3#proximity-distance-calculation))
@@ -1013,10 +1044,6 @@ Now, we can go ahead to calibrate the gwr-based hedonic pricing model by using a
 ```
 
 ```{r}
-#gwr_adaptive
-```
-
-```{r}
 #saveRDS(gwr_adaptive, "gwradaptive.rds")
 ```
 
@@ -1024,11 +1051,9 @@ Now, we can go ahead to calibrate the gwr-based hedonic pricing model by using a
 gwr_adaptive <- read_rds("gwradaptive.rds")
 ```
 
-![](img/gwr0.png){fig-align="center"}
-
-![](img/gwr1.png)
-
-![](img/gwr2.png){fig-align="center"}
+```{r}
+gwr_adaptive
+```
 
 ## Preparing Coordinates data
 
@@ -1068,6 +1093,30 @@ print(rf)
 
 ## **Calibrating Geographical Random Forest Model**
 
+## Calculating Bandwidth
+
+```{r}
+#gwRF_bw <- grf.bw(formula = rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m + #stry_lvl_h  +
+#                  PROX_CH + PROX_EL +
+#                  PROX_FO + PROX_MR + PROX_TO + 
+#                  PROX_MA + PROX_SP + NUM_FOO +
+#                  NUM_CHI + NUM_BUS +
+#                  NUM_SPM + NUM_SCH,
+#                  trees = 50,
+#                  nthreads = 1,
+#                 data = train_data,
+#                 kernel = "adaptive",
+#                 coords = coords_train)
+```
+
+After running for 2 days plus, I decided to stop and picked the highest R-square of the bandwidth. Below are the image that I have captured what I have ran previously.
+
+![](img/optimizebw.png){fig-align="center" width="706"}
+
+![](img/optimizebw2.png){fig-align="center"}
+
+The above output, the highest R2 of the Local model would be **Bandwidth of 1202**. Hence, I will be using this value for the random forest predict.
+
 The code chunk below calibrate a geographic ranform forest model by using `grf()` of **SpatialML** package. Previously, we have calculated the adjusted bandwidth, we will use that value for our grf() function. We decided to use adaptive and should be consistent for the kernel
 
 ```{r}
@@ -1080,21 +1129,25 @@ The code chunk below calibrate a geographic ranform forest model by using `grf()
 #                  NUM_SPM + NUM_SCH,
 #                     dframe=train_data,
 #                      ntree=50,
-#                     bw=bw_adaptive,
+#                     bw = 1202,
 #                     kernel="adaptive",
 #                     coords=coords_train
 #                )
 ```
 
 ```{r}
-#write_rds(gwRF_adaptive, "gwRF_adaptive_50trees.rds")
+#write_rds(gwRF_adaptive, "gwRF_adaptive_50treesbw.rds")
 ```
 
 ```{r}
-gwRF_adaptive <- read_rds("gwRF_adaptive_50trees.rds")
+gwRF_adaptive <- read_rds("gwRF_adaptive_50treesbw.rds")
 ```
 
-## Predicting by using test data 
+![](img/predictrf.png){fig-align="center"}
+
+![](img/predictrf1.png){fig-align="center"}
+
+## Predicting by using test data
 
 ```{r}
 test_data <- cbind(test_resale, coords_test) %>%
@@ -1111,13 +1164,13 @@ test_data <- cbind(test_resale, coords_test) %>%
 ```
 
 ```{r}
-#write_rds(gwRF_pred, "GRF_pred.rds")
+#write_rds(gwRF_pred, "GRF_pred2.rds")
 ```
 
 ## **Converting the predicting output into a data frame**
 
 ```{r}
-GRF_pred <- read_rds("GRF_pred.rds")
+GRF_pred <- read_rds("GRF_pred2.rds")
 GRF_pred_df <- as.data.frame(GRF_pred)
 ```
 
@@ -1132,7 +1185,7 @@ rmse(test_data_p$rsl_prc,
      test_data_p$GRF_pred)
 ```
 
-## Visualizing the predicted values 
+## Visualizing the predicted values
 
 ```{r}
 ggplot(data = test_data_p,
@@ -1140,3 +1193,5 @@ ggplot(data = test_data_p,
            y = rsl_prc)) +
   geom_point()
 ```
+
+reasoning
