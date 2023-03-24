@@ -29,8 +29,6 @@ Data sets will be used in this model building exercise, they are:
 
 3.  [HDB Resale Price](https://data.gov.sg/dataset/resale-flat-prices)
 
-4.  
-
 ## Loading of packages
 
 ```{r}
@@ -137,6 +135,14 @@ tmap_mode("view")
 
 ```{r}
 tmap_options(check.and.fix = TRUE)
+youngmap <- tm_shape(mpsz_pop2020)+ 
+  tm_polygons("YOUNG", 
+              style = "quantile", 
+              palette = "Blues",
+              )+ 
+  tm_view(set.zoom.limits = c(9,14))
+
+tmap_options(check.and.fix = TRUE)
 activemap <- tm_shape(mpsz_pop2020)+ 
   tm_polygons("ECONOMY ACTIVE", 
               style = "quantile", 
@@ -150,7 +156,7 @@ agedmap <- tm_shape(mpsz_pop2020)+
               palette = "Oranges") +
   tm_view(set.zoom.limits = c(9,14))
 
-tmap_arrange(activemap, agedmap, asp=1, ncol=2, sync = TRUE)
+tmap_arrange(youngmap,activemap, agedmap, asp=1, ncol=3, sync = TRUE)
 ```
 
 ```{r}
@@ -221,18 +227,25 @@ Mentioned above that the study should focus on **either** three-room, four-room 
 
 The data mostly are taken from [data.gov](data.gov.sg) or [LTA data mall](https://datamall.lta.gov.sg/content/datamall/en/dynamic-data.html) factors include:
 
-1.  Bus stop location
-2.  Eldercare
+1.  Bus stop location [LTA data mall](https://datamall.lta.gov.sg/content/datamall/en/static-data.html)
+
+2.  Eldercare [data.gov](https://data.gov.sg/dataset/eldercare-services)
+
 3.  Foodarea
-4.  schools
-5.  childcare
+
+4.  schools [data.gov](https://data.gov.sg/dataset/school-directory-and-information)
+
+5.  childcare (taken from our inclass exercise)
+
 6.  train station [kaggel](https://www.kaggle.com/datasets/yxlee245/singapore-train-station-coordinates)
+
 7.  malls from [kaggle](https://www.kaggle.com/datasets/karthikgangula/shopping-mall-coordinates?resource=download)
-8.  supermarket
+
+8.  supermarket [geofabrik](https://download.geofabrik.de/asia/malaysia-singapore-brunei.html)
+
 9.  hospital (collated manually) [SGhospital](https://www.healthhub.sg/directory/hospitals)
-10. primary schools
-11. good primary schools
-    -   As there are many views about elite schools in Singapore as attending an elite primary school in Singapore is important depends on an individual's unique circumstances and goals. In this take home exercise, I will be picking the top 10 most common popular primary schools. These are the top 10 popular schools according to this [website](https://smiletutor.sg/primary-school-ranking-choose-the-best-primary-schools-in-singapore/).
+
+As there are many views about elite schools in Singapore as attending an elite primary school in Singapore is important depends on an individual's unique circumstances and goals. In this take home exercise, I will be picking the top 10 most common popular primary schools. These are the top 10 popular schools according to this [website](https://smiletutor.sg/primary-school-ranking-choose-the-best-primary-schools-in-singapore/).
 
 ```{r}
 busstops <- st_read(dsn = "data/aspatial/BusStopLocation", layer = "BusStop")
@@ -588,7 +601,7 @@ tmap_arrange(PLOT_HOST, PLOT_MALL,
 
 Looks like all data points are within Singapore! Next, we will be preparing data for the HDB resale price.
 
-# Importing Aspatial Data HDB resale price (shift this up before the importing locational data)
+# Importing Aspatial Data HDB resale price 
 
 We will import the HDB resale prices and also filter the data to 4-room flat from 1st January 2021 to 31st December 2022 fro training purposes
 
@@ -838,11 +851,20 @@ Comparing to megan's previous analysis the [HDB resale flat](https://is415-msty.
 
 ![](img/megans%20resaleprice.png){fig-align="center"}
 
-We can find out more insights by picking variety of factors that deem fit. Below will be the different factor that we will be analyzing.
+We can find out more insights by picking variety of factors that deem fit.
+
+# Exploratory Data Analysis (EDA)
+
+```{r}
+ggplot(data=hdb_resale.sf, aes(x=`resale_price`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+```
+
+The figure above reveals a right skewed distribution. This means that more hdb units were transacted at relative lower prices at around 500k
 
 ## Proximity Distance Calculation
 
-Moving on, we need to find is the proximity to particular facilities - which we can compute with *st_distance()*, and find the closest facility (shortest distance) with the *rowMins()* function of our matrixStats package. The values will be appended to the data frame as a new column. (the below code will be credited to our senior [Megan](https://is415-msty.netlify.app/posts/2021-10-25-take-home-exercise-3/?panelset=base&panelset2=self-sourced3#proximity-distance-calculation))
+In this section, we need to find the proximity to particular facilities - which we can compute with *st_distance()*, and find the closest facility (shortest distance) with the *rowMins()* function of our matrixStats package. The values will be appended to the data frame as a new column. (the below code will be credited to our senior [Megan](https://is415-msty.netlify.app/posts/2021-10-25-take-home-exercise-3/?panelset=base&panelset2=self-sourced3#proximity-distance-calculation))
 
 ```{r}
 #library(units)
@@ -962,7 +984,7 @@ we can see that NUM_SPM AND PROX_SP has a negative correlation between each othe
 
 Even though the two variables may have a moderate negative correlation, this does not necessarily imply that the behavior of one has any causal influence on the other. Hence, I decided to keep them.
 
-# Building a non-spatial multiple linear regression
+# Building a multiple linear regression
 
 ```{r}
 set.seed(99)
@@ -995,14 +1017,65 @@ ols_regress(resale_train_mlr_revised)
 ```
 
 ```{r}
+tbl_regression(resale_train_mlr_revised, intercept = TRUE)
+```
+
+```{r}
+ols_vif_tol(resale_train_mlr_revised)
+```
+
+Since the VIF of the independent variables are less than 10. We can safely conclude that there are no sign of multicollinearity among the independent variables.
+
+## Test for Non Linearity 
+
+```{r}
+ols_plot_resid_hist(resale_train_mlr_revised)
+```
+
+The figure reveals that the residual of the multiple linear regression model is resemble normal distribution.
+
+## Test for Spatial Autocorrelation
+
+```{r}
+mlr.output <- as.data.frame(resale_train_mlr_revised$residuals)
+```
+
+```{r}
+resale.res.sf <- cbind(hdb_resale.sf, 
+                        resale_train_mlr_revised$residuals)
+```
+
+```{r}
+resale.sp <- as_Spatial(resale.res.sf)
+resale.sp
+```
+
+Now, we will display the distribution of the residuals on an interactive map.
+
+```{r}
+tm_shape(mpsz19)+
+  tmap_options(check.and.fix = TRUE) +
+  tm_polygons(alpha = 0.4) +
+tm_shape(resale.res.sf) +  
+  tm_dots(col = "resale_train_mlr_revised.residuals",
+          alpha = 0.6,
+          style="quantile") +
+  tm_view(set.zoom.limits = c(11,14))
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+```{r}
 train_data_sp <- as_Spatial(train_resale)
 train_data_sp
 ```
 
-The weights have a very large influence on the parameter estimation of the geographically weighted regression (GWR). The weights show the relationship between observations or locations in the model. Types of weights that are often used in GWR are Gaussian kernels. This weighting can also be arranged into two forms. There are the fixed Gaussian kernel and the adaptive Gaussian kernel. Fixed is used when each location has the same bandwidth value. Adaptive is used when each location has a different bandwidth value. Adaptive is appropriate if points are irregularly spread -- it ensures that there are enough points to calibrate the regression. In this take home, I've decided to use adaptive
+The weights have a very large influence on the parameter estimation of the geographically weighted regression (GWR). The weights show the relationship between observations or locations in the model. Types of weights that are often used in GWR are Gaussian kernels. This weighting can also be arranged into two forms. There are the fixed Gaussian kernel and the adaptive Gaussian kernel. Fixed is used when each location has the same bandwidth value. Adaptive is used when each location has a different bandwidth value. Adaptive is appropriate if points are irregularly spread -- it ensures that there are enough points to calibrate the regression. In this take home, I've decided to use adaptive.
 
 ```{r}
-#bw_adaptive <- bw.gwr(rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m + #stry_lvl_h  +
+#bw_adaptive <- bw.gwr(rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m + #stry_lvl_h + stry_lvl_v  +
 #                  PROX_CH + PROX_EL +
 #                  PROX_FO + PROX_MR + PROX_TO + 
 #                  PROX_MA + PROX_SP + NUM_FOO +
@@ -1030,7 +1103,7 @@ bw_adaptive <- read_rds("bwadaptive.rds")
 Now, we can go ahead to calibrate the gwr-based hedonic pricing model by using adaptive bandwidth and Gaussian kernel as shown in the code chunk below.
 
 ```{r}
-#gwr_adaptive <- gwr.basic(formula = rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + #stry_lvl_m + stry_lvl_h  +
+#gwr_adaptive <- gwr.basic(formula = rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + #stry_lvl_m + stry_lvl_h  + stry_lvl_v  +
 #                  PROX_CH + PROX_EL +
 #                  PROX_FO + PROX_MR + PROX_TO + 
 #                  PROX_MA + PROX_SP + NUM_FOO +
@@ -1055,11 +1128,86 @@ gwr_adaptive <- read_rds("gwradaptive.rds")
 gwr_adaptive
 ```
 
+## Visualizing GWR Output 
+
+Condition Number, LocalR2, Predicted, Residual, Coefficient standard error are all stored in a SpatialPointsDataFrame or SpatialPolygonsDataFrame object integrated with fit.points, GWR coefficient estimates, y value, predicted values, coefficient standard errors and t-values in its \"data\" slot in an object called **SDF** of the output list. [Chapter 13](https://r4gdsa.netlify.app/chap13.html#visualising-gwr-output)
+
+```{r}
+resale.sf.adaptive <- st_as_sf(gwr_adaptive$SDF) %>%
+  st_transform(crs=3414)
+```
+
+```{r}
+ gwr_adaptive.output <- as.data.frame(gwr_adaptive$SDF)
+resale.sf.adaptive <- cbind(resale.res.sf, as.matrix(gwr_adaptive.output))
+```
+
+## Local R2
+
+```{r}
+tmap_mode("view")
+tm_shape(mpsz19)+
+  tm_polygons(alpha = 0.1) +
+tm_shape(resale.sf.adaptive) +  
+  tm_dots(col = "Local_R2",
+          border.col = "gray60",
+          border.lwd = 1) +
+  tm_view(set.zoom.limits = c(11,14))
+```
+
+We can observe that majority of the HDB flats have Local R-squared values are within the range of 0.6 to 1. A high local R2 value indicates that the independent variables explain a large proportion of the variance in the dependent variable within a specific spatial unit, while a low local R2 value indicates that the independent variables are not very good at explaining the variation within the spatial unit. Refer to the map, the central area has a higher range and the east area has a lower range. This shows that the independent variable are not as good at explaining the variation in the central region.
+
+With curiosity, lets narrow down to the east and north east region, to find out why there is a poor variation. But before that, we can extract out the area first.
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz19[mpsz19$REGION_N=="NORTH-EAST REGION", ])+
+  tm_polygons()+
+tm_shape(resale.sf.adaptive) + 
+  tm_bubbles(col = "Local_R2",
+           size = 0.15,
+           border.col = "gray60",
+           border.lwd = 1)
+```
+
+```{r}
+tm_shape(mpsz19[mpsz19$REGION_N=="EAST REGION", ])+
+  tm_polygons()+
+tm_shape(resale.sf.adaptive) + 
+  tm_bubbles(col = "Local_R2",
+           size = 0.15,
+           border.col = "gray60",
+           border.lwd = 1)
+```
+
+```{r}
+train_resale_narrow <- st_join(train_resale,mpsz19 ,
+                          by = c("PLN_AREA_N" = "town")) %>% filter (REGION_N =="NORTH-EAST REGION" | REGION_N=="EAST REGION")
+```
+
+```{r}
+test_resale_narrow <- st_join(test_resale,mpsz19 ,
+                          by = c("PLN_AREA_N" = "town")) %>% filter (REGION_N =="NORTH-EAST REGION" | REGION_N=="EAST REGION")
+```
+
+Drop columns
+
+```{r}
+train_resale_narrow <- train_resale_narrow[ -c(32:37) ]
+```
+
+```{r}
+test_resale_narrow <- test_resale_narrow[ -c(32:37) ]
+```
+
 ## Preparing Coordinates data
 
 ```{r}
-coords_train <- st_coordinates(train_resale)
-coords_test <- st_coordinates(test_resale)
+#coords_train <- st_coordinates(train_resale)
+#coords_test <- st_coordinates(test_resale)
+
+coords_train <- st_coordinates(train_resale_narrow)
+coords_test <- st_coordinates(test_resale_narrow)
 ```
 
 ```{r}
@@ -1070,15 +1218,15 @@ coords_test <- st_coordinates(test_resale)
 ## Dropping geometry field
 
 ```{r}
-train_data <- train_resale %>% 
+train_data <- train_resale_narrow %>% 
   st_drop_geometry()
 ```
 
-## Calibrating Random Forest Model
+# Calibrating Random Forest Model
 
 ```{r}
 set.seed(999)
-rf <- ranger(rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m + stry_lvl_h  +
+rf <- ranger(rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m + stry_lvl_h + stry_lvl_v  +
                   PROX_CH + PROX_EL +
                   PROX_FO + PROX_MR + PROX_TO + 
                   PROX_MA + PROX_SP + NUM_FOO +
@@ -1109,19 +1257,19 @@ print(rf)
 #                 coords = coords_train)
 ```
 
-After running for 2 days plus, I decided to stop and picked the highest R-square of the bandwidth. Below are the image that I have captured what I have ran previously.
+After letting it run for more than 2 days , I decided to stop and pick the highest R-square of the bandwidth. Below are the image that I have captured what I have ran previously.
 
-![](img/optimizebw.png){fig-align="center" width="706"}
+![](img/optimizebw.png){fig-align="left" width="706"}
 
 ![](img/optimizebw2.png){fig-align="center"}
 
 The above output, the highest R2 of the Local model would be **Bandwidth of 1202**. Hence, I will be using this value for the random forest predict.
 
-The code chunk below calibrate a geographic ranform forest model by using `grf()` of **SpatialML** package. Previously, we have calculated the adjusted bandwidth, we will use that value for our grf() function. We decided to use adaptive and should be consistent for the kernel
+The code chunk below calibrate a geographic ranform forest model by using grf() of **SpatialML** package. Previously, we have calculated the adjusted bandwidth, we will use that value for our grf() function. We decided to use adaptive and should be consistent for the kernel.
 
 ```{r}
 #set.seed(99)
-#gwRF_adaptive <- grf(formula = rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m #+ stry_lvl_h  +
+#gwRF_adaptive <- grf(formula = rsl_prc ~ flr_r_s+ rmnng_l + stry_lvl_l + stry_lvl_m #+ stry_lvl_h +
 #                  PROX_CH + PROX_EL +
 #                  PROX_FO + PROX_MR + PROX_TO + 
 #                  PROX_MA + PROX_SP + NUM_FOO +
@@ -1135,22 +1283,26 @@ The code chunk below calibrate a geographic ranform forest model by using `grf()
 #                )
 ```
 
+![](img/grf_narrow.png)
+
+![](img/grf_narrow1.png)
+
+![](img/grf_narrow2.png)
+
 ```{r}
-#write_rds(gwRF_adaptive, "gwRF_adaptive_50treesbw.rds")
+#write_rds(gwRF_adaptive, "gwRF_adaptive_narrow.rds")
 ```
 
 ```{r}
-gwRF_adaptive <- read_rds("gwRF_adaptive_50treesbw.rds")
+gwRF_adaptive <- read_rds("gwRF_adaptive_narrow.rds")
 ```
 
-![](img/predictrf.png){fig-align="center"}
+Using the grf function gives us information about the model fit, including the number of trees in the forest and the out-of-bag (OOB) error rate. The OOB error rate is an estimate of the generalization error of the model, which is how well it is expected to perform on new, unseen data. In this model, an R-squared value of 0.66 indicates a moderate-to-strong relationship between the independent variables and the dependent variable, as it implies that 66% of the variance in the dependent variable is explained by the independent variables.
 
-![](img/predictrf1.png){fig-align="center"}
-
-## Predicting by using test data
+# Predicting by using test data
 
 ```{r}
-test_data <- cbind(test_resale, coords_test) %>%
+test_data <- cbind(test_resale_narrow, coords_test) %>%
   st_drop_geometry()
 ```
 
@@ -1164,13 +1316,13 @@ test_data <- cbind(test_resale, coords_test) %>%
 ```
 
 ```{r}
-#write_rds(gwRF_pred, "GRF_pred2.rds")
+#write_rds(gwRF_pred, "GRF_pred3.rds")
 ```
 
 ## **Converting the predicting output into a data frame**
 
 ```{r}
-GRF_pred <- read_rds("GRF_pred2.rds")
+GRF_pred <- read_rds("GRF_pred3.rds")
 GRF_pred_df <- as.data.frame(GRF_pred)
 ```
 
@@ -1182,7 +1334,7 @@ test_data_p <- cbind(test_data, GRF_pred_df)
 
 ```{r}
 rmse(test_data_p$rsl_prc, 
-     test_data_p$GRF_pred)
+     test_data_p$gwRF_pred)
 ```
 
 ## Visualizing the predicted values
@@ -1194,4 +1346,46 @@ ggplot(data = test_data_p,
   geom_point()
 ```
 
-reasoning
+# Conclusion 
+
+From this analysis, we can see that the prices of 4-room resale flats in Singapore have generally increased over the years due to a variety of factors. The growing demand for housing in Singapore, which has led to higher prices for all types of homes, including 4-room resale flats. Additionally, the location of the flat can also impact its price, with flats located in more desirable areas commanding higher prices.
+
+We also derived from the result that BUKIT TIMAH'S resale price has decrease from 4th position to 7th position. MARINE PARADE is not seen in the 10th position and it's over taken by ANG MO KIO.
+
+Surprisingly, The variables insignificant are PROX_BS and PROX_HO and has been removed.Based on our locational factors under milticolinearity, we can see that all the values are below 0.8 hence, showing no signs of multicolinearity.
+
+The most important factor based on the gwRF_adaptive would be PROX_TO (top schools), followed by NUm_SPM (number of shopping malls within 350m) .
+
+Interestingly, as we compare the story level, we can see that middle floors has the highest importance score than low, high and v high. We can also say that resale price for middle level are also an important factor to price.
+
+We had our R-squared value of 0.66 indicates a moderate-to-strong relationship between the independent variables and the dependent variable, as it implies that 66% of the variance in the dependent variable is explained by the independent variables.
+
+However, the acceptability of an R-squared value may vary depending on the research field, the type of data being analyzed, and the level of complexity of the model. In some fields, an R-squared value of 0.6 may be considered quite good, while in others it may be considered relatively weak. In our case, I think that it is still fine.
+
+Reason being, I think that it's also important to note R-squared should not be used as the sole metric for evaluating the performance of a model. Other factors, such as the significance of the independent variables, the appropriateness of the model assumptions, and the predictive accuracy of the model, should also be considered.
+
+There are a some independent variable that are unable to measure, such as:
+
+1.  **Market conditions** such as supply and demand, interest rates, and economic factors can also influence resale price. When the demand for properties is high and the supply is low, resale prices tend to be higher, while in a sluggish market, resale prices may be lower.
+2.  The **reputation of the property** **developer** can also impact the resale price. Developers with a good reputation for building high-quality properties tend to command higher resale values.
+3.  Properties with desirable **views**, such as waterfront or city skyline views, can command higher resale prices.
+4.  The presence of **upcoming developments** such as new MRT stations, shopping centers, or other amenities can impact the resale value of nearby properties.
+5.  The **quality of finishes** and materials used in the property can also affect resale value. Properties with high-end finishes such as marble flooring or designer fixtures tend to command higher resale values or properties that have room for improvement or expansion may be more attractive to buyers and command higher resale values.
+6.  **Seller's price decision** can also affect the resale value of a property. When a seller prices a property too high, it may take longer to sell or may not sell at all. This can lead to a perception in the market that the property is overpriced, which can negatively impact the property's resale value.
+
+### Suggestion for future work 
+
+We realized that there are a higher population staying in the east area, and most of the top schools are located around the central area. Where top schools are being the most important variable a few ways we can boost the reputation of the school. However increasing the number of top schools in Singapore can be a complex a issue that involves various stakeholders, including the government, educators, parents, and students. Strategies that could potentially help increase the number of top schools.
+
+1.   Increasing funding for education: Providing sufficient funding for schools can help ensure that they have access to the resources and facilities necessary to provide high-quality education. This could include funding for teacher salaries, classroom resources, and technology infrastructure.
+
+2.  Encouraging parents to be actively involved in their children's education can help create a more supportive learning environment and improve student outcomes. This could involve initiatives such as parent-teacher conferences, volunteering opportunities, and parent education programs.
+
+3.  Creating a culture that values academic excellence and rewards high performance can motivate students to strive for academic success. This could include recognizing and celebrating student achievements, offering scholarships and other incentives for academic excellence, and encouraging healthy competition among students.
+
+4.  Encouraging collaboration and knowledge-sharing among schools can help promote best practices and improve overall educational outcomes. This could involve initiatives such as teacher exchanges, joint research projects, and shared training opportunities. Example: Hwa Chong X Tampines
+
+
+
+
+
