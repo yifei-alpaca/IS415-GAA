@@ -103,5 +103,11 @@
   },
   "checkingdata.qmd": {
     "checkingdata.html": "abaf9cb7"
+  },
+  "inclass_ex/inclass_ex11/inclass_ex11.qmd": {
+    "inclass_ex11.html": "3c015a40"
+  },
+  "inclass_ex/inclass_ex11/data/geospatial/MPSZ-2019.qmd": {
+    "MPSZ-2019.html": "de00c328"
   }
 }

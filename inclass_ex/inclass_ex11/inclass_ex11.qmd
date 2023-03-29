@@ -1,0 +1,216 @@
+---
+title: "Inclass Ex11"
+date: "27 March 2023"
+date-modified: "`r Sys.Date()`"
+format:
+ html:
+  toc: true
+  toc-location: right
+  number-depth: 3
+execute: 
+  message: false
+  warning: false
+editor: visual
+---
+
+# Getting started
+
+```{r}
+pacman::p_load(tmap,sf,sp,caret,stplanr, reshape2,broom, tidyverse)
+```
+
+```{r}
+odbus <- read_csv("data/aspatial/origin_destination_bus_202210.csv")
+```
+
+```{r}
+odbus$ORIGIN_PT_CODE <- 
+  as.factor(odbus$ORIGIN_PT_CODE)
+odbus$DESTINATION_PT_CODE <- 
+  as.factor(odbus$DESTINATION_PT_CODE)
+```
+
+```{r}
+#odbus7_9 <- odbus %>% 
+#  filter(DAY_TYPE== "WEEKDAY") %>% 
+#  filter(TIME_PER_HOUR >=7 & 
+#           TIME_PER_HOUR <= 9 ) %>% 
+#  group_by(ORIGIN_PT_CODE,
+#           DESTINATION_PT_CODE) %>%
+#  summarise(TRIPS = sum(TOTAL_TRIPS))
+```
+
+```{r}
+
+#write_rds(odbus7_9, "data/rds/odbus7_9.rds")
+
+
+```
+
+```{r}
+odbus7_9 <- read_rds("data/rds/odbus7_9.rds ")
+```
+
+```{r}
+busstop <- st_read(dsn="data/geospatial", layer="BusStop") %>% 
+  st_transform(crs=3414)
+```
+
+```{r}
+mpsz <- st_read(dsn="data/geospatial", layer="MPSZ-2019") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+busstop_mpsz <- st_intersection(busstop, mpsz)%>% 
+                                  select(BUS_STOP_N, SUBZONE_C)%>%
+                                  st_drop_geometry()
+```
+
+```{r}
+#od_data <- left_join(odbus7_9, busstop_mpsz,
+#                     by = c("ORIGIN_PT_CODE" = "BUS_STOP_N")) %>% 
+#  rename(ORIGIN_BS = ORIGIN_PT_CODE, 
+#         ORIGIN_SZ = SUBZONE_C, 
+#         DESTIN_BS = DESTINATION_PT_CODE)
+```
+
+before we continue, it is good to check if we have duplicates
+
+```{r}
+#duplicate <- od_data %>% 
+#  group_by_all() %>%
+#  filter(n()>1) %>% 
+#  ungroup()
+```
+
+```{r}
+#od_data <- unique(od_data)
+```
+
+```{r}
+#od_data <- left_join(od_data, busstop_mpsz,
+#                     by = c("DESTIN_BS" = "BUS_STOP_N"))
+```
+
+```{r}
+#duplicate <- od_data %>% 
+#  group_by_all() %>%
+#  filter(n()>1) %>% 
+#  ungroup()
+```
+
+```{r}
+#od_data <- unique(od_data)
+```
+
+```{r}
+#od_data <- od_data %>% 
+#  rename(DESTIN_SC = SUBZONE_C) %>%
+#  drop_na()
+```
+
+write it into rds format
+
+```{r}
+#write_rds(od_data,"data/rds/od_data.rds")
+```
+
+```{r}
+od_data <- read_rds("data/rds/od_data.rds")
+```
+
+# Computing distance matrix
+
+```{r}
+mpsz_sp <- as(mpsz, "Spatial")
+```
+
+similar as st_distance()
+
+values are in meters
+
+```{r}
+dist <- spDists(mpsz_sp)
+dist
+```
+
+### sorting the distance matrix by subzone name
+
+```{r}
+sz_names <- mpsz$SUBZONE_C
+```
+
+### attaching subzone_c to row and column for distance matrix matching ahead.
+
+```{r}
+colnames(dist) <- paste0(sz_names)
+rownames(dist) <- paste0(sz_names)
+```
+
+### pivoting distance value by subzone c
+
+melt the distance, one will be come origin another would become distination
+
+```{r}
+distpair <- melt(dist) %>% 
+  rename(dist = value)
+head(distpair,10) 
+```
+
+A constraint, distance value of 50m is added into intra-zones.
+
+```{r}
+distpair$dist <- ifelse(distpair$dist == 0,
+                        50, distpair$dist)
+```
+
+the code chunck below is used to rename the origin nad desitination fields.
+
+```{r}
+distpair <- distpair %>% 
+  rename(orig = Var1,
+         dest = Var2)
+```
+
+completing the flow data
+
+```{r}
+flow_data <- od_data %>% 
+  group_by(ORIGIN_SZ, DESTIN_SC) %>% 
+  summarise(TRIPS = sum(TRIPS))
+```
+
+```{r}
+pop <- read_csv("data/aspatial/pop.csv")
+
+```
+
+```{r}
+pop <- pop %>% 
+  left_join(mpsz,
+            by= c("PA" = "PLN_AREA_N",
+                  "SZ" = "SUBZONE_N")) %>% 
+  select(1:6) %>% 
+  rename(SZ_NAME = SZ,
+         SZ = SUBZONE_C)
+```
+
+```{r}
+flow_data <- flow_data %>% 
+  left_join (distpair,
+            by = c("ORIGIN_SZ" = "orig",
+                   "DESTIN_SC" = "dest"))
+```
+
+update flow data with population
+
+```{r}
+flow_data1 <- flow_data %>% 
+  left_join(pop,
+            by = c(ORIGIN_SZ = "SZ"))%>%
+  rename(ORIGIN_AGE7_12 = AGE7_12,
+         ORIGIN_AGE13_24 = AGE13_24,
+         ORIGIN_AGE25_64 = AGE25_64) %>% 
+  select(-c(PA,SZ_NAME))
+```
